@@ -1,0 +1,50 @@
+{
+  "name": "product-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build:live": "nodemon src/server.ts --ignore 'test/*'",
+    "start": "npm run build:live",
+    "models-gen": "sequelize-auto -h 127.0.0.1 -d pm-db -u admin -x pm12345678900 -p 3307 --dialect mysql -o \"./src/db_models/mysql\" -l ts && npm run lint:fix-model && npm run prettier:models",
+    "prettier:models": "npm run prettier:base -- --write \"src/db_models/mysql/*.ts\"",
+    "lint:fix-model": "eslint --fix --ext .ts ./src/db_models/mysql",
+    "prettier:base": "prettier --parser typescript --single-quote --tab-width 4",
+    "prettier:check": "npm run prettier:base -- --check \"src/**/*.{ts,tsx}\"",
+    "prettier:write": "npm run prettier:base -- --write \"src/**/*.{ts,tsx}\"",
+    "codegen": "graphql-codegen --config codegen.yml && npm run prettier:base -- --write \"src/__generated__/*.ts\""
+  },
+  "keywords": [],
+  "author": "duckienlh",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.47.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-babel": "^9.0.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "nodemon": "^3.0.1",
+    "prettier": "^2.2.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-graphql": "^0.12.0",
+    "graphql": "^16.8.0",
+    "graphql-ws": "^5.14.0",
+    "http": "^0.0.1-security",
+    "mysql2": "^3.6.0",
+    "sequelize": "^6.32.1",
+    "sequelize-auto": "^0.8.8",
+    "ts-node": "^10.9.1"
+  }
+}

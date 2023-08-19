@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  pm-mysql:
+    image: mysql:latest
+    container_name: pm-mysql
+    ports:
+      - "3307:3306"
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=pm12345678900
+      - MYSQL_DATABASE=pm-db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=pm12345678900
+    command:
+      - --character-set-server=utf8mb4
+    volumes:
+      - pm-mysql-volume:/var/lib/mysql
+
+  pm-api-server:
+    build:
+      context: ./server
+      target: pm-srv-development
+    container_name: pm-api-server
+    ports:
+      - "4000:4000"
+    restart: always
+    depends_on:
+      - pm-mysql
+    volumes:
+      - ./server/src:/app/src
+    env_file:
+      - .env
+    environment:
+      - SYNC_DATA
+
+  pm-redis:
+    image: redis:6.0.5
+    container_name: pm-redis
+    ports:
+      - "6379:6379"
+    restart: always
+    entrypoint:
+      - "redis-server"
+      - "--notify-keyspace-events AKE"
+
+volumes:
+  pm-mysql-volume:
