@@ -41,7 +41,9 @@ MINIO_ACCESS=ii7N4rM0pT1jo20wtGGy
 MINIO_SECRET=6o2eyFLOQv2Qwhix5g1DtEJTVcVmYVH9hDBgfQJs
 ```
 2. Form folder `project-manager/server` run command install packages by:
-> npm install --legacy-peer-deps
+```shell
+npm install --legacy-peer-deps
+```
 3. From project folder run command (For sync database):
 ```shell
 SYNC_DATA=true docker-compose up -d --build
