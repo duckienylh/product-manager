@@ -1,0 +1,61 @@
+extend type Query {
+    me: User!
+
+    login(input: UserLoginInput!): UserLoginResponse!
+}
+
+extend type Mutation {
+    createUser(input: CreateUserInput!): User!
+}
+
+extend type Subscription {
+    subscribeNotifications: User!
+}
+
+enum Role {
+    Director
+    Admin
+    Manager
+    Accountant
+    Sales
+    TransporterManager
+    Driver
+    AssistantDriver
+}
+
+type User {
+    id: Int!
+    email: String
+    userName: String!
+    firstName: String!
+    lastName: String!
+    fullName: String!
+    phoneNumber: String!
+    address: String
+    avatarURL: String
+    isActive: Boolean
+    role: Role
+    createdAt: Date
+    updatedAt: Date
+}
+
+type UserLoginResponse {
+    token: String!
+    user: User!
+}
+
+input UserLoginInput {
+    account: String!
+    password: String!
+}
+
+input CreateUserInput {
+    email: String
+    userName: String!
+    phoneNumber: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    role: Role!
+    avatar:Upload
+}

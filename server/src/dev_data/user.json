@@ -1,1 +1,1 @@
-[{"id":1, "userName":"duckien", "passWord":"123456", "firstName":"nguyen", "lastName":"kien", "createdAt":"2021-07-29 15:07:40", "updatedAt":"2021-07-29 15:07:40"}]
+[{"id":1, "email":"admin@gmail.com", "userName":"admin", "password":"$2b$10$EXvVBoYdMRNWnM9l3MS9ue4pE4y1lnqM5LSTlCj0bDgn4VnIE9UzK", "phoneNumber":"0999999999", "firstName":"1", "lastName":"Admin", "address":"ha noi", "avatarURL":"", "isActive":1, "role":99, "createdAt":"2023-05-16 11:04:39", "updatedAt":"2023-05-16 11:04:39"}]

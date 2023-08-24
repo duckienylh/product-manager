@@ -3,29 +3,47 @@ import { DataTypes, Model, Optional } from 'sequelize';
 
 export interface userAttributes {
     id: number;
+    email?: string;
     userName: string;
-    passWord: string;
-    firstName?: string;
-    lastName?: string;
+    password: string;
+    phoneNumber: string;
+    firstName: string;
+    lastName: string;
+    address?: string;
+    avatarURL?: string;
+    isActive: boolean;
+    role: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export type userPk = 'id';
 export type userId = user[userPk];
-export type userOptionalAttributes = 'id' | 'firstName' | 'lastName' | 'createdAt' | 'updatedAt';
+export type userOptionalAttributes = 'id' | 'email' | 'address' | 'avatarURL' | 'isActive' | 'role' | 'createdAt' | 'updatedAt';
 export type userCreationAttributes = Optional<userAttributes, userOptionalAttributes>;
 
 export class user extends Model<userAttributes, userCreationAttributes> implements userAttributes {
     id!: number;
 
+    email?: string;
+
     userName!: string;
 
-    passWord!: string;
+    password!: string;
 
-    firstName?: string;
+    phoneNumber!: string;
 
-    lastName?: string;
+    firstName!: string;
+
+    lastName!: string;
+
+    address?: string;
+
+    avatarURL?: string;
+
+    isActive!: boolean;
+
+    role!: number;
 
     createdAt?: Date;
 
@@ -40,21 +58,47 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
                     allowNull: false,
                     primaryKey: true,
                 },
+                email: {
+                    type: DataTypes.STRING(100),
+                    allowNull: true,
+                },
                 userName: {
                     type: DataTypes.STRING(45),
                     allowNull: false,
                 },
-                passWord: {
-                    type: DataTypes.STRING(45),
+                password: {
+                    type: DataTypes.STRING(200),
+                    allowNull: false,
+                },
+                phoneNumber: {
+                    type: DataTypes.STRING(11),
                     allowNull: false,
                 },
                 firstName: {
                     type: DataTypes.STRING(45),
-                    allowNull: true,
+                    allowNull: false,
                 },
                 lastName: {
                     type: DataTypes.STRING(45),
+                    allowNull: false,
+                },
+                address: {
+                    type: DataTypes.STRING(100),
                     allowNull: true,
+                },
+                avatarURL: {
+                    type: DataTypes.STRING(100),
+                    allowNull: true,
+                },
+                isActive: {
+                    type: DataTypes.BOOLEAN,
+                    allowNull: false,
+                    defaultValue: 1,
+                },
+                role: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    defaultValue: 1,
                 },
             },
             {

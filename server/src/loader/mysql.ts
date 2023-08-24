@@ -10,8 +10,6 @@ export const sequelize = new Sequelize(database.db_name, database.db_user, datab
 
 const models = initModels(sequelize);
 
-console.log('sequelize', sequelize);
-
 export const syncDatabase = async () => {
     if (process.env.NODE_ENV === 'development' && process.env.SYNC_DATA === 'true') {
         const isForceSync = process.env.SYNC_DATA === 'true';
@@ -21,7 +19,6 @@ export const syncDatabase = async () => {
                 console.log('Database sync is done!');
             })
             .then(async () => {
-                console.log('im here!');
                 if (isForceSync) {
                     await models.user.bulkCreate(user as any);
                 }
@@ -32,4 +29,4 @@ export const syncDatabase = async () => {
     }
 };
 
-export * as ssmDb from '../db_models/mysql/init-models';
+export * as pmDb from '../db_models/mysql/init-models';

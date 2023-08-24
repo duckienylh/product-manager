@@ -1,9 +1,9 @@
 version: "3.7"
 
 services:
-  pm-mysql:
+  pm-mysql-db:
     image: mysql:latest
-    container_name: pm-mysql
+    container_name: pm-mysql-db
     ports:
       - "3307:3306"
     restart: always
@@ -26,7 +26,7 @@ services:
       - "4000:4000"
     restart: always
     depends_on:
-      - pm-mysql
+      - pm-mysql-db
     volumes:
       - ./server/src:/app/src
     env_file:

@@ -1,0 +1,50 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+type Mutation {
+    createUser: User!
+}
+
+type Query {
+    me: User!
+}
+
+type Subscription {
+    subscribeNotifications: User!
+}
+
+type User {
+    createdAt: Date
+    firstName: String!
+    fullName: String!
+    id: Int!
+    lastName: String!
+    updatedAt: Date
+    userName: String!
+}
+
+enum Role {
+    Accountant
+    Admin
+    AssistantDriver
+    Director
+    Driver
+    Manager
+    Sales
+    TransporterManager
+}
+
+enum SuccessResponse {
+    success
+}
+
+scalar Cursor
+
+scalar Date
+
+scalar JSON
