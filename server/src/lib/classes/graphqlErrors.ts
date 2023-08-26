@@ -12,7 +12,14 @@ export enum PM_ERROR_CODE {
     InValidRole = 'InValidRole',
     Permission = 'Permission',
     UserAlreadyExist = 'UserAlreadyExist',
+    /**
+     * Error query in mysql.
+     */
     MySQL = 'MySQL',
+    /**
+     * pagination Error
+     */
+    InvalidPaginationArgument = 'InvalidPaginationArgument',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -70,6 +77,16 @@ export class MySQLError extends GraphQLError {
         super(message || 'Lỗi bất thường khi thao tác trong cơ sở dữ liệu', {
             extensions: {
                 code: PM_ERROR_CODE.MySQL,
+            },
+        });
+    }
+}
+
+export class InvalidPaginationArgumentError extends GraphQLError {
+    constructor(message: string) {
+        super(message, {
+            extensions: {
+                code: PM_ERROR_CODE.InvalidPaginationArgument,
             },
         });
     }

@@ -29,6 +29,14 @@ const login = importGraphqlString('./queries/authentication/login.graphql');
 
 const me = importGraphqlString('./queries/user/me.graphql');
 
+const createUser = importGraphqlString('./mutations/user/createUser.graphql');
+
+const updateUser = importGraphqlString('./mutations/user/updateUser.graphql');
+
+const deleteUser = importGraphqlString('./mutations/user/deleteUser.graphql');
+
+const users = importGraphqlString('./queries/user/users.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     // const subscriptionHeaders = {
@@ -48,6 +56,34 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             name: 'Đăng nhập',
             query: login,
             variables: prettifyJsonString(variables.login),
+        },
+        {
+            endpoint: path,
+            name: 'Tạo người dùng',
+            query: createUser,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createUser),
+        },
+        {
+            endpoint: path,
+            name: 'Sửa người dùng',
+            query: updateUser,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateUser),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa người dùng',
+            query: deleteUser,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.deleteUser),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách người dùng',
+            query: users,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.users),
         },
     ];
 };

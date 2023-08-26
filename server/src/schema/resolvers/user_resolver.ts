@@ -1,6 +1,6 @@
-import { Op, Transaction } from 'sequelize';
+import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
 import bcrypt from 'bcrypt';
-import { IResolvers } from '../../__generated__/graphql';
+import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { pmDb, sequelize } from '../../loader/mysql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
@@ -10,8 +10,13 @@ import { iRoleToNumber, roleNumberToIRole } from '../../lib/resolver_enum';
 import { BucketValue, DefaultHashValue, RoleList } from '../../lib/enum';
 import { userCreationAttributes } from '../../db_models/mysql/user';
 import { minIOServices } from '../../lib/classes';
+import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 
 const user_resolver: IResolvers = {
+    UserEdge: rdbEdgeResolver,
+
+    UserConnection: rdbConnectionResolver,
+
     User: {
         role: (parent) => roleNumberToIRole(parent.role),
         fullName: (parent) => `${parent.lastName} ${parent.firstName}`,
@@ -27,7 +32,7 @@ const user_resolver: IResolvers = {
             }
             throw new UserNotFoundError();
         },
-        login: async (parent, { input }) => {
+        login: async (_parent, { input }) => {
             const { account, password } = input;
             const user = await pmDb.user.findOne({
                 where: {
@@ -66,27 +71,60 @@ const user_resolver: IResolvers = {
                 token,
             };
         },
+        users: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { searchQuery, role, isActive, args } = input;
+
+            const { limit, offset, limitForLast } = getRDBPaginationParams(args);
+
+            const option: FindAndCountOptions<pmDb.user> = {
+                limit,
+                offset,
+                order: [['id', 'DESC']],
+            };
+            const orWhereOpt: WhereOptions<pmDb.user> = {};
+            const andWhereOpt: WhereOptions<pmDb.user> = {};
+
+            if (searchQuery) {
+                orWhereOpt['$user.firstName$'] = {
+                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                orWhereOpt['$user.lastName$'] = {
+                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                orWhereOpt['$user.phoneNumber$'] = {
+                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
+                };
+            }
+
+            if (role) {
+                andWhereOpt['$user.role$'] = {
+                    [Op.eq]: `${iRoleToNumber(role)}`,
+                };
+            }
+            if (isActive !== null && isActive !== undefined) {
+                andWhereOpt['$user.isActive$'] = isActive;
+            }
+            option.where = searchQuery ? { [Op.and]: [{ ...{ [Op.or]: orWhereOpt } }, andWhereOpt] } : { ...andWhereOpt };
+
+            const result = await pmDb.user.findAndCountAll(option);
+            return convertRDBRowsToConnection(result, offset, limitForLast);
+        },
     },
     Mutation: {
-        createUser: async (parent, { input }, context: PmContext) => {
+        createUser: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            if (
-                context.user?.role !== RoleList.admin &&
-                context.user?.role !== RoleList.director &&
-                context.user?.role !== RoleList.manager &&
-                context.user?.role !== RoleList.transporterManager
-            ) {
+            if (context.user?.role !== RoleList.admin && context.user?.role !== RoleList.director && context.user?.role !== RoleList.manager) {
                 throw new PermissionError();
             }
-            const { userName, email, password, role, phoneNumber, firstName, lastName, avatar } = input;
+            const { userName, email, password, role, phoneNumber, firstName, lastName, avatar, address } = input;
             const emailCheck = email ? { email } : {};
 
-            if (
-                iRoleToNumber(role) !== RoleList.driver &&
-                iRoleToNumber(role) !== RoleList.assistantDriver &&
-                context.user?.role === RoleList.transporterManager
-            )
-                throw new PermissionError();
+            // if (
+            //     iRoleToNumber(role) !== RoleList.driver &&
+            //     iRoleToNumber(role) !== RoleList.assistantDriver
+            // )
+            //     throw new PermissionError();
 
             const createdUser = await pmDb.user.findOne({
                 where: {
@@ -110,7 +148,7 @@ const user_resolver: IResolvers = {
                 lastName,
                 isActive: true,
                 role: iRoleToNumber(role),
-                address: 'ha noi',
+                address: address ?? undefined,
             };
 
             return await sequelize.transaction(async (t: Transaction) => {
@@ -118,10 +156,9 @@ const user_resolver: IResolvers = {
                     const newUser = await pmDb.user.create(userAttribute, {
                         transaction: t,
                     });
-                    console.log('avatar', avatar);
+
                     if (avatar) {
-                        const { createReadStream, filename, mimetype } = await avatar;
-                        console.log('createReadStream', filename);
+                        const { createReadStream, filename, mimetype } = await avatar.file;
                         const fileStream = createReadStream();
                         const filePath = `avatar/users/${newUser.id}/${filename}`;
                         await minIOServices.upload(BucketValue.DEVAPP, filePath, fileStream, mimetype);
@@ -134,6 +171,96 @@ const user_resolver: IResolvers = {
                     throw new MySQLError(`Lỗi bất thường khi thao tác trong cơ sở dữ liệu: ${error}`);
                 }
             });
+        },
+
+        updateUser: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            if (context.user?.role !== RoleList.admin && context.user?.role !== RoleList.director) {
+                throw new PermissionError();
+            }
+            const { id, userName, email, role, phoneNumber, firstName, lastName, avatarURL, address, isActive, oldPassword, newPassword } = input;
+            const user = await pmDb.user.findByPk(id, {
+                rejectOnEmpty: new UserNotFoundError(),
+            });
+
+            if (userName) user.userName = userName;
+            if (email) user.email = email;
+            if (role) user.role = iRoleToNumber(role);
+            if (phoneNumber) user.phoneNumber = phoneNumber;
+            if (firstName) user.firstName = firstName;
+            if (lastName) user.lastName = lastName;
+            if (address) user.address = address;
+            if (isActive !== null && isActive !== undefined) user.isActive = isActive;
+
+            if (oldPassword && newPassword) {
+                const checkPassword = bcrypt.compareSync(oldPassword, user.password);
+                if (!checkPassword) {
+                    throw new UserNotFoundError('Mật khẩu cũ không đúng');
+                }
+                const salt = bcrypt.genSaltSync(DefaultHashValue.saltRounds);
+                user.password = bcrypt.hashSync(newPassword, salt);
+            }
+
+            const uploadAvatarProcess: Promise<string>[] = [];
+
+            if (avatarURL) {
+                const { createReadStream, filename, mimetype } = await avatarURL.file;
+                if (user.avatarURL) {
+                    const deletedOldAvatar = minIOServices.deleteObjects([user.avatarURL], BucketValue.DEVAPP);
+                    uploadAvatarProcess.push(deletedOldAvatar);
+                }
+                const fileStream = createReadStream();
+                const filePath = `avatar/users/${id}/${filename}`;
+                const uploadNewAvatar = minIOServices.upload(BucketValue.DEVAPP, filePath, fileStream, mimetype);
+                user.avatarURL = filePath;
+                uploadAvatarProcess.push(uploadNewAvatar);
+            }
+
+            await user.save();
+
+            if (uploadAvatarProcess.length) await Promise.all(uploadAvatarProcess);
+
+            return ISuccessResponse.Success;
+        },
+
+        deleteUser: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { ids } = input;
+            if (context.user?.role !== RoleList.admin && context.user?.role !== RoleList.director) {
+                throw new PermissionError();
+            }
+            const deleteUser = await pmDb.user.findAll({
+                where: {
+                    id: ids,
+                },
+            });
+
+            if (deleteUser.length !== ids.length) throw new UserNotFoundError();
+
+            deleteUser.forEach((e) => {
+                if (!e.isActive) throw new Error('Người dùng không hợp lệ');
+            });
+
+            await sequelize.transaction(async (t: Transaction) => {
+                try {
+                    const allActive: Promise<pmDb.user>[] = [];
+
+                    deleteUser.forEach((e) => {
+                        if (e.role === RoleList.admin || e.role === RoleList.director) throw new MySQLError('Không được xóa admin hoặc giám đốc');
+                        e.isActive = false;
+                        allActive.push(e.save({ transaction: t }));
+                    });
+
+                    if (allActive.length > 0) {
+                        await Promise.all(allActive);
+                    }
+                } catch (error) {
+                    await t.rollback();
+                    throw new MySQLError(`Lỗi trong khi xóa bản ghi user: ${error}`);
+                }
+            });
+
+            return ISuccessResponse.Success;
         },
     },
 };

@@ -10,3 +10,5 @@ generates:
     config:
       mappers:
         User: ../db_models/mysql/init-models#user
+        UserEdge: ../db_models/mysql/user#UserEdge
+        UserConnection: ../db_models/mysql/user#UserConnection

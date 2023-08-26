@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
+import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
 export interface userAttributes {
     id: number;
@@ -21,6 +22,9 @@ export type userPk = 'id';
 export type userId = user[userPk];
 export type userOptionalAttributes = 'id' | 'email' | 'address' | 'avatarURL' | 'isActive' | 'role' | 'createdAt' | 'updatedAt';
 export type userCreationAttributes = Optional<userAttributes, userOptionalAttributes>;
+
+export type UserEdge = TRDBEdge<user>;
+export type UserConnection = TRDBConnection<user>;
 
 export class user extends Model<userAttributes, userCreationAttributes> implements userAttributes {
     id!: number;

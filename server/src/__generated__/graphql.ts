@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { user } from '../db_models/mysql/init-models';
+import { UserEdge, UserConnection } from '../db_models/mysql/user';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -23,6 +24,7 @@ export type Scalars = {
 };
 
 export type ICreateUserInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
   avatar?: InputMaybe<Scalars['Upload']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   firstName: Scalars['String']['input'];
@@ -33,14 +35,30 @@ export type ICreateUserInput = {
   userName: Scalars['String']['input'];
 };
 
+export type IDeleteUserInput = {
+  ids: Array<Scalars['Int']['input']>;
+};
+
 export type IMutation = {
   __typename?: 'Mutation';
   createUser: IUser;
+  deleteUser: ISuccessResponse;
+  updateUser: ISuccessResponse;
 };
 
 
 export type IMutationCreateUserArgs = {
   input: ICreateUserInput;
+};
+
+
+export type IMutationDeleteUserArgs = {
+  input: IDeleteUserInput;
+};
+
+
+export type IMutationUpdateUserArgs = {
+  input: IUpdateUserInput;
 };
 
 export type IPageInfo = {
@@ -60,11 +78,17 @@ export type IQuery = {
   __typename?: 'Query';
   login: IUserLoginResponse;
   me: IUser;
+  users: IUserConnection;
 };
 
 
 export type IQueryLoginArgs = {
   input: IUserLoginInput;
+};
+
+
+export type IQueryUsersArgs = {
+  input: IUsersInput;
 };
 
 export enum IRole {
@@ -87,6 +111,21 @@ export enum ISuccessResponse {
   Success = 'success'
 }
 
+export type IUpdateUserInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  avatarURL?: InputMaybe<Scalars['Upload']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+  oldPassword?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<IRole>;
+  userName?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type IUser = {
   __typename?: 'User';
   address?: Maybe<Scalars['String']['output']>;
@@ -104,6 +143,19 @@ export type IUser = {
   userName: Scalars['String']['output'];
 };
 
+export type IUserConnection = {
+  __typename?: 'UserConnection';
+  edges?: Maybe<Array<Maybe<IUserEdge>>>;
+  pageInfo: IPageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type IUserEdge = {
+  __typename?: 'UserEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<IUser>;
+};
+
 export type IUserLoginInput = {
   account: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -113,6 +165,13 @@ export type IUserLoginResponse = {
   __typename?: 'UserLoginResponse';
   token: Scalars['String']['output'];
   user: IUser;
+};
+
+export type IUsersInput = {
+  args?: InputMaybe<IPaginationInput>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  role?: InputMaybe<IRole>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -190,6 +249,7 @@ export type IResolversTypes = {
   CreateUserInput: ICreateUserInput;
   Cursor: ResolverTypeWrapper<Scalars['Cursor']['output']>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
+  DeleteUserInput: IDeleteUserInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -200,10 +260,14 @@ export type IResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subscription: ResolverTypeWrapper<{}>;
   SuccessResponse: ISuccessResponse;
+  UpdateUserInput: IUpdateUserInput;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
   User: ResolverTypeWrapper<user>;
+  UserConnection: ResolverTypeWrapper<UserConnection>;
+  UserEdge: ResolverTypeWrapper<UserEdge>;
   UserLoginInput: IUserLoginInput;
   UserLoginResponse: ResolverTypeWrapper<Omit<IUserLoginResponse, 'user'> & { user: IResolversTypes['User'] }>;
+  UsersInput: IUsersInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -212,6 +276,7 @@ export type IResolversParentTypes = {
   CreateUserInput: ICreateUserInput;
   Cursor: Scalars['Cursor']['output'];
   Date: Scalars['Date']['output'];
+  DeleteUserInput: IDeleteUserInput;
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
@@ -220,10 +285,14 @@ export type IResolversParentTypes = {
   Query: {};
   String: Scalars['String']['output'];
   Subscription: {};
+  UpdateUserInput: IUpdateUserInput;
   Upload: Scalars['Upload']['output'];
   User: user;
+  UserConnection: UserConnection;
+  UserEdge: UserEdge;
   UserLoginInput: IUserLoginInput;
   UserLoginResponse: Omit<IUserLoginResponse, 'user'> & { user: IResolversParentTypes['User'] };
+  UsersInput: IUsersInput;
 };
 
 export interface ICursorScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Cursor'], any> {
@@ -240,6 +309,8 @@ export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTyp
 
 export type IMutationResolvers<ContextType = any, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
+  deleteUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteUserArgs, 'input'>>;
+  updateUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateUserArgs, 'input'>>;
 };
 
 export type IPageInfoResolvers<ContextType = any, ParentType extends IResolversParentTypes['PageInfo'] = IResolversParentTypes['PageInfo']> = {
@@ -251,6 +322,7 @@ export type IPageInfoResolvers<ContextType = any, ParentType extends IResolversP
 export type IQueryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
   login?: Resolver<IResolversTypes['UserLoginResponse'], ParentType, ContextType, RequireFields<IQueryLoginArgs, 'input'>>;
   me?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
+  users?: Resolver<IResolversTypes['UserConnection'], ParentType, ContextType, RequireFields<IQueryUsersArgs, 'input'>>;
 };
 
 export type ISubscriptionResolvers<ContextType = any, ParentType extends IResolversParentTypes['Subscription'] = IResolversParentTypes['Subscription']> = {
@@ -278,6 +350,19 @@ export type IUserResolvers<ContextType = any, ParentType extends IResolversParen
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type IUserConnectionResolvers<ContextType = any, ParentType extends IResolversParentTypes['UserConnection'] = IResolversParentTypes['UserConnection']> = {
+  edges?: Resolver<Maybe<Array<Maybe<IResolversTypes['UserEdge']>>>, ParentType, ContextType>;
+  pageInfo?: Resolver<IResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IUserEdgeResolvers<ContextType = any, ParentType extends IResolversParentTypes['UserEdge'] = IResolversParentTypes['UserEdge']> = {
+  cursor?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type IUserLoginResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['UserLoginResponse'] = IResolversParentTypes['UserLoginResponse']> = {
   token?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
@@ -294,6 +379,8 @@ export type IResolvers<ContextType = any> = {
   Subscription?: ISubscriptionResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   User?: IUserResolvers<ContextType>;
+  UserConnection?: IUserConnectionResolvers<ContextType>;
+  UserEdge?: IUserEdgeResolvers<ContextType>;
   UserLoginResponse?: IUserLoginResponseResolvers<ContextType>;
 };
 

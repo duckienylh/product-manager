@@ -89,4 +89,17 @@ export default class MinIOServices {
             });
         });
     }
+
+    async deleteObjects(objectsList: string[], bucketName: string | null | undefined) {
+        const bucket = bucketName ?? this.bucketName;
+        return new Promise<string>((resolve, reject) => {
+            this.minioClient.removeObjects(bucket, objectsList, (err) => {
+                if (err) {
+                    console.error(err);
+                    reject(err);
+                }
+                resolve('success');
+            });
+        });
+    }
 }

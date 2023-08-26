@@ -2,10 +2,16 @@ extend type Query {
     me: User!
 
     login(input: UserLoginInput!): UserLoginResponse!
+
+    users(input: UsersInput!): UserConnection!
 }
 
 extend type Mutation {
     createUser(input: CreateUserInput!): User!
+
+    updateUser(input: UpdateUserInput!): SuccessResponse!
+
+    deleteUser(input: DeleteUserInput!): SuccessResponse!
 }
 
 extend type Subscription {
@@ -44,6 +50,22 @@ type UserLoginResponse {
     user: User!
 }
 
+type UserConnection {
+    edges: [UserEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type UserEdge {
+    cursor: String!
+    node: User
+}
+
+type PageInfo {
+    endCursor: Cursor
+    hasNextPage: Boolean!
+}
+
 input UserLoginInput {
     account: String!
     password: String!
@@ -57,5 +79,32 @@ input CreateUserInput {
     firstName: String!
     lastName: String!
     role: Role!
-    avatar:Upload
+    avatar: Upload
+    address: String
+}
+
+input UpdateUserInput {
+    id: Int!
+    email: String
+    userName: String
+    firstName: String
+    lastName: String
+    phoneNumber: String
+    address: String
+    avatarURL: Upload
+    isActive: Boolean
+    role: Role
+    oldPassword: String
+    newPassword: String
+}
+
+input DeleteUserInput {
+    ids: [Int!]!
+}
+
+input UsersInput {
+    args: PaginationInput
+    isActive: Boolean
+    role: Role
+    searchQuery: String
 }
