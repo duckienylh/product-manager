@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user } from '../db_models/mysql/init-models';
+import { user, customers } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -23,6 +23,14 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type ICreateCustomerInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  companyName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber: Scalars['String']['input'];
+};
+
 export type ICreateUserInput = {
   address?: InputMaybe<Scalars['String']['input']>;
   avatar?: InputMaybe<Scalars['Upload']['input']>;
@@ -35,15 +43,39 @@ export type ICreateUserInput = {
   userName: Scalars['String']['input'];
 };
 
+export type ICustomer = {
+  __typename?: 'Customer';
+  address?: Maybe<Scalars['String']['output']>;
+  companyName?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  phoneNumber: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+};
+
+export type IDeleteCustomerInput = {
+  ids: Array<Scalars['Int']['input']>;
+};
+
 export type IDeleteUserInput = {
   ids: Array<Scalars['Int']['input']>;
 };
 
 export type IMutation = {
   __typename?: 'Mutation';
+  createCustomer: ICustomer;
   createUser: IUser;
+  deleteCustomer: ISuccessResponse;
   deleteUser: ISuccessResponse;
+  updateCustomer: ISuccessResponse;
   updateUser: ISuccessResponse;
+};
+
+
+export type IMutationCreateCustomerArgs = {
+  input: ICreateCustomerInput;
 };
 
 
@@ -52,8 +84,18 @@ export type IMutationCreateUserArgs = {
 };
 
 
+export type IMutationDeleteCustomerArgs = {
+  input: IDeleteCustomerInput;
+};
+
+
 export type IMutationDeleteUserArgs = {
   input: IDeleteUserInput;
+};
+
+
+export type IMutationUpdateCustomerArgs = {
+  input: IUpdateCustomerInput;
 };
 
 
@@ -110,6 +152,15 @@ export type ISubscription = {
 export enum ISuccessResponse {
   Success = 'success'
 }
+
+export type IUpdateCustomerInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  companyName?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type IUpdateUserInput = {
   address?: InputMaybe<Scalars['String']['input']>;
@@ -246,9 +297,12 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type IResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CreateCustomerInput: ICreateCustomerInput;
   CreateUserInput: ICreateUserInput;
   Cursor: ResolverTypeWrapper<Scalars['Cursor']['output']>;
+  Customer: ResolverTypeWrapper<ICustomer>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
+  DeleteCustomerInput: IDeleteCustomerInput;
   DeleteUserInput: IDeleteUserInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
@@ -260,6 +314,7 @@ export type IResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subscription: ResolverTypeWrapper<{}>;
   SuccessResponse: ISuccessResponse;
+  UpdateCustomerInput: IUpdateCustomerInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
   User: ResolverTypeWrapper<user>;
@@ -273,9 +328,12 @@ export type IResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type IResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
+  CreateCustomerInput: ICreateCustomerInput;
   CreateUserInput: ICreateUserInput;
   Cursor: Scalars['Cursor']['output'];
+  Customer: ICustomer;
   Date: Scalars['Date']['output'];
+  DeleteCustomerInput: IDeleteCustomerInput;
   DeleteUserInput: IDeleteUserInput;
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
@@ -285,6 +343,7 @@ export type IResolversParentTypes = {
   Query: {};
   String: Scalars['String']['output'];
   Subscription: {};
+  UpdateCustomerInput: IUpdateCustomerInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: Scalars['Upload']['output'];
   User: user;
@@ -299,6 +358,18 @@ export interface ICursorScalarConfig extends GraphQLScalarTypeConfig<IResolversT
   name: 'Cursor';
 }
 
+export type ICustomerResolvers<ContextType = any, ParentType extends IResolversParentTypes['Customer'] = IResolversParentTypes['Customer']> = {
+  address?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  companyName?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  email?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  phoneNumber?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface IDateScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Date'], any> {
   name: 'Date';
 }
@@ -308,8 +379,11 @@ export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTyp
 }
 
 export type IMutationResolvers<ContextType = any, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
+  createCustomer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IMutationCreateCustomerArgs, 'input'>>;
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
+  deleteCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteCustomerArgs, 'input'>>;
   deleteUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteUserArgs, 'input'>>;
+  updateCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateCustomerArgs, 'input'>>;
   updateUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateUserArgs, 'input'>>;
 };
 
@@ -371,6 +445,7 @@ export type IUserLoginResponseResolvers<ContextType = any, ParentType extends IR
 
 export type IResolvers<ContextType = any> = {
   Cursor?: GraphQLScalarType;
+  Customer?: ICustomerResolvers<ContextType>;
   Date?: GraphQLScalarType;
   JSON?: GraphQLScalarType;
   Mutation?: IMutationResolvers<ContextType>;

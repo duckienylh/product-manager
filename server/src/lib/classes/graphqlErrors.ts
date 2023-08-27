@@ -91,3 +91,13 @@ export class InvalidPaginationArgumentError extends GraphQLError {
         });
     }
 }
+
+export class CustomerAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'khách hàng không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.InvalidPaginationArgument,
+            },
+        });
+    }
+}

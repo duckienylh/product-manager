@@ -1,0 +1,43 @@
+#extend type Query {
+#    listAllCustomer(input: ListAllCustomerInput!): [Customer]!
+#}
+
+extend type Mutation {
+    createCustomer(input: CreateCustomerInput!): Customer!
+
+    updateCustomer(input: UpdateCustomerInput!): SuccessResponse!
+
+    deleteCustomer(input: DeleteCustomerInput!): SuccessResponse!
+}
+
+type Customer {
+    id: Int!
+    name: String
+    phoneNumber: String!
+    email: String
+    address: String
+    companyName: String
+    createdAt: Date
+    updatedAt: Date
+}
+
+input CreateCustomerInput {
+    name: String
+    phoneNumber: String!
+    email: String
+    address: String
+    companyName: String
+}
+
+input UpdateCustomerInput {
+    id: Int!
+    name: String
+    phoneNumber: String
+    email: String
+    address: String
+    companyName: String
+}
+
+input DeleteCustomerInput {
+    ids: [Int!]!
+}

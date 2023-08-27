@@ -20,6 +20,7 @@ const user_resolver: IResolvers = {
     User: {
         role: (parent) => roleNumberToIRole(parent.role),
         fullName: (parent) => `${parent.lastName} ${parent.firstName}`,
+        avatarURL: async (parent) => (parent.avatarURL ? await minIOServices.generateDownloadURL(parent.avatarURL, null) : null),
     },
     Query: {
         me: async (_parent, _, context: PmContext) => {
