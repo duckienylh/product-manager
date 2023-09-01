@@ -5,7 +5,7 @@ import { customersCreationAttributes } from '../../db_models/mysql/customers';
 import { pmDb } from '../../loader/mysql';
 import { CustomerAlreadyExistError } from '../../lib/classes/graphqlErrors';
 
-const user_resolver: IResolvers = {
+const customer_resolver: IResolvers = {
     Mutation: {
         createCustomer: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
@@ -53,4 +53,4 @@ const user_resolver: IResolvers = {
     },
 };
 
-export default user_resolver;
+export default customer_resolver;

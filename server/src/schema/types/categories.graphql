@@ -1,0 +1,31 @@
+extend type Query {
+    listAllCategory: [Category]!
+}
+
+extend type Mutation {
+    createCategory(input: CreateCategoryInput!): Category!
+
+    updateCategory(input: UpdateCategoryInput!): SuccessResponse!
+
+#    deleteCategory(input: DeleteCategoryInput!): SuccessResponse!
+}
+
+type Category {
+    id: Int!
+    name: String!
+    createdAt: Date
+    updatedAt: Date
+}
+
+input CreateCategoryInput {
+    name: String!
+}
+
+input UpdateCategoryInput {
+    id: Int!
+    name: String
+}
+
+#input DeleteCategoryInput {
+#    ids: [Int!]!
+#}

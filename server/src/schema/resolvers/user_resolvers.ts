@@ -12,7 +12,7 @@ import { userCreationAttributes } from '../../db_models/mysql/user';
 import { minIOServices } from '../../lib/classes';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 
-const user_resolver: IResolvers = {
+const user_resolvers: IResolvers = {
     UserEdge: rdbEdgeResolver,
 
     UserConnection: rdbConnectionResolver,
@@ -266,4 +266,4 @@ const user_resolver: IResolvers = {
     },
 };
 
-export default user_resolver;
+export default user_resolvers;
