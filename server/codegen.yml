@@ -12,3 +12,8 @@ generates:
         User: ../db_models/mysql/init-models#user
         UserEdge: ../db_models/mysql/user#UserEdge
         UserConnection: ../db_models/mysql/user#UserConnection
+        Customers: ../db_models/mysql/init-models#customers
+        Category: ../db_models/mysql/init-models#categories
+        Product: ../db_models/mysql/init-models#products
+        ProductEdge: ../db_models/mysql/products#ProductEdge
+        ProductConnection: ../db_models/mysql/products#ProductConnection

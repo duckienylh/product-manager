@@ -1,0 +1,76 @@
+extend type Query {
+    listAllProduct(input: ListAllProductInput!): ProductConnection!
+}
+
+extend type Mutation {
+    createProduct(input: CreateProductInput!): Product!
+
+    updateProduct(input: UpdateProductInput!): SuccessResponse!
+
+    deleteProduct(input: DeleteProductInput!): SuccessResponse!
+}
+
+type Product {
+    id: Int!
+    category: Category!
+    name: String!
+    code: String!
+    price: Float!
+    quantity: Int
+    height: Float
+    width: Float
+    weight: Float
+    image: String
+    description: String
+    createdAt: Date
+    updatedAt: Date
+}
+
+type ProductConnection {
+    edges: [ProductEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ProductEdge {
+    cursor: String!
+    node: Product
+}
+
+input CreateProductInput {
+    categoryId: Int!
+    name: String!
+    code: String!
+    price: Float!
+    quantity: Int
+    height: Float
+    width: Float
+    weight: Float
+    image: Upload
+    description: String
+}
+
+input UpdateProductInput {
+    id: Int!
+    categoryId: Int
+    name: String
+    code: String
+    price: Float
+    quantity: Int
+    height: Float
+    width: Float
+    weight: Float
+    image: Upload
+    description: String
+}
+
+input DeleteProductInput {
+    ids: [Int!]!
+}
+
+input ListAllProductInput {
+    stringQuery: String
+    categoryId: Int
+    checkInventory: Boolean
+    args: PaginationInput
+}

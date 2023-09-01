@@ -2,13 +2,13 @@
 // @ts-ignore
 import importGraphqlString from 'import-graphql-string';
 import { Tab } from '@apollographql/graphql-playground-html/dist/render-playground-page';
-import user_resolver from '../schema/resolvers/user_resolver';
+import user_resolvers from '../schema/resolvers/user_resolvers';
 import { variables } from './variables';
 
 const setUserAuthorization = async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const token = await user_resolver.Query?.login({}, variables.login)
+    const token = await user_resolvers.Query?.login({}, variables.login)
         .then((result: { token: any }) => result?.token)
         .catch((e: Error) => {
             console.error(e);
@@ -36,6 +36,26 @@ const updateUser = importGraphqlString('./mutations/user/updateUser.graphql');
 const deleteUser = importGraphqlString('./mutations/user/deleteUser.graphql');
 
 const users = importGraphqlString('./queries/user/users.graphql');
+
+const createCustomer = importGraphqlString('./mutations/customer/createCustomer.graphql');
+
+const updateCustomer = importGraphqlString('./mutations/customer/updateCustomer.graphql');
+
+const deleteCustomer = importGraphqlString('./mutations/customer/deleteCustomer.graphql');
+
+const createCategory = importGraphqlString('./mutations/category/createCategory.graphql');
+
+const updateCategory = importGraphqlString('./mutations/category/updateCategory.graphql');
+
+const listAllCategory = importGraphqlString('./queries/category/listAllCategory.graphql');
+
+const createProduct = importGraphqlString('./mutations/product/createProduct.graphql');
+
+const updateProduct = importGraphqlString('./mutations/product/updateProduct.graphql');
+
+const deleteProduct = importGraphqlString('./mutations/product/deleteProduct.graphql');
+
+const listAllProduct = importGraphqlString('./queries/product/listAllProduct.graphql');
 
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
@@ -84,6 +104,74 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: users,
             headers: userAuth,
             variables: prettifyJsonString(variables.users),
+        },
+        {
+            endpoint: path,
+            name: 'Tạo khách hàng mới',
+            query: createCustomer,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createCustomer),
+        },
+        {
+            endpoint: path,
+            name: 'sửa khách hàng',
+            query: updateCustomer,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateCustomer),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa khách hàng',
+            query: deleteCustomer,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.deleteCustomer),
+        },
+        {
+            endpoint: path,
+            name: 'Thêm loại sản phẩm mới',
+            query: createCategory,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createCategory),
+        },
+        {
+            endpoint: path,
+            name: 'Sửa loại sản phẩm',
+            query: updateCategory,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateCategory),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách loại sản phẩm',
+            query: listAllCategory,
+        },
+        {
+            endpoint: path,
+            name: 'Thêm sản phẩm mới',
+            query: createProduct,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createProduct),
+        },
+        {
+            endpoint: path,
+            name: 'Sửa sản phẩm',
+            query: updateProduct,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateProduct),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa sản phẩm',
+            query: deleteProduct,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.deleteProduct),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách sản phẩm',
+            query: listAllProduct,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.listAllProduct),
         },
     ];
 };

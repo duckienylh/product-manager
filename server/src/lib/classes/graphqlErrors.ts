@@ -20,6 +20,9 @@ export enum PM_ERROR_CODE {
      * pagination Error
      */
     InvalidPaginationArgument = 'InvalidPaginationArgument',
+    CustomerAlreadyExist = 'CustomerAlreadyExist',
+    CategoryAlreadyExist = 'CategoryAlreadyExist',
+    ProductAlreadyExist = 'ProductAlreadyExist',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -87,6 +90,36 @@ export class InvalidPaginationArgumentError extends GraphQLError {
         super(message, {
             extensions: {
                 code: PM_ERROR_CODE.InvalidPaginationArgument,
+            },
+        });
+    }
+}
+
+export class CustomerAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'khách hàng không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.CustomerAlreadyExist,
+            },
+        });
+    }
+}
+
+export class CategoryAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Loại sản phẩm không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.CategoryAlreadyExist,
+            },
+        });
+    }
+}
+
+export class ProductAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Sản phẩm không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.ProductAlreadyExist,
             },
         });
     }
