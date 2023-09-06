@@ -4,7 +4,7 @@ extend type Mutation {
     updateOrder(input: UpdateOrderInput!): SuccessResponse!
 }
 
-enum Status {
+enum StatusOrder {
     creatNew
     Delivering
     successDelivery
@@ -20,7 +20,7 @@ type Order {
     invoiceNo: String!
     VAT: Float
     totalAmount: Float
-    status: Status!
+    status: StatusOrder!
     createdAt: Date
     updatedAt: Date
 }
@@ -28,9 +28,7 @@ type Order {
 input CreateOrderInput {
     saleId: Int!
     customerId: Int!
-    invoiceNo: String!
     VAT: Float
-    status: Status!
 }
 
 input UpdateOrderInput {
@@ -39,5 +37,5 @@ input UpdateOrderInput {
     customerId: Int
     invoiceNo: String
     VAT: Float
-    status: Status
+    status: StatusOrder
 }

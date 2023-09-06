@@ -1,6 +1,6 @@
-import { INotificationEvent, IRole } from '../__generated__/graphql';
-import { RoleList } from './enum';
-import { InValidRoleError } from './classes/graphqlErrors';
+import { INotificationEvent, IRole, IStatusOrder } from '../__generated__/graphql';
+import { RoleList, StatusOrder } from './enum';
+import { InValidRoleError, InValidValueError } from './classes/graphqlErrors';
 import { NotificationEvent } from './classes/PubSubService';
 
 export const iRoleToNumber = (role: IRole) => {
@@ -57,5 +57,45 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.Common;
         case INotificationEvent.NewMessage:
             return NotificationEvent.NewMessage;
+        case INotificationEvent.NewOrder:
+            return NotificationEvent.NewOrder;
+    }
+};
+
+export const IStatusOrderTypeResolve = (input: string | undefined) => {
+    switch (input) {
+        case StatusOrder.creatNew:
+            return IStatusOrder.CreatNew;
+        case StatusOrder.delivering:
+            return IStatusOrder.Delivering;
+        case StatusOrder.successDelivery:
+            return IStatusOrder.SuccessDelivery;
+        case StatusOrder.paymentConfirmation:
+            return IStatusOrder.PaymentConfirmation;
+        case StatusOrder.paid:
+            return IStatusOrder.Paid;
+        case StatusOrder.done:
+            return IStatusOrder.Done;
+        default:
+            throw new InValidValueError();
+    }
+};
+
+export const iStatusOrderToStatusOrder = (iStatusOrderInput: IStatusOrder) => {
+    switch (iStatusOrderInput) {
+        case IStatusOrder.CreatNew:
+            return StatusOrder.creatNew;
+        case IStatusOrder.Delivering:
+            return StatusOrder.delivering;
+        case IStatusOrder.SuccessDelivery:
+            return StatusOrder.successDelivery;
+        case IStatusOrder.PaymentConfirmation:
+            return StatusOrder.paymentConfirmation;
+        case IStatusOrder.Paid:
+            return StatusOrder.paid;
+        case IStatusOrder.Done:
+            return StatusOrder.done;
+        default:
+            throw new InValidValueError();
     }
 };

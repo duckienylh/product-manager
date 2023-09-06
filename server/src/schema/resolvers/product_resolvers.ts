@@ -3,7 +3,7 @@ import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb, sequelize } from '../../loader/mysql';
-import { CategoryAlreadyExistError, MySQLError, PermissionError, ProductAlreadyExistError } from '../../lib/classes/graphqlErrors';
+import { CategoryNotFoundError, MySQLError, PermissionError, ProductNotFoundError } from '../../lib/classes/graphqlErrors';
 import { productsCreationAttributes } from '../../db_models/mysql/products';
 import { minIOServices } from '../../lib/classes';
 import { BucketValue, RoleList } from '../../lib/enum';
@@ -70,7 +70,7 @@ const product_resolver: IResolvers = {
         createProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
             const { name, code, height, image, price, description, weight, width, quantity, categoryId } = input;
-            await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryAlreadyExistError() });
+            await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryNotFoundError() });
             const productAttribute: productsCreationAttributes = {
                 categoryId,
                 name,
@@ -104,9 +104,9 @@ const product_resolver: IResolvers = {
             checkAuthentication(context);
             const { id, name, code, height, image, price, description, weight, width, quantity, categoryId } = input;
 
-            const product = await pmDb.products.findByPk(id, { rejectOnEmpty: new ProductAlreadyExistError() });
+            const product = await pmDb.products.findByPk(id, { rejectOnEmpty: new ProductNotFoundError() });
             if (categoryId) {
-                await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryAlreadyExistError() });
+                await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryNotFoundError() });
                 product.categoryId = categoryId;
             }
             if (name) product.name = name;
@@ -148,7 +148,7 @@ const product_resolver: IResolvers = {
                 },
             });
 
-            if (deleteProduct.length !== ids.length) throw new ProductAlreadyExistError();
+            if (deleteProduct.length !== ids.length) throw new ProductNotFoundError();
 
             await sequelize.transaction(async (t: Transaction) => {
                 try {

@@ -10,4 +10,5 @@ type Notification {
 enum NotificationEvent {
     Common
     NewMessage
+    NewOrder
 }

@@ -47,9 +47,7 @@ export type ICreateCustomerInput = {
 export type ICreateOrderInput = {
   VAT?: InputMaybe<Scalars['Float']['input']>;
   customerId: Scalars['Int']['input'];
-  invoiceNo: Scalars['String']['input'];
   saleId: Scalars['Int']['input'];
-  status: IStatus;
 };
 
 export type ICreateProductInput = {
@@ -202,7 +200,8 @@ export type INotification = {
 
 export enum INotificationEvent {
   Common = 'Common',
-  NewMessage = 'NewMessage'
+  NewMessage = 'NewMessage',
+  NewOrder = 'NewOrder'
 }
 
 export type INotificationResponse = {
@@ -219,7 +218,7 @@ export type IOrder = {
   id: Scalars['Int']['output'];
   invoiceNo: Scalars['String']['output'];
   sale: IUser;
-  status: IStatus;
+  status: IStatusOrder;
   totalAmount?: Maybe<Scalars['Float']['output']>;
   updatedAt?: Maybe<Scalars['Date']['output']>;
 };
@@ -302,7 +301,7 @@ export enum IRole {
   TransporterManager = 'TransporterManager'
 }
 
-export enum IStatus {
+export enum IStatusOrder {
   Delivering = 'Delivering',
   CreatNew = 'creatNew',
   Done = 'done',
@@ -352,7 +351,7 @@ export type IUpdateOrderInput = {
   id: Scalars['Int']['input'];
   invoiceNo?: InputMaybe<Scalars['String']['input']>;
   saleId?: InputMaybe<Scalars['Int']['input']>;
-  status?: InputMaybe<IStatus>;
+  status?: InputMaybe<IStatusOrder>;
 };
 
 export type IUpdateProductInput = {
@@ -532,7 +531,7 @@ export type IResolversTypes = {
   ProductEdge: ResolverTypeWrapper<ProductEdge>;
   Query: ResolverTypeWrapper<{}>;
   Role: IRole;
-  Status: IStatus;
+  StatusOrder: IStatusOrder;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubscribeNotificationsInput: ISubscribeNotificationsInput;
   Subscription: ResolverTypeWrapper<{}>;
@@ -668,7 +667,7 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   invoiceNo?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   sale?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
-  status?: Resolver<IResolversTypes['Status'], ParentType, ContextType>;
+  status?: Resolver<IResolversTypes['StatusOrder'], ParentType, ContextType>;
   totalAmount?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
