@@ -23,7 +23,11 @@ const setUserAuthorization = async () => {
 
 const defaultPath = `http://${process.env.PM_SERVER_HOST || 'localhost'}:${process.env.PM_SERVER_PORT || '4000'}/graphql`;
 
+const defaultSubscriptionPath = `ws://${process.env.SSM_SERVER_HOST || 'localhost'}:${process.env.SSM_SERVER_PORT || '4000'}/subscriptions`;
+
 const prettifyJsonString = (variable: any) => JSON.stringify(variable, null, 2);
+
+const getMessage = importGraphqlString('./subscription/getMessage.graphql');
 
 const login = importGraphqlString('./queries/authentication/login.graphql');
 
@@ -59,12 +63,19 @@ const listAllProduct = importGraphqlString('./queries/product/listAllProduct.gra
 
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
-    // const subscriptionHeaders = {
-    //     headers: {
-    //         ...userAuth,
-    //     },
-    // };
+    const subscriptionHeaders = {
+        headers: {
+            ...userAuth,
+        },
+    };
     return [
+        {
+            endpoint: defaultSubscriptionPath,
+            name: 'Subscription',
+            query: getMessage,
+            headers: subscriptionHeaders as any,
+            variables: prettifyJsonString(variables.getMessage),
+        },
         {
             endpoint: path,
             name: 'Current user',

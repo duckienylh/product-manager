@@ -1,0 +1,43 @@
+extend type Mutation {
+    createOrder(input: CreateOrderInput!): Order!
+
+    updateOrder(input: UpdateOrderInput!): SuccessResponse!
+}
+
+enum Status {
+    creatNew
+    Delivering
+    successDelivery
+    paymentConfirmation
+    paid
+    done
+}
+
+type Order {
+    id: Int!
+    sale: User!
+    customer: Customer!
+    invoiceNo: String!
+    VAT: Float
+    totalAmount: Float
+    status: Status!
+    createdAt: Date
+    updatedAt: Date
+}
+
+input CreateOrderInput {
+    saleId: Int!
+    customerId: Int!
+    invoiceNo: String!
+    VAT: Float
+    status: Status!
+}
+
+input UpdateOrderInput {
+    id:Int!
+    saleId: Int
+    customerId: Int
+    invoiceNo: String
+    VAT: Float
+    status: Status
+}
