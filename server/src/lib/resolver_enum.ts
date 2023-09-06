@@ -1,6 +1,7 @@
-import { IRole } from '../__generated__/graphql';
+import { INotificationEvent, IRole } from '../__generated__/graphql';
 import { RoleList } from './enum';
 import { InValidRoleError } from './classes/graphqlErrors';
+import { NotificationEvent } from './classes/PubSubService';
 
 export const iRoleToNumber = (role: IRole) => {
     switch (role) {
@@ -45,5 +46,16 @@ export const roleNumberToIRole = (roleNumber: RoleList) => {
             return IRole.AssistantDriver;
         default:
             throw new InValidRoleError();
+    }
+};
+
+// eslint-disable-next-line consistent-return
+export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
+    // eslint-disable-next-line default-case
+    switch (event) {
+        case INotificationEvent.Common:
+            return NotificationEvent.Common;
+        case INotificationEvent.NewMessage:
+            return NotificationEvent.NewMessage;
     }
 };

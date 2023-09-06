@@ -6,11 +6,12 @@ import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { MySQLError, PermissionError, UserAlreadyExistError, UserNotFoundError } from '../../lib/classes/graphqlErrors';
 import { generateJWT, USER_JWT } from '../../lib/utils/jwt';
-import { iRoleToNumber, roleNumberToIRole } from '../../lib/resolver_enum';
+import { iNotificationEventToValueResolve, iRoleToNumber, roleNumberToIRole } from '../../lib/resolver_enum';
 import { BucketValue, DefaultHashValue, RoleList } from '../../lib/enum';
 import { userCreationAttributes } from '../../db_models/mysql/user';
-import { minIOServices } from '../../lib/classes';
+import { minIOServices, pubsubService } from '../../lib/classes';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
+import { NotificationEvent, PublishMessage } from '../../lib/classes/PubSubService';
 
 const user_resolvers: IResolvers = {
     UserEdge: rdbEdgeResolver,
@@ -262,6 +263,25 @@ const user_resolvers: IResolvers = {
             });
 
             return ISuccessResponse.Success;
+        },
+    },
+    Subscription: {
+        subscribeNotifications: {
+            subscribe: (parent, { input }) => {
+                const { userId, excludingEvent } = input;
+                const allEvent = Object.values(NotificationEvent);
+                let filteredEvent: NotificationEvent[] = allEvent;
+                if (excludingEvent) {
+                    const childArray = excludingEvent.map((e) => iNotificationEventToValueResolve(e));
+                    filteredEvent = allEvent.filter((item) => !childArray.includes(item));
+                }
+                return pubsubService.asyncIteratorByUser(userId, filteredEvent);
+            },
+            resolve: async (contextValue: PublishMessage) => ({
+                message: contextValue.message,
+                notification: contextValue.notification,
+                order: contextValue.order,
+            }),
         },
     },
 };

@@ -2,6 +2,11 @@ const adminAccount = 'admin';
 const password = 'demo1234';
 
 export const variables = {
+    getMessage: {
+        input: {
+            userId: 1,
+        },
+    },
     login: {
         input: {
             account: adminAccount,

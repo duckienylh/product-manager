@@ -1,0 +1,13 @@
+type Notification {
+    id: Int!
+    event: NotificationEvent!
+    content: String!
+    Order: Order
+    createdAt: Date!
+    updatedAt: Date!
+}
+
+enum NotificationEvent {
+    Common
+    NewMessage
+}

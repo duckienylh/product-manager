@@ -27,6 +27,7 @@ type Customer {
 type Mutation {
     createCategory(input: CreateCategoryInput!): Category!
     createCustomer(input: CreateCustomerInput!): Customer!
+    createOrder(input: CreateOrderInput!): Order!
     createProduct(input: CreateProductInput!): Product!
     createUser(input: CreateUserInput!): User!
     deleteCustomer(input: DeleteCustomerInput!): SuccessResponse!
@@ -34,8 +35,35 @@ type Mutation {
     deleteUser(input: DeleteUserInput!): SuccessResponse!
     updateCategory(input: UpdateCategoryInput!): SuccessResponse!
     updateCustomer(input: UpdateCustomerInput!): SuccessResponse!
+    updateOrder(input: UpdateOrderInput!): SuccessResponse!
     updateProduct(input: UpdateProductInput!): SuccessResponse!
     updateUser(input: UpdateUserInput!): SuccessResponse!
+}
+
+type Notification {
+    Order: Order
+    content: String!
+    createdAt: Date!
+    event: NotificationEvent!
+    id: Int!
+    updatedAt: Date!
+}
+
+type NotificationResponse {
+    message: String!
+    notification: Notification
+}
+
+type Order {
+    VAT: Float
+    createdAt: Date
+    customer: Customer!
+    id: Int!
+    invoiceNo: String!
+    sale: User!
+    status: Status!
+    totalAmount: Float
+    updatedAt: Date
 }
 
 type PageInfo {
@@ -53,21 +81,33 @@ type Product {
     image: String
     name: String!
     price: Float!
-    quantity: String
+    quantity: Int
     updatedAt: Date
     weight: Float
     width: Float
 }
 
+type ProductConnection {
+    edges: [ProductEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ProductEdge {
+    cursor: String!
+    node: Product
+}
+
 type Query {
     listAllCategory: [Category]!
+    listAllProduct(input: ListAllProductInput!): ProductConnection!
     login(input: UserLoginInput!): UserLoginResponse!
     me: User!
     users(input: UsersInput!): UserConnection!
 }
 
 type Subscription {
-    subscribeNotifications: User!
+    subscribeNotifications(input: SubscribeNotificationsInput!): NotificationResponse!
 }
 
 type User {
@@ -102,6 +142,11 @@ type UserLoginResponse {
     user: User!
 }
 
+enum NotificationEvent {
+    Common
+    NewMessage
+}
+
 enum Role {
     Accountant
     Admin
@@ -111,6 +156,15 @@ enum Role {
     Manager
     Sales
     TransporterManager
+}
+
+enum Status {
+    Delivering
+    creatNew
+    done
+    paid
+    paymentConfirmation
+    successDelivery
 }
 
 enum SuccessResponse {
@@ -137,6 +191,14 @@ input CreateCustomerInput {
     phoneNumber: String!
 }
 
+input CreateOrderInput {
+    VAT: Float
+    customerId: Int!
+    invoiceNo: String!
+    saleId: Int!
+    status: Status!
+}
+
 input CreateProductInput {
     categoryId: Int!
     code: String!
@@ -145,7 +207,7 @@ input CreateProductInput {
     image: Upload
     name: String!
     price: Float!
-    quantity: String
+    quantity: Int
     weight: Float
     width: Float
 }
@@ -174,11 +236,25 @@ input DeleteUserInput {
     ids: [Int!]!
 }
 
+input ListAllProductInput {
+    args: PaginationInput
+    categoryId: Int
+    checkInventory: Boolean
+    stringQuery: String
+}
+
 input PaginationInput {
     after: Cursor
     before: Cursor
     first: Int
     last: Int
+}
+
+input SubscribeNotificationsInput {
+    "excludingEvent: Khi user không muốn nhận thông từ 1 sự kiện nào đó"
+    excludingEvent: [NotificationEvent!]
+    "#### User Id: ID của user sẽ nhận đc các thông báo"
+    userId: Int!
 }
 
 input UpdateCategoryInput {
@@ -195,6 +271,15 @@ input UpdateCustomerInput {
     phoneNumber: String
 }
 
+input UpdateOrderInput {
+    VAT: Float
+    customerId: Int
+    id: Int!
+    invoiceNo: String
+    saleId: Int
+    status: Status
+}
+
 input UpdateProductInput {
     categoryId: Int
     code: String
@@ -204,7 +289,7 @@ input UpdateProductInput {
     image: Upload
     name: String
     price: Float
-    quantity: String
+    quantity: Int
     weight: Float
     width: Float
 }

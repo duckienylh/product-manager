@@ -15,7 +15,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    subscribeNotifications: User!
+    subscribeNotifications(input: SubscribeNotificationsInput!): NotificationResponse!
 }
 
 enum Role {
@@ -66,6 +66,11 @@ type PageInfo {
     hasNextPage: Boolean!
 }
 
+type NotificationResponse {
+    message: String!
+    notification: Notification
+}
+
 input UserLoginInput {
     account: String!
     password: String!
@@ -107,4 +112,11 @@ input UsersInput {
     isActive: Boolean
     role: Role
     searchQuery: String
+}
+
+input SubscribeNotificationsInput {
+    "excludingEvent: Khi user không muốn nhận thông từ 1 sự kiện nào đó"
+    excludingEvent: [NotificationEvent!]
+    "#### User Id: ID của user sẽ nhận đc các thông báo"
+    userId: Int!
 }
