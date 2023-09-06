@@ -30,19 +30,12 @@ export interface PmContext {
     error: any;
     req: express.Request;
     res: express.Response;
-    // awsS3StorageService: AwsS3StorageService;
-    // pubsub: PubSubService;
 }
 
 interface ContextFunctionProps {
     req: express.Request;
     res: express.Response;
 }
-
-// const appContext: Omit<SsmContext, 'user' | 'isAuth' | 'error' | 'req' | 'res'> = {
-//     pubsub: pubsubService,
-//     awsS3StorageService,
-// };
 
 const authentication = async (authorization: string, req: express.Request, res: express.Response): Promise<PmContext & JwtPayload> => {
     let token: string;
@@ -74,7 +67,6 @@ const context = async ({ req, res }: ContextFunctionProps): Promise<PmContext> =
     const token = req.headers?.authorization || '';
     const auth = await authentication(token, req, res);
     return {
-        // ...appContext,
         ...auth,
     };
 };
