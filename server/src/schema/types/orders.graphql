@@ -21,6 +21,9 @@ type Order {
     VAT: Float
     totalAmount: Float
     status: StatusOrder!
+    discount: Float
+    freightPrice: Float
+    deliverAddress: String
     createdAt: Date
     updatedAt: Date
 }
@@ -29,6 +32,18 @@ input CreateOrderInput {
     saleId: Int!
     customerId: Int!
     VAT: Float
+    product: [productInput!]!
+    discount: Float
+    freightPrice: Float
+    deliverAddress: String
+}
+
+input productInput {
+    description: String
+    priceProduct: Float!
+    productId: Int!
+    quantity: Int!
+    weightProduct: Float
 }
 
 input UpdateOrderInput {
@@ -38,4 +53,17 @@ input UpdateOrderInput {
     invoiceNo: String
     VAT: Float
     status: StatusOrder
+    discount: Float
+    freightPrice: Float
+    deliverAddress: String
+    product: [UpdateProductOrderInput!]
+}
+
+input UpdateProductOrderInput {
+    orderItem: Int!
+    productId: Int
+    description: String
+    priceProduct: Float
+    quantity: Int
+    weightProduct: Float
 }

@@ -136,17 +136,17 @@ export default class MinIOServices {
         });
     }
 
-    async checkObject(object: string, bucketName: string | null | undefined) {
-        const bucket = bucketName ?? this.bucketName;
-        return new Promise<BucketItemStat>((resolve, reject) => {
-            this.minioClient.statObject(bucket, object, (err, stat) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(stat);
-            });
-        });
-    }
+    // async checkObject(object: string, bucketName: string | null | undefined) {
+    //     const bucket = bucketName ?? this.bucketName;
+    //     return new Promise<BucketItemStat>((resolve, reject) => {
+    //         this.minioClient.statObject(bucket, object, (err, stat) => {
+    //             if (err) {
+    //                 reject(err);
+    //             }
+    //             resolve(stat);
+    //         });
+    //     });
+    // }
 
     async listObjects(bucketName: string, prefix?: string) {
         return new Promise<BucketItem[]>((resolve, reject) => {
@@ -164,62 +164,62 @@ export default class MinIOServices {
         });
     }
 
-    async listFolders(bucketName: string, prefix?: string) {
-        return new Promise<string[]>((resolve, reject) => {
-            const stream = this.minioClient.listObjects(bucketName, prefix, true);
-            const directories: string[] = [];
-            stream.on('data', (obj) => {
-                const splitName = obj.name.split('/');
-                if (splitName.length > 0) {
-                    const directoryName = splitName[0];
-                    directories.push(directoryName);
-                }
-            });
-            stream.on('error', (err) => {
-                reject(err);
-            });
-            stream.on('end', () => {
-                // const folderLst = objects.filter((obj) => obj.prefix);
-                resolve([...new Set(directories)]);
-            });
-        });
-    }
+    // async listFolders(bucketName: string, prefix?: string) {
+    //     return new Promise<string[]>((resolve, reject) => {
+    //         const stream = this.minioClient.listObjects(bucketName, prefix, true);
+    //         const directories: string[] = [];
+    //         stream.on('data', (obj) => {
+    //             const splitName = obj.name.split('/');
+    //             if (splitName.length > 0) {
+    //                 const directoryName = splitName[0];
+    //                 directories.push(directoryName);
+    //             }
+    //         });
+    //         stream.on('error', (err) => {
+    //             reject(err);
+    //         });
+    //         stream.on('end', () => {
+    //             // const folderLst = objects.filter((obj) => obj.prefix);
+    //             resolve([...new Set(directories)]);
+    //         });
+    //     });
+    // }
 
-    async moveFolder(sourceBucket: string, sourceFolder: string, destinationBucket: string, destinationFolder: string) {
-        // Copy all objects from the source folder to the destination folder
-        const objectsStream = await this.listObjects(sourceBucket, sourceFolder);
-        if (objectsStream.length < 1) {
-            return [];
-        }
-        const fileList: FileObject[] = [];
-        const conditions = new CopyConditions();
-
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const obj of objectsStream) {
-            conditions.setMatchETag(obj.etag);
-            const objectName = obj.name;
-            const fileName = objectName.split('/').pop() || '';
-            const destObjectName = objectName.replace(sourceFolder, destinationFolder);
-            const fileObj = {
-                fileName,
-                folderName: sourceFolder,
-                url: `${destinationFolder}/${fileName}`,
-            };
-            this.minioClient.copyObject(destinationBucket, destObjectName, `${sourceBucket}/${objectName}`, conditions, (e) => {
-                if (e) {
-                    console.log(e);
-                    throw e;
-                }
-            });
-            fileList.push(fileObj);
-        }
-
-        // Remove all objects from the source folder after copying
-        const sourceObjectsStream = this.minioClient.listObjectsV2(sourceBucket, sourceFolder, true);
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const obj of sourceObjectsStream) {
-            await this.minioClient.removeObject(sourceBucket, obj.name);
-        }
-        return fileList;
-    }
+    // async moveFolder(sourceBucket: string, sourceFolder: string, destinationBucket: string, destinationFolder: string) {
+    //     // Copy all objects from the source folder to the destination folder
+    //     const objectsStream = await this.listObjects(sourceBucket, sourceFolder);
+    //     if (objectsStream.length < 1) {
+    //         return [];
+    //     }
+    //     const fileList: FileObject[] = [];
+    //     const conditions = new CopyConditions();
+    //
+    //     // eslint-disable-next-line no-restricted-syntax
+    //     for await (const obj of objectsStream) {
+    //         conditions.setMatchETag(obj.etag);
+    //         const objectName = obj.name;
+    //         const fileName = objectName.split('/').pop() || '';
+    //         const destObjectName = objectName.replace(sourceFolder, destinationFolder);
+    //         const fileObj = {
+    //             fileName,
+    //             folderName: sourceFolder,
+    //             url: `${destinationFolder}/${fileName}`,
+    //         };
+    //         this.minioClient.copyObject(destinationBucket, destObjectName, `${sourceBucket}/${objectName}`, conditions, (e) => {
+    //             if (e) {
+    //                 console.log(e);
+    //                 throw e;
+    //             }
+    //         });
+    //         fileList.push(fileObj);
+    //     }
+    //
+    //     // Remove all objects from the source folder after copying
+    //     const sourceObjectsStream = this.minioClient.listObjectsV2(sourceBucket, sourceFolder, true);
+    //     // eslint-disable-next-line no-restricted-syntax
+    //     for await (const obj of sourceObjectsStream) {
+    //         await this.minioClient.removeObject(sourceBucket, obj.name);
+    //     }
+    //     return fileList;
+    // }
 }

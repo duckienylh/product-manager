@@ -119,4 +119,16 @@ export const variables = {
             categoryId: 1,
         },
     },
+    createOrder: {
+        input: {
+            saleId: 1,
+            customerId: 1,
+            product: {
+                priceProduct: 10000,
+                productId: 1,
+                quantity: 12,
+                weightProduct: 100,
+            },
+        },
+    },
 };

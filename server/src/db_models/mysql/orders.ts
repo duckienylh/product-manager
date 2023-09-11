@@ -14,16 +14,18 @@ export interface ordersAttributes {
     saleId: number;
     customerId: number;
     invoiceNo: string;
-    VAT?: number;
-    totalAmount?: number;
     status: string;
+    VAT?: number;
+    discount?: number;
+    freightPrice?: number;
+    deliverAddress?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export type ordersPk = 'id';
 export type ordersId = orders[ordersPk];
-export type ordersOptionalAttributes = 'id' | 'VAT' | 'totalAmount' | 'createdAt' | 'updatedAt';
+export type ordersOptionalAttributes = 'id' | 'VAT' | 'discount' | 'freightPrice' | 'deliverAddress' | 'createdAt' | 'updatedAt';
 export type ordersCreationAttributes = Optional<ordersAttributes, ordersOptionalAttributes>;
 
 export class orders extends Model<ordersAttributes, ordersCreationAttributes> implements ordersAttributes {
@@ -35,11 +37,15 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
 
     invoiceNo!: string;
 
+    status!: string;
+
     VAT?: number;
 
-    totalAmount?: number;
+    discount?: number;
 
-    status!: string;
+    freightPrice?: number;
+
+    deliverAddress?: string;
 
     createdAt?: Date;
 
@@ -202,19 +208,28 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
                     type: DataTypes.STRING(45),
                     allowNull: false,
                 },
+                status: {
+                    type: DataTypes.STRING(45),
+                    allowNull: false,
+                },
                 VAT: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
                     defaultValue: 0,
                 },
-                totalAmount: {
+                discount: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
                     defaultValue: 0,
                 },
-                status: {
-                    type: DataTypes.STRING(45),
-                    allowNull: false,
+                freightPrice: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                    defaultValue: 0,
+                },
+                deliverAddress: {
+                    type: DataTypes.STRING(100),
+                    allowNull: true,
                 },
             },
             {

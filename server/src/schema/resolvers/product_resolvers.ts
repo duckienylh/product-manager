@@ -150,6 +150,14 @@ const product_resolver: IResolvers = {
 
             if (deleteProduct.length !== ids.length) throw new ProductNotFoundError();
 
+            const orderExistProduct = await pmDb.orderItem.findAll({
+                where: {
+                    productId: ids,
+                },
+            });
+
+            if (orderExistProduct.length > 0) throw new Error('Sản phẩm đã tồn tại trong đơn hàng');
+
             await sequelize.transaction(async (t: Transaction) => {
                 try {
                     const deleteImageProductOnS3: string[] = [];

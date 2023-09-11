@@ -11,4 +11,5 @@ enum NotificationEvent {
     Common
     NewMessage
     NewOrder
+    updateOrder
 }

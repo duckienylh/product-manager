@@ -59,10 +59,12 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.NewMessage;
         case INotificationEvent.NewOrder:
             return NotificationEvent.NewOrder;
+        case INotificationEvent.UpdateOrder:
+            return NotificationEvent.UpdateOrder;
     }
 };
 
-export const IStatusOrderTypeResolve = (input: string | undefined) => {
+export const StatusOrderTypeResolve = (input: string | undefined) => {
     switch (input) {
         case StatusOrder.creatNew:
             return IStatusOrder.CreatNew;
@@ -81,7 +83,7 @@ export const IStatusOrderTypeResolve = (input: string | undefined) => {
     }
 };
 
-export const iStatusOrderToStatusOrder = (iStatusOrderInput: IStatusOrder) => {
+export const IStatusOrderToStatusOrder = (iStatusOrderInput: IStatusOrder) => {
     switch (iStatusOrderInput) {
         case IStatusOrder.CreatNew:
             return StatusOrder.creatNew;
