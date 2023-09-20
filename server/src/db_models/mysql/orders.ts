@@ -1,228 +1,260 @@
 import * as Sequelize from 'sequelize';
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model, Op, Optional } from 'sequelize';
 import type { customers, customersId } from './customers';
 import type { notifications, notificationsId } from './notifications';
 import type { orderItem, orderItemId } from './orderItem';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { paymentInfor, paymentInforId } from './paymentInfor';
 import type { user, userId } from './user';
+import { pmDb } from '../../loader/mysql';
+import { fDateTimeForInvoiceNoDayMonYear } from '../../lib/utils/formatTime';
 
 export interface ordersAttributes {
-  id: number;
-  saleId: number;
-  customerId: number;
-  invoiceNo: string;
-  VAT?: number;
-  totalAmount?: number;
-  status: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+    id: number;
+    saleId: number;
+    customerId: number;
+    invoiceNo: string;
+    status: string;
+    VAT?: number;
+    discount?: number;
+    freightPrice?: number;
+    deliverAddress?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type ordersPk = 'id';
 export type ordersId = orders[ordersPk];
-export type ordersOptionalAttributes = 'id' | 'VAT' | 'totalAmount' | 'createdAt' | 'updatedAt';
+export type ordersOptionalAttributes = 'id' | 'VAT' | 'discount' | 'freightPrice' | 'deliverAddress' | 'createdAt' | 'updatedAt';
 export type ordersCreationAttributes = Optional<ordersAttributes, ordersOptionalAttributes>;
 
 export class orders extends Model<ordersAttributes, ordersCreationAttributes> implements ordersAttributes {
-  id!: number;
+    id!: number;
 
-  saleId!: number;
+    saleId!: number;
 
-  customerId!: number;
+    customerId!: number;
 
-  invoiceNo!: string;
+    invoiceNo!: string;
 
-  VAT?: number;
+    status!: string;
 
-  totalAmount?: number;
+    VAT?: number;
 
-  status!: string;
+    discount?: number;
 
-  createdAt?: Date;
+    freightPrice?: number;
 
-  updatedAt?: Date;
+    deliverAddress?: string;
 
-  // orders belongsTo customers via customerId
-  customer!: customers;
+    createdAt?: Date;
 
-  getCustomer!: Sequelize.BelongsToGetAssociationMixin<customers>;
+    updatedAt?: Date;
 
-  setCustomer!: Sequelize.BelongsToSetAssociationMixin<customers, customersId>;
+    // orders belongsTo customers via customerId
+    customer!: customers;
 
-  createCustomer!: Sequelize.BelongsToCreateAssociationMixin<customers>;
+    getCustomer!: Sequelize.BelongsToGetAssociationMixin<customers>;
 
-  // orders hasMany notifications via orderId
-  notifications!: notifications[];
+    setCustomer!: Sequelize.BelongsToSetAssociationMixin<customers, customersId>;
 
-  getNotifications!: Sequelize.HasManyGetAssociationsMixin<notifications>;
+    createCustomer!: Sequelize.BelongsToCreateAssociationMixin<customers>;
 
-  setNotifications!: Sequelize.HasManySetAssociationsMixin<notifications, notificationsId>;
+    // orders hasMany notifications via orderId
+    notifications!: notifications[];
 
-  addNotification!: Sequelize.HasManyAddAssociationMixin<notifications, notificationsId>;
+    getNotifications!: Sequelize.HasManyGetAssociationsMixin<notifications>;
 
-  addNotifications!: Sequelize.HasManyAddAssociationsMixin<notifications, notificationsId>;
+    setNotifications!: Sequelize.HasManySetAssociationsMixin<notifications, notificationsId>;
 
-  createNotification!: Sequelize.HasManyCreateAssociationMixin<notifications>;
+    addNotification!: Sequelize.HasManyAddAssociationMixin<notifications, notificationsId>;
 
-  removeNotification!: Sequelize.HasManyRemoveAssociationMixin<notifications, notificationsId>;
+    addNotifications!: Sequelize.HasManyAddAssociationsMixin<notifications, notificationsId>;
 
-  removeNotifications!: Sequelize.HasManyRemoveAssociationsMixin<notifications, notificationsId>;
+    createNotification!: Sequelize.HasManyCreateAssociationMixin<notifications>;
 
-  hasNotification!: Sequelize.HasManyHasAssociationMixin<notifications, notificationsId>;
+    removeNotification!: Sequelize.HasManyRemoveAssociationMixin<notifications, notificationsId>;
 
-  hasNotifications!: Sequelize.HasManyHasAssociationsMixin<notifications, notificationsId>;
+    removeNotifications!: Sequelize.HasManyRemoveAssociationsMixin<notifications, notificationsId>;
 
-  countNotifications!: Sequelize.HasManyCountAssociationsMixin;
+    hasNotification!: Sequelize.HasManyHasAssociationMixin<notifications, notificationsId>;
 
-  // orders hasMany orderItem via orderId
-  orderItems!: orderItem[];
+    hasNotifications!: Sequelize.HasManyHasAssociationsMixin<notifications, notificationsId>;
 
-  getOrderItems!: Sequelize.HasManyGetAssociationsMixin<orderItem>;
+    countNotifications!: Sequelize.HasManyCountAssociationsMixin;
 
-  setOrderItems!: Sequelize.HasManySetAssociationsMixin<orderItem, orderItemId>;
+    // orders hasMany orderItem via orderId
+    orderItems!: orderItem[];
 
-  addOrderItem!: Sequelize.HasManyAddAssociationMixin<orderItem, orderItemId>;
+    getOrderItems!: Sequelize.HasManyGetAssociationsMixin<orderItem>;
 
-  addOrderItems!: Sequelize.HasManyAddAssociationsMixin<orderItem, orderItemId>;
+    setOrderItems!: Sequelize.HasManySetAssociationsMixin<orderItem, orderItemId>;
 
-  createOrderItem!: Sequelize.HasManyCreateAssociationMixin<orderItem>;
+    addOrderItem!: Sequelize.HasManyAddAssociationMixin<orderItem, orderItemId>;
 
-  removeOrderItem!: Sequelize.HasManyRemoveAssociationMixin<orderItem, orderItemId>;
+    addOrderItems!: Sequelize.HasManyAddAssociationsMixin<orderItem, orderItemId>;
 
-  removeOrderItems!: Sequelize.HasManyRemoveAssociationsMixin<orderItem, orderItemId>;
+    createOrderItem!: Sequelize.HasManyCreateAssociationMixin<orderItem>;
 
-  hasOrderItem!: Sequelize.HasManyHasAssociationMixin<orderItem, orderItemId>;
+    removeOrderItem!: Sequelize.HasManyRemoveAssociationMixin<orderItem, orderItemId>;
 
-  hasOrderItems!: Sequelize.HasManyHasAssociationsMixin<orderItem, orderItemId>;
+    removeOrderItems!: Sequelize.HasManyRemoveAssociationsMixin<orderItem, orderItemId>;
 
-  countOrderItems!: Sequelize.HasManyCountAssociationsMixin;
+    hasOrderItem!: Sequelize.HasManyHasAssociationMixin<orderItem, orderItemId>;
 
-  // orders hasMany orderProcess via orderId
-  orderProcesses!: orderProcess[];
+    hasOrderItems!: Sequelize.HasManyHasAssociationsMixin<orderItem, orderItemId>;
 
-  getOrderProcesses!: Sequelize.HasManyGetAssociationsMixin<orderProcess>;
+    countOrderItems!: Sequelize.HasManyCountAssociationsMixin;
 
-  setOrderProcesses!: Sequelize.HasManySetAssociationsMixin<orderProcess, orderProcessId>;
+    // orders hasMany orderProcess via orderId
+    orderProcesses!: orderProcess[];
 
-  addOrderProcess!: Sequelize.HasManyAddAssociationMixin<orderProcess, orderProcessId>;
+    getOrderProcesses!: Sequelize.HasManyGetAssociationsMixin<orderProcess>;
 
-  addOrderProcesses!: Sequelize.HasManyAddAssociationsMixin<orderProcess, orderProcessId>;
+    setOrderProcesses!: Sequelize.HasManySetAssociationsMixin<orderProcess, orderProcessId>;
 
-  createOrderProcess!: Sequelize.HasManyCreateAssociationMixin<orderProcess>;
+    addOrderProcess!: Sequelize.HasManyAddAssociationMixin<orderProcess, orderProcessId>;
 
-  removeOrderProcess!: Sequelize.HasManyRemoveAssociationMixin<orderProcess, orderProcessId>;
+    addOrderProcesses!: Sequelize.HasManyAddAssociationsMixin<orderProcess, orderProcessId>;
 
-  removeOrderProcesses!: Sequelize.HasManyRemoveAssociationsMixin<orderProcess, orderProcessId>;
+    createOrderProcess!: Sequelize.HasManyCreateAssociationMixin<orderProcess>;
 
-  hasOrderProcess!: Sequelize.HasManyHasAssociationMixin<orderProcess, orderProcessId>;
+    removeOrderProcess!: Sequelize.HasManyRemoveAssociationMixin<orderProcess, orderProcessId>;
 
-  hasOrderProcesses!: Sequelize.HasManyHasAssociationsMixin<orderProcess, orderProcessId>;
+    removeOrderProcesses!: Sequelize.HasManyRemoveAssociationsMixin<orderProcess, orderProcessId>;
 
-  countOrderProcesses!: Sequelize.HasManyCountAssociationsMixin;
+    hasOrderProcess!: Sequelize.HasManyHasAssociationMixin<orderProcess, orderProcessId>;
 
-  // orders hasMany paymentInfor via orderId
-  paymentInfors!: paymentInfor[];
+    hasOrderProcesses!: Sequelize.HasManyHasAssociationsMixin<orderProcess, orderProcessId>;
 
-  getPaymentInfors!: Sequelize.HasManyGetAssociationsMixin<paymentInfor>;
+    countOrderProcesses!: Sequelize.HasManyCountAssociationsMixin;
 
-  setPaymentInfors!: Sequelize.HasManySetAssociationsMixin<paymentInfor, paymentInforId>;
+    // orders hasMany paymentInfor via orderId
+    paymentInfors!: paymentInfor[];
 
-  addPaymentInfor!: Sequelize.HasManyAddAssociationMixin<paymentInfor, paymentInforId>;
+    getPaymentInfors!: Sequelize.HasManyGetAssociationsMixin<paymentInfor>;
 
-  addPaymentInfors!: Sequelize.HasManyAddAssociationsMixin<paymentInfor, paymentInforId>;
+    setPaymentInfors!: Sequelize.HasManySetAssociationsMixin<paymentInfor, paymentInforId>;
 
-  createPaymentInfor!: Sequelize.HasManyCreateAssociationMixin<paymentInfor>;
+    addPaymentInfor!: Sequelize.HasManyAddAssociationMixin<paymentInfor, paymentInforId>;
 
-  removePaymentInfor!: Sequelize.HasManyRemoveAssociationMixin<paymentInfor, paymentInforId>;
+    addPaymentInfors!: Sequelize.HasManyAddAssociationsMixin<paymentInfor, paymentInforId>;
 
-  removePaymentInfors!: Sequelize.HasManyRemoveAssociationsMixin<paymentInfor, paymentInforId>;
+    createPaymentInfor!: Sequelize.HasManyCreateAssociationMixin<paymentInfor>;
 
-  hasPaymentInfor!: Sequelize.HasManyHasAssociationMixin<paymentInfor, paymentInforId>;
+    removePaymentInfor!: Sequelize.HasManyRemoveAssociationMixin<paymentInfor, paymentInforId>;
 
-  hasPaymentInfors!: Sequelize.HasManyHasAssociationsMixin<paymentInfor, paymentInforId>;
+    removePaymentInfors!: Sequelize.HasManyRemoveAssociationsMixin<paymentInfor, paymentInforId>;
 
-  countPaymentInfors!: Sequelize.HasManyCountAssociationsMixin;
+    hasPaymentInfor!: Sequelize.HasManyHasAssociationMixin<paymentInfor, paymentInforId>;
 
-  // orders belongsTo user via saleId
-  sale!: user;
+    hasPaymentInfors!: Sequelize.HasManyHasAssociationsMixin<paymentInfor, paymentInforId>;
 
-  getSale!: Sequelize.BelongsToGetAssociationMixin<user>;
+    countPaymentInfors!: Sequelize.HasManyCountAssociationsMixin;
 
-  setSale!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
+    // orders belongsTo user via saleId
+    sale!: user;
 
-  createSale!: Sequelize.BelongsToCreateAssociationMixin<user>;
+    getSale!: Sequelize.BelongsToGetAssociationMixin<user>;
 
-  static initModel(sequelize: Sequelize.Sequelize): typeof orders {
-    return orders.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    saleId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'user',
-        key: 'id'
-      }
-    },
-    customerId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'customers',
-        key: 'id'
-      }
-    },
-    invoiceNo: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    VAT: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-      defaultValue: 0
-    },
-    totalAmount: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-      defaultValue: 0
-    },
-    status: {
-      type: DataTypes.STRING(45),
-      allowNull: false
+    setSale!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
+
+    createSale!: Sequelize.BelongsToCreateAssociationMixin<user>;
+
+    static async invoiceNoOrderName(saleId: number) {
+        const today = new Date();
+        const formatToday = fDateTimeForInvoiceNoDayMonYear(today);
+        const startOfDay = new Date(today).setHours(0, 0, 0, 0);
+        const endOfDay = new Date(today).setHours(23, 59, 59, 999);
+
+        const numberOrderOfSale = await pmDb.orders.findAll({
+            where: {
+                saleId,
+                createdAt: {
+                    [Op.between]: [startOfDay, endOfDay],
+                },
+            },
+        });
+
+        return `${formatToday}-S.${saleId}-${numberOrderOfSale.length + 1}`;
     }
-  }, {
-    sequelize,
-    tableName: 'orders',
-    timestamps: true,
-    indexes: [
-      {
-        name: 'PRIMARY',
-        unique: true,
-        using: 'BTREE',
-        fields: [
-          { name: 'id' },
-        ]
-      },
-      {
-        name: 'fk_orders_1_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'saleId' },
-        ]
-      },
-      {
-        name: 'fk_orders_2_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'customerId' },
-        ]
-      },
-    ]
-  });
-  }
+
+    static initModel(sequelize: Sequelize.Sequelize): typeof orders {
+        return orders.init(
+            {
+                id: {
+                    autoIncrement: true,
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                saleId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'user',
+                        key: 'id',
+                    },
+                },
+                customerId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'customers',
+                        key: 'id',
+                    },
+                },
+                invoiceNo: {
+                    type: DataTypes.STRING(45),
+                    allowNull: false,
+                },
+                status: {
+                    type: DataTypes.STRING(45),
+                    allowNull: false,
+                },
+                VAT: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                    defaultValue: 0,
+                },
+                discount: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                    defaultValue: 0,
+                },
+                freightPrice: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                    defaultValue: 0,
+                },
+                deliverAddress: {
+                    type: DataTypes.STRING(100),
+                    allowNull: true,
+                },
+            },
+            {
+                sequelize,
+                tableName: 'orders',
+                timestamps: true,
+                indexes: [
+                    {
+                        name: 'PRIMARY',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'fk_orders_1_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'saleId' }],
+                    },
+                    {
+                        name: 'fk_orders_2_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'customerId' }],
+                    },
+                ],
+            }
+        );
+    }
 }

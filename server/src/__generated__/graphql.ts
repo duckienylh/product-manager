@@ -47,9 +47,11 @@ export type ICreateCustomerInput = {
 export type ICreateOrderInput = {
   VAT?: InputMaybe<Scalars['Float']['input']>;
   customerId: Scalars['Int']['input'];
-  invoiceNo: Scalars['String']['input'];
+  deliverAddress?: InputMaybe<Scalars['String']['input']>;
+  discount?: InputMaybe<Scalars['Float']['input']>;
+  freightPrice?: InputMaybe<Scalars['Float']['input']>;
+  product: Array<IProductInput>;
   saleId: Scalars['Int']['input'];
-  status: IStatus;
 };
 
 export type ICreateProductInput = {
@@ -202,7 +204,9 @@ export type INotification = {
 
 export enum INotificationEvent {
   Common = 'Common',
-  NewMessage = 'NewMessage'
+  NewMessage = 'NewMessage',
+  NewOrder = 'NewOrder',
+  UpdateOrder = 'updateOrder'
 }
 
 export type INotificationResponse = {
@@ -216,10 +220,13 @@ export type IOrder = {
   VAT?: Maybe<Scalars['Float']['output']>;
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer: ICustomer;
+  deliverAddress?: Maybe<Scalars['String']['output']>;
+  discount?: Maybe<Scalars['Float']['output']>;
+  freightPrice?: Maybe<Scalars['Float']['output']>;
   id: Scalars['Int']['output'];
   invoiceNo: Scalars['String']['output'];
   sale: IUser;
-  status: IStatus;
+  status: IStatusOrder;
   totalAmount?: Maybe<Scalars['Float']['output']>;
   updatedAt?: Maybe<Scalars['Date']['output']>;
 };
@@ -302,7 +309,7 @@ export enum IRole {
   TransporterManager = 'TransporterManager'
 }
 
-export enum IStatus {
+export enum IStatusOrder {
   Delivering = 'Delivering',
   CreatNew = 'creatNew',
   Done = 'done',
@@ -349,10 +356,14 @@ export type IUpdateCustomerInput = {
 export type IUpdateOrderInput = {
   VAT?: InputMaybe<Scalars['Float']['input']>;
   customerId?: InputMaybe<Scalars['Int']['input']>;
+  deliverAddress?: InputMaybe<Scalars['String']['input']>;
+  discount?: InputMaybe<Scalars['Float']['input']>;
+  freightPrice?: InputMaybe<Scalars['Float']['input']>;
   id: Scalars['Int']['input'];
   invoiceNo?: InputMaybe<Scalars['String']['input']>;
+  product?: InputMaybe<Array<IUpdateProductOrderInput>>;
   saleId?: InputMaybe<Scalars['Int']['input']>;
-  status?: InputMaybe<IStatus>;
+  status?: InputMaybe<IStatusOrder>;
 };
 
 export type IUpdateProductInput = {
@@ -367,6 +378,15 @@ export type IUpdateProductInput = {
   quantity?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
   width?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type IUpdateProductOrderInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  orderItem: Scalars['Int']['input'];
+  priceProduct?: InputMaybe<Scalars['Float']['input']>;
+  productId?: InputMaybe<Scalars['Int']['input']>;
+  quantity?: InputMaybe<Scalars['Int']['input']>;
+  weightProduct?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type IUpdateUserInput = {
@@ -430,6 +450,14 @@ export type IUsersInput = {
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   role?: InputMaybe<IRole>;
   searchQuery?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IProductInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  priceProduct: Scalars['Float']['input'];
+  productId: Scalars['Int']['input'];
+  quantity: Scalars['Int']['input'];
+  weightProduct?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -532,7 +560,7 @@ export type IResolversTypes = {
   ProductEdge: ResolverTypeWrapper<ProductEdge>;
   Query: ResolverTypeWrapper<{}>;
   Role: IRole;
-  Status: IStatus;
+  StatusOrder: IStatusOrder;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubscribeNotificationsInput: ISubscribeNotificationsInput;
   Subscription: ResolverTypeWrapper<{}>;
@@ -541,6 +569,7 @@ export type IResolversTypes = {
   UpdateCustomerInput: IUpdateCustomerInput;
   UpdateOrderInput: IUpdateOrderInput;
   UpdateProductInput: IUpdateProductInput;
+  UpdateProductOrderInput: IUpdateProductOrderInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
   User: ResolverTypeWrapper<user>;
@@ -549,6 +578,7 @@ export type IResolversTypes = {
   UserLoginInput: IUserLoginInput;
   UserLoginResponse: ResolverTypeWrapper<Omit<IUserLoginResponse, 'user'> & { user: IResolversTypes['User'] }>;
   UsersInput: IUsersInput;
+  productInput: IProductInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -587,6 +617,7 @@ export type IResolversParentTypes = {
   UpdateCustomerInput: IUpdateCustomerInput;
   UpdateOrderInput: IUpdateOrderInput;
   UpdateProductInput: IUpdateProductInput;
+  UpdateProductOrderInput: IUpdateProductOrderInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: Scalars['Upload']['output'];
   User: user;
@@ -595,6 +626,7 @@ export type IResolversParentTypes = {
   UserLoginInput: IUserLoginInput;
   UserLoginResponse: Omit<IUserLoginResponse, 'user'> & { user: IResolversParentTypes['User'] };
   UsersInput: IUsersInput;
+  productInput: IProductInput;
 };
 
 export type ICategoryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Category'] = IResolversParentTypes['Category']> = {
@@ -665,10 +697,13 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   VAT?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType>;
+  deliverAddress?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  discount?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
+  freightPrice?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   invoiceNo?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   sale?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
-  status?: Resolver<IResolversTypes['Status'], ParentType, ContextType>;
+  status?: Resolver<IResolversTypes['StatusOrder'], ParentType, ContextType>;
   totalAmount?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

@@ -3,7 +3,7 @@ import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { customersCreationAttributes } from '../../db_models/mysql/customers';
 import { pmDb } from '../../loader/mysql';
-import { CustomerAlreadyExistError } from '../../lib/classes/graphqlErrors';
+import { CustomerNotFoundError } from '../../lib/classes/graphqlErrors';
 
 const customer_resolver: IResolvers = {
     Mutation: {
@@ -23,7 +23,7 @@ const customer_resolver: IResolvers = {
         updateCustomer: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
             const { id, name, phoneNumber, email, address, companyName } = input;
-            const customer = await pmDb.customers.findByPk(id, { rejectOnEmpty: new CustomerAlreadyExistError() });
+            const customer = await pmDb.customers.findByPk(id, { rejectOnEmpty: new CustomerNotFoundError() });
 
             if (name) customer.name = name;
             if (phoneNumber) customer.phoneNumber = phoneNumber;
@@ -40,7 +40,7 @@ const customer_resolver: IResolvers = {
             const { ids } = input;
             const customer = await pmDb.customers.findAll({ where: { id: ids } });
 
-            if (customer.length !== ids.length) throw new CustomerAlreadyExistError();
+            if (customer.length !== ids.length) throw new CustomerNotFoundError();
 
             await pmDb.customers.destroy({
                 where: {

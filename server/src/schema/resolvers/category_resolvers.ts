@@ -3,7 +3,7 @@ import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb } from '../../loader/mysql';
 import { categoriesCreationAttributes } from '../../db_models/mysql/categories';
-import { CategoryAlreadyExistError } from '../../lib/classes/graphqlErrors';
+import { CategoryNotFoundError } from '../../lib/classes/graphqlErrors';
 
 const category_resolver: IResolvers = {
     Query: {
@@ -24,7 +24,7 @@ const category_resolver: IResolvers = {
         updateCategory: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
             const { id, name } = input;
-            const category = await pmDb.categories.findByPk(id, { rejectOnEmpty: new CategoryAlreadyExistError() });
+            const category = await pmDb.categories.findByPk(id, { rejectOnEmpty: new CategoryNotFoundError() });
             if (name) category.name = name;
             await category.save();
             return ISuccessResponse.Success;
@@ -38,7 +38,7 @@ const category_resolver: IResolvers = {
         //             id: ids,
         //         },
         //     });
-        //     if (categories.length !== ids.length) throw new CategoryAlreadyExistError();
+        //     if (categories.length !== ids.length) throw new CategoryNotFoundError();
         //     await pmDb.categories.destroy({ where: { id: ids } });
         //     return ISuccessResponse.Success;
         // },

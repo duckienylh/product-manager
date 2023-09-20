@@ -10,6 +10,7 @@ export enum PM_ERROR_CODE {
      */
     UserNotFound = 'UserNotFound',
     InValidRole = 'InValidRole',
+    InValidValue = 'InValidValue',
     Permission = 'Permission',
     UserAlreadyExist = 'UserAlreadyExist',
     /**
@@ -20,9 +21,11 @@ export enum PM_ERROR_CODE {
      * pagination Error
      */
     InvalidPaginationArgument = 'InvalidPaginationArgument',
-    CustomerAlreadyExist = 'CustomerAlreadyExist',
-    CategoryAlreadyExist = 'CategoryAlreadyExist',
-    ProductAlreadyExist = 'ProductAlreadyExist',
+    CustomerNotFound = 'CustomerNotFound',
+    CategoryNotFound = 'CategoryNotFound',
+    ProductNotFound = 'ProductNotFound',
+    OrderNotFound = 'OrderNotFound',
+    OrderItemNotFound = 'OrderItemNotFound',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -50,6 +53,16 @@ export class InValidRoleError extends GraphQLError {
         super(message || 'Không xác định được quyền truy cập của người dùng', {
             extensions: {
                 code: PM_ERROR_CODE.InValidRole,
+            },
+        });
+    }
+}
+
+export class InValidValueError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Không xác định được giá trị truyền vào', {
+            extensions: {
+                code: PM_ERROR_CODE.InValidValue,
             },
         });
     }
@@ -95,31 +108,51 @@ export class InvalidPaginationArgumentError extends GraphQLError {
     }
 }
 
-export class CustomerAlreadyExistError extends GraphQLError {
+export class CustomerNotFoundError extends GraphQLError {
     constructor(message: string | null = null) {
         super(message || 'khách hàng không tồn tại', {
             extensions: {
-                code: PM_ERROR_CODE.CustomerAlreadyExist,
+                code: PM_ERROR_CODE.CustomerNotFound,
             },
         });
     }
 }
 
-export class CategoryAlreadyExistError extends GraphQLError {
+export class CategoryNotFoundError extends GraphQLError {
     constructor(message: string | null = null) {
         super(message || 'Loại sản phẩm không tồn tại', {
             extensions: {
-                code: PM_ERROR_CODE.CategoryAlreadyExist,
+                code: PM_ERROR_CODE.CategoryNotFound,
             },
         });
     }
 }
 
-export class ProductAlreadyExistError extends GraphQLError {
+export class ProductNotFoundError extends GraphQLError {
     constructor(message: string | null = null) {
         super(message || 'Sản phẩm không tồn tại', {
             extensions: {
-                code: PM_ERROR_CODE.ProductAlreadyExist,
+                code: PM_ERROR_CODE.ProductNotFound,
+            },
+        });
+    }
+}
+
+export class OrderNotFoundError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Đơn hàng không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.OrderNotFound,
+            },
+        });
+    }
+}
+
+export class OrderItemNotFoundError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Chi tiết đơn hàng không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.OrderItemNotFound,
             },
         });
     }

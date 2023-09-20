@@ -1,0 +1,27 @@
+mutation CreateOrder($input: CreateOrderInput!) {
+    createOrder(input: $input) {
+        id
+        sale {
+            id
+            email
+            userName
+            phoneNumber
+            firstName
+            lastName
+            address
+            avatarURL
+            isActive
+            role
+        }
+        customer {
+            id
+            name
+        }
+        invoiceNo
+        VAT
+        totalAmount
+        status
+        createdAt
+        updatedAt
+    }
+}

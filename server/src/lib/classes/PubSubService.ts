@@ -7,6 +7,8 @@ import { pmDb } from '../../loader/mysql';
 export enum NotificationEvent {
     Common = 'Common',
     NewMessage = 'NewMessage',
+    NewOrder = 'NewOrder',
+    UpdateOrder = 'UpdateOrder',
 }
 
 export interface IPubSubConfig {
