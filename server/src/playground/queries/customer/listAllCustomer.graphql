@@ -1,0 +1,17 @@
+query ListAllCustomer($input: ListAllCustomerInput!) {
+    listAllCustomer(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                email
+                name
+                phoneNumber
+                companyName
+                address
+                createdAt
+                updatedAt
+            }
+        }
+    }
+}

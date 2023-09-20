@@ -131,4 +131,15 @@ export const variables = {
             },
         },
     },
+    getUserById: {
+        userId: 1,
+    },
+    getCustomerById: {
+        customer: 1,
+    },
+    listAllCustomer: {
+        input: {
+            searchQuery: '',
+        },
+    },
 };

@@ -1,11 +1,60 @@
+import { FindAndCountOptions, Op, WhereOptions } from 'sequelize';
 import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { customersCreationAttributes } from '../../db_models/mysql/customers';
 import { pmDb } from '../../loader/mysql';
 import { CustomerNotFoundError } from '../../lib/classes/graphqlErrors';
+import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 
 const customer_resolver: IResolvers = {
+    CustomerEdge: rdbEdgeResolver,
+
+    CustomerConnection: rdbConnectionResolver,
+
+    Query: {
+        getCustomerById: async (_parent, { CustomerId }, context: PmContext) => {
+            checkAuthentication(context);
+            return await pmDb.customers.findByPk(CustomerId, {
+                rejectOnEmpty: new CustomerNotFoundError('Khách hàng không tồn tại'),
+            });
+        },
+        listAllCustomer: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { searchQuery, args } = input;
+
+            const { limit, offset, limitForLast } = getRDBPaginationParams(args);
+
+            const option: FindAndCountOptions<pmDb.user> = {
+                limit,
+                offset,
+                include: [
+                    {
+                        model: pmDb.orders,
+                        as: 'orders',
+                        required: false,
+                    },
+                ],
+                distinct: true,
+                order: [['id', 'DESC']],
+            };
+
+            const orQueryWhereOpt: WhereOptions<pmDb.customers> = {};
+            if (searchQuery) {
+                orQueryWhereOpt['$customer.name$'] = {
+                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                orQueryWhereOpt['$customer.phoneNumber$'] = {
+                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
+                };
+            }
+
+            option.where = searchQuery ? { ...{ [Op.or]: orQueryWhereOpt } } : {};
+
+            const result = await pmDb.customers.findAndCountAll(option);
+            return convertRDBRowsToConnection(result, offset, limitForLast);
+        },
+    },
     Mutation: {
         createCustomer: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);

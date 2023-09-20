@@ -1,6 +1,8 @@
-#extend type Query {
-#    listAllCustomer(input: ListAllCustomerInput!): [Customer]!
-#}
+extend type Query {
+    listAllCustomer(input: ListAllCustomerInput!): CustomerConnection!
+
+    getCustomerById(CustomerId: Int!): Customer!
+}
 
 extend type Mutation {
     createCustomer(input: CreateCustomerInput!): Customer!
@@ -19,6 +21,17 @@ type Customer {
     companyName: String
     createdAt: Date
     updatedAt: Date
+}
+
+type CustomerConnection {
+    edges: [CustomerEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type CustomerEdge {
+    cursor: String!
+    node: Customer
 }
 
 input CreateCustomerInput {
@@ -40,4 +53,9 @@ input UpdateCustomerInput {
 
 input DeleteCustomerInput {
     ids: [Int!]!
+}
+
+input ListAllCustomerInput {
+    args: PaginationInput
+    searchQuery: String
 }

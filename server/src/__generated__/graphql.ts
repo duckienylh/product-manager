@@ -1,6 +1,7 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { user, customers, categories, products, orders, notifications } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
+import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -91,6 +92,19 @@ export type ICustomer = {
   updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
+export type ICustomerConnection = {
+  __typename?: 'CustomerConnection';
+  edges?: Maybe<Array<Maybe<ICustomerEdge>>>;
+  pageInfo: IPageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ICustomerEdge = {
+  __typename?: 'CustomerEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<ICustomer>;
+};
+
 export type IDeleteCustomerInput = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -101,6 +115,11 @@ export type IDeleteProductInput = {
 
 export type IDeleteUserInput = {
   ids: Array<Scalars['Int']['input']>;
+};
+
+export type IListAllCustomerInput = {
+  args?: InputMaybe<IPaginationInput>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type IListAllProductInput = {
@@ -276,11 +295,29 @@ export type IProductEdge = {
 
 export type IQuery = {
   __typename?: 'Query';
+  getCustomerById: ICustomer;
+  getUserById: IUser;
   listAllCategory: Array<Maybe<ICategory>>;
+  listAllCustomer: ICustomerConnection;
   listAllProduct: IProductConnection;
   login: IUserLoginResponse;
   me: IUser;
   users: IUserConnection;
+};
+
+
+export type IQueryGetCustomerByIdArgs = {
+  CustomerId: Scalars['Int']['input'];
+};
+
+
+export type IQueryGetUserByIdArgs = {
+  userId: Scalars['Int']['input'];
+};
+
+
+export type IQueryListAllCustomerArgs = {
+  input: IListAllCustomerInput;
 };
 
 
@@ -540,6 +577,8 @@ export type IResolversTypes = {
   CreateUserInput: ICreateUserInput;
   Cursor: ResolverTypeWrapper<Scalars['Cursor']['output']>;
   Customer: ResolverTypeWrapper<ICustomer>;
+  CustomerConnection: ResolverTypeWrapper<CustomerConnection>;
+  CustomerEdge: ResolverTypeWrapper<CustomerEdge>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteProductInput: IDeleteProductInput;
@@ -547,6 +586,7 @@ export type IResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
+  ListAllCustomerInput: IListAllCustomerInput;
   ListAllProductInput: IListAllProductInput;
   Mutation: ResolverTypeWrapper<{}>;
   Notification: ResolverTypeWrapper<notifications>;
@@ -592,6 +632,8 @@ export type IResolversParentTypes = {
   CreateUserInput: ICreateUserInput;
   Cursor: Scalars['Cursor']['output'];
   Customer: ICustomer;
+  CustomerConnection: CustomerConnection;
+  CustomerEdge: CustomerEdge;
   Date: Scalars['Date']['output'];
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteProductInput: IDeleteProductInput;
@@ -599,6 +641,7 @@ export type IResolversParentTypes = {
   Float: Scalars['Float']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
+  ListAllCustomerInput: IListAllCustomerInput;
   ListAllProductInput: IListAllProductInput;
   Mutation: {};
   Notification: notifications;
@@ -650,6 +693,19 @@ export type ICustomerResolvers<ContextType = any, ParentType extends IResolversP
   name?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
   phoneNumber?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ICustomerConnectionResolvers<ContextType = any, ParentType extends IResolversParentTypes['CustomerConnection'] = IResolversParentTypes['CustomerConnection']> = {
+  edges?: Resolver<Maybe<Array<Maybe<IResolversTypes['CustomerEdge']>>>, ParentType, ContextType>;
+  pageInfo?: Resolver<IResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ICustomerEdgeResolvers<ContextType = any, ParentType extends IResolversParentTypes['CustomerEdge'] = IResolversParentTypes['CustomerEdge']> = {
+  cursor?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<IResolversTypes['Customer']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -746,7 +802,10 @@ export type IProductEdgeResolvers<ContextType = any, ParentType extends IResolve
 };
 
 export type IQueryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
+  getCustomerById?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IQueryGetCustomerByIdArgs, 'CustomerId'>>;
+  getUserById?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IQueryGetUserByIdArgs, 'userId'>>;
   listAllCategory?: Resolver<Array<Maybe<IResolversTypes['Category']>>, ParentType, ContextType>;
+  listAllCustomer?: Resolver<IResolversTypes['CustomerConnection'], ParentType, ContextType, RequireFields<IQueryListAllCustomerArgs, 'input'>>;
   listAllProduct?: Resolver<IResolversTypes['ProductConnection'], ParentType, ContextType, RequireFields<IQueryListAllProductArgs, 'input'>>;
   login?: Resolver<IResolversTypes['UserLoginResponse'], ParentType, ContextType, RequireFields<IQueryLoginArgs, 'input'>>;
   me?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
@@ -801,6 +860,8 @@ export type IResolvers<ContextType = any> = {
   Category?: ICategoryResolvers<ContextType>;
   Cursor?: GraphQLScalarType;
   Customer?: ICustomerResolvers<ContextType>;
+  CustomerConnection?: ICustomerConnectionResolvers<ContextType>;
+  CustomerEdge?: ICustomerEdgeResolvers<ContextType>;
   Date?: GraphQLScalarType;
   JSON?: GraphQLScalarType;
   Mutation?: IMutationResolvers<ContextType>;

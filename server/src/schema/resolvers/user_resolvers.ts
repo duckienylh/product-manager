@@ -112,6 +112,12 @@ const user_resolvers: IResolvers = {
             const result = await pmDb.user.findAndCountAll(option);
             return convertRDBRowsToConnection(result, offset, limitForLast);
         },
+        getUserById: async (_parent, { userId }, context: PmContext) => {
+            checkAuthentication(context);
+            return await pmDb.user.findByPk(userId, {
+                rejectOnEmpty: new UserNotFoundError('Người dùng không tồn tại'),
+            });
+        },
     },
     Mutation: {
         createUser: async (_parent, { input }, context: PmContext) => {

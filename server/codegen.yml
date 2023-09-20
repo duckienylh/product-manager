@@ -13,6 +13,8 @@ generates:
         UserEdge: ../db_models/mysql/user#UserEdge
         UserConnection: ../db_models/mysql/user#UserConnection
         Customers: ../db_models/mysql/init-models#customers
+        CustomerEdge: ../db_models/mysql/customers#CustomerEdge
+        CustomerConnection: ../db_models/mysql/customers#CustomerConnection
         Category: ../db_models/mysql/init-models#categories
         Product: ../db_models/mysql/init-models#products
         ProductEdge: ../db_models/mysql/products#ProductEdge

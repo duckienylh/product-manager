@@ -4,6 +4,8 @@ extend type Query {
     login(input: UserLoginInput!): UserLoginResponse!
 
     users(input: UsersInput!): UserConnection!
+
+    getUserById(userId: Int!): User!
 }
 
 extend type Mutation {
@@ -59,11 +61,6 @@ type UserConnection {
 type UserEdge {
     cursor: String!
     node: User
-}
-
-type PageInfo {
-    endCursor: Cursor
-    hasNextPage: Boolean!
 }
 
 type NotificationResponse {
