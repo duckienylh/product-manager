@@ -41,10 +41,10 @@ const customer_resolver: IResolvers = {
 
             const orQueryWhereOpt: WhereOptions<pmDb.customers> = {};
             if (searchQuery) {
-                orQueryWhereOpt['$customer.name$'] = {
+                orQueryWhereOpt['$customers.name$'] = {
                     [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
                 };
-                orQueryWhereOpt['$customer.phoneNumber$'] = {
+                orQueryWhereOpt['$customers.phoneNumber$'] = {
                     [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
                 };
             }

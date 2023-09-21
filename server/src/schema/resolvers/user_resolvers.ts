@@ -88,10 +88,7 @@ const user_resolvers: IResolvers = {
             const andWhereOpt: WhereOptions<pmDb.user> = {};
 
             if (searchQuery) {
-                orWhereOpt['$user.firstName$'] = {
-                    [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
-                };
-                orWhereOpt['$user.lastName$'] = {
+                orWhereOpt['$user.fullName$'] = {
                     [Op.like]: `%${searchQuery.replace(/([\\%_])/, '\\$1')}%`,
                 };
                 orWhereOpt['$user.phoneNumber$'] = {
@@ -154,6 +151,7 @@ const user_resolvers: IResolvers = {
                 password: hashedPassword,
                 firstName,
                 lastName,
+                fullName: `${lastName} ${firstName}`,
                 isActive: true,
                 role: iRoleToNumber(role),
                 address: address ?? undefined,
@@ -195,10 +193,21 @@ const user_resolvers: IResolvers = {
             if (email) user.email = email;
             if (role) user.role = iRoleToNumber(role);
             if (phoneNumber) user.phoneNumber = phoneNumber;
-            if (firstName) user.firstName = firstName;
-            if (lastName) user.lastName = lastName;
+            if (firstName) {
+                user.firstName = firstName;
+                user.fullName = `${user.lastName} ${firstName}`;
+            }
+            if (lastName) {
+                user.lastName = lastName;
+                user.fullName = `${lastName} ${user.firstName}`;
+            }
             if (address) user.address = address;
-            if (isActive !== null && isActive !== undefined) user.isActive = isActive;
+            if (isActive !== null && isActive !== undefined) {
+                if (user.role === RoleList.admin || user.role === RoleList.director)
+                    throw new MySQLError('Không được cập nhật trạng thái admin hoặc giám đốc');
+                user.isActive = isActive;
+            }
+            if (firstName && lastName) user.fullName = `${lastName} ${firstName}`;
 
             if (oldPassword && newPassword) {
                 const checkPassword = bcrypt.compareSync(oldPassword, user.password);
