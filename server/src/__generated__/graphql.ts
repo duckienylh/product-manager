@@ -296,6 +296,7 @@ export type IProductEdge = {
 export type IQuery = {
   __typename?: 'Query';
   getCustomerById: ICustomer;
+  getProductById: IProduct;
   getUserById: IUser;
   listAllCategory: Array<Maybe<ICategory>>;
   listAllCustomer: ICustomerConnection;
@@ -308,6 +309,11 @@ export type IQuery = {
 
 export type IQueryGetCustomerByIdArgs = {
   CustomerId: Scalars['Int']['input'];
+};
+
+
+export type IQueryGetProductByIdArgs = {
+  productId: Scalars['Int']['input'];
 };
 
 
@@ -803,6 +809,7 @@ export type IProductEdgeResolvers<ContextType = any, ParentType extends IResolve
 
 export type IQueryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
   getCustomerById?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IQueryGetCustomerByIdArgs, 'CustomerId'>>;
+  getProductById?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IQueryGetProductByIdArgs, 'productId'>>;
   getUserById?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IQueryGetUserByIdArgs, 'userId'>>;
   listAllCategory?: Resolver<Array<Maybe<IResolversTypes['Category']>>, ParentType, ContextType>;
   listAllCustomer?: Resolver<IResolversTypes['CustomerConnection'], ParentType, ContextType, RequireFields<IQueryListAllCustomerArgs, 'input'>>;

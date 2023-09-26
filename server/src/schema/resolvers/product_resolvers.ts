@@ -3,7 +3,7 @@ import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb, sequelize } from '../../loader/mysql';
-import { CategoryNotFoundError, MySQLError, PermissionError, ProductNotFoundError } from '../../lib/classes/graphqlErrors';
+import { CategoryNotFoundError, CustomerNotFoundError, MySQLError, PermissionError, ProductNotFoundError } from '../../lib/classes/graphqlErrors';
 import { productsCreationAttributes } from '../../db_models/mysql/products';
 import { minIOServices } from '../../lib/classes';
 import { BucketValue, RoleList } from '../../lib/enum';
@@ -22,6 +22,13 @@ const product_resolver: IResolvers = {
     },
 
     Query: {
+        getProductById: async (_parent, { productId }, context: PmContext) => {
+            checkAuthentication(context);
+            return await pmDb.products.findByPk(productId, {
+                rejectOnEmpty: new ProductNotFoundError('Sản phẩm không tồn tại'),
+            });
+        },
+
         listAllProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
             const { categoryId, stringQuery, checkInventory, args } = input;

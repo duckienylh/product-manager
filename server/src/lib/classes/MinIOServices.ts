@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 // noinspection ExceptionCaughtLocallyJS
 
-import { BucketItem, BucketItemStat, Client, CopyConditions } from 'minio';
+import { BucketItem, Client } from 'minio';
 
 export type FileObject = {
     fileName: string;
@@ -23,12 +23,6 @@ export default class MinIOServices {
     private minioClient!: Client;
 
     private readonly bucketName!: string;
-
-    private readonly originalFilesBucketName!: string;
-
-    private readonly finishedFilesBucketName!: string;
-
-    private readonly avatarFilesBucketName!: string;
 
     private readonly domainName!: string;
 

@@ -142,4 +142,7 @@ export const variables = {
             searchQuery: '',
         },
     },
+    getProductById: {
+        productId: 1,
+    },
 };

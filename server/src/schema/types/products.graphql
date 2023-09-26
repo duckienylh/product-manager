@@ -1,5 +1,7 @@
 extend type Query {
     listAllProduct(input: ListAllProductInput!): ProductConnection!
+
+    getProductById(productId: Int!): Product!
 }
 
 extend type Mutation {
