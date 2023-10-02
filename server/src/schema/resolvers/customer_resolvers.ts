@@ -25,7 +25,7 @@ const customer_resolver: IResolvers = {
 
             const { limit, offset, limitForLast } = getRDBPaginationParams(args);
 
-            const option: FindAndCountOptions<pmDb.user> = {
+            const option: FindAndCountOptions<pmDb.customers> = {
                 limit,
                 offset,
                 include: [

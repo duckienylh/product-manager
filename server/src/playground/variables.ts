@@ -145,4 +145,9 @@ export const variables = {
     getProductById: {
         productId: 1,
     },
+    listAllOrder: {
+        input: {
+            queryString: '',
+        },
+    },
 };

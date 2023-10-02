@@ -3,7 +3,7 @@ import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb, sequelize } from '../../loader/mysql';
-import { CategoryNotFoundError, CustomerNotFoundError, MySQLError, PermissionError, ProductNotFoundError } from '../../lib/classes/graphqlErrors';
+import { CategoryNotFoundError, MySQLError, PermissionError, ProductNotFoundError } from '../../lib/classes/graphqlErrors';
 import { productsCreationAttributes } from '../../db_models/mysql/products';
 import { minIOServices } from '../../lib/classes';
 import { BucketValue, RoleList } from '../../lib/enum';
@@ -34,7 +34,7 @@ const product_resolver: IResolvers = {
             const { categoryId, stringQuery, checkInventory, args } = input;
             const { limit, offset, limitForLast } = getRDBPaginationParams(args);
 
-            const option: FindAndCountOptions<pmDb.user> = {
+            const option: FindAndCountOptions<pmDb.products> = {
                 limit,
                 offset,
                 include: [
@@ -47,8 +47,8 @@ const product_resolver: IResolvers = {
                 order: [['id', 'DESC']],
             };
 
-            const orWhereOpt: WhereOptions<pmDb.user> = {};
-            const andWhereOpt: WhereOptions<pmDb.user> = {};
+            const orWhereOpt: WhereOptions<pmDb.products> = {};
+            const andWhereOpt: WhereOptions<pmDb.products> = {};
 
             if (stringQuery) {
                 orWhereOpt['$products.name$'] = {
@@ -61,7 +61,7 @@ const product_resolver: IResolvers = {
             }
 
             if (checkInventory) {
-                andWhereOpt['$products.quantity$'] = {
+                andWhereOpt['$products.weight$'] = {
                     [Op.lte]: warningInventory,
                 };
             }

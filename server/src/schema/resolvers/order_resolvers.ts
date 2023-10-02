@@ -1,4 +1,4 @@
-import { Transaction } from 'sequelize';
+import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
 import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
@@ -13,14 +13,162 @@ import { pubsubService } from '../../lib/classes';
 import { orderItemCreationAttributes } from '../../db_models/mysql/orderItem';
 import { orderProcessCreationAttributes } from '../../db_models/mysql/orderProcess';
 import { IStatusOrderToStatusOrder, StatusOrderTypeResolve } from '../../lib/resolver_enum';
+import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
+import { getNextNDayFromDate } from '../../lib/utils/formatTime';
 
 const order_resolver: IResolvers = {
+    OrderEdge: rdbEdgeResolver,
+
+    OrderConnection: rdbConnectionResolver,
+
     Order: {
         sale: async (parent) => parent.sale ?? (await parent.getSale()),
 
         customer: async (parent) => parent.customer ?? (await parent.getCustomer()),
 
         status: (parent) => StatusOrderTypeResolve(parent.status),
+
+        totalMoney: async (parent) => await parent.getTotalMoney(),
+    },
+    Query: {
+        listAllOrder: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { saleId, status, args, invoiceNo, queryString, createAt } = input;
+            const { limit, offset, limitForLast } = getRDBPaginationParams(args);
+
+            const commonOption: FindAndCountOptions = {
+                include: [
+                    {
+                        model: pmDb.user,
+                        as: 'sale',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                ],
+                distinct: true,
+                order: [['id', 'DESC']],
+            };
+
+            const limitOption: FindAndCountOptions = {
+                ...commonOption,
+                limit,
+                offset,
+            };
+
+            const whereOpt: WhereOptions<pmDb.orders> = {};
+            const whereOptNoStatus: WhereOptions<pmDb.orders> = {};
+            const whereOptOr: WhereOptions<pmDb.customers | pmDb.orders> = {};
+
+            if (queryString) {
+                whereOptOr['$customer.phoneNumber$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+
+                whereOptOr['$customer.name$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+
+                whereOptOr['$orders.invoiceNo$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+            }
+
+            if (invoiceNo) {
+                whereOpt['$orders.invoiceNo$'] = {
+                    [Op.like]: `%${invoiceNo.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                whereOptNoStatus['$orders.invoiceNo$'] = {
+                    [Op.like]: `%${invoiceNo.replace(/([\\%_])/, '\\$1')}%`,
+                };
+            }
+
+            if (saleId) {
+                whereOpt['$orders.saleId$'] = {
+                    [Op.eq]: saleId,
+                };
+                whereOptNoStatus['$orders.saleId$'] = {
+                    [Op.eq]: saleId,
+                };
+            }
+
+            if (createAt) {
+                whereOpt['$orders.createdAt$'] = {
+                    [Op.between]: [createAt.startAt, getNextNDayFromDate(createAt.endAt, 1)],
+                };
+                whereOptNoStatus['$orders.createdAt$'] = {
+                    [Op.between]: [createAt.startAt, getNextNDayFromDate(createAt.endAt, 1)],
+                };
+            }
+
+            if (status) {
+                whereOpt['$orders.status$'] = {
+                    [Op.eq]: IStatusOrderToStatusOrder(status),
+                };
+            }
+
+            limitOption.where = !queryString
+                ? whereOpt
+                : {
+                      [Op.and]: whereOpt,
+                      [Op.or]: whereOptOr,
+                  };
+            const result = await pmDb.orders.findAndCountAll(limitOption);
+            const orderConnection = convertRDBRowsToConnection(result, offset, limitForLast);
+
+            commonOption.where = !queryString
+                ? whereOptNoStatus
+                : {
+                      [Op.and]: whereOptNoStatus,
+                      [Op.or]: whereOptOr,
+                  };
+
+            const allOrder = await pmDb.orders.findAll(commonOption);
+            const totalMoneyOrderPromise = allOrder.map((e) => e.getTotalMoney());
+
+            await Promise.all(totalMoneyOrderPromise);
+
+            const totalRevenue = allOrder.reduce((sumRevenue, od) => sumRevenue + (od ? parseFloat(String(od.totalMoney)) : 0.0), 0.0);
+            const allOrderCounter = allOrder.length;
+            const creatNewOrderCounter = allOrder.filter((e) => e.status === StatusOrder.creatNew).length;
+            const successDeliveryOrderCounter = allOrder.filter((e) => e.status === StatusOrder.successDelivery).length;
+            const paymentConfirmationOrderCounter = allOrder.filter((e) => e.status === StatusOrder.paymentConfirmation).length;
+            const orderCompleted = allOrder.filter((e) => e.status === StatusOrder.done);
+            const doneOrderCounter = orderCompleted.length;
+            const totalCompleted = orderCompleted.reduce(
+                (sumCompleted, orderDetail) => sumCompleted + (orderDetail ? parseFloat(String(orderDetail.totalMoney)) : 0.0),
+                0.0
+            );
+            const orderPaid = allOrder.filter((e) => e.status === StatusOrder.paid);
+            const paidOrderCounter = orderPaid.length;
+            const totalPaid = orderPaid.reduce(
+                (sumPaid, orderDetail) => sumPaid + (orderDetail ? parseFloat(String(orderDetail.totalMoney)) : 0.0),
+                0.0
+            );
+            const orderDeliver = allOrder.filter((e) => e.status === StatusOrder.delivering);
+            const deliveryOrderCounter = orderDeliver.length;
+            const totalDeliver = orderDeliver.reduce(
+                (sumDeliver, orderDetail) => sumDeliver + (orderDetail ? parseFloat(String(orderDetail.totalMoney)) : 0.0),
+                0.0
+            );
+            return {
+                orders: orderConnection,
+                totalRevenue,
+                totalCompleted,
+                totalPaid,
+                totalDeliver,
+                allOrderCounter,
+                creatNewOrderCounter,
+                deliveryOrderCounter,
+                successDeliveryOrderCounter,
+                paymentConfirmationOrderCounter,
+                paidOrderCounter,
+                doneOrderCounter,
+            };
+        },
     },
     Mutation: {
         createOrder: async (_parent, { input }, context: PmContext) => {

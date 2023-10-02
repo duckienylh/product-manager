@@ -19,7 +19,7 @@ mutation CreateOrder($input: CreateOrderInput!) {
         }
         invoiceNo
         VAT
-        totalAmount
+        totalMoney
         status
         createdAt
         updatedAt
