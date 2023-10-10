@@ -72,8 +72,8 @@ input productInput {
     description: String
     priceProduct: Float!
     productId: Int!
-    quantity: Int!
-    weightProduct: Float
+    quantity: Int
+    weightProduct: Float!
 }
 
 input UpdateOrderInput {

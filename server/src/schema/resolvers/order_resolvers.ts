@@ -3,7 +3,14 @@ import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb, sequelize } from '../../loader/mysql';
-import { CustomerNotFoundError, MySQLError, OrderItemNotFoundError, OrderNotFoundError, UserNotFoundError } from '../../lib/classes/graphqlErrors';
+import {
+    CustomerNotFoundError,
+    MySQLError,
+    OrderItemNotFoundError,
+    OrderNotFoundError,
+    ProductNotFoundError,
+    UserNotFoundError,
+} from '../../lib/classes/graphqlErrors';
 import { ordersCreationAttributes } from '../../db_models/mysql/orders';
 import { RoleList, StatusOrder } from '../../lib/enum';
 import { notificationsCreationAttributes } from '../../db_models/mysql/notifications';
@@ -30,6 +37,7 @@ const order_resolver: IResolvers = {
 
         totalMoney: async (parent) => await parent.getTotalMoney(),
     },
+
     Query: {
         listAllOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
@@ -170,6 +178,7 @@ const order_resolver: IResolvers = {
             };
         },
     },
+
     Mutation: {
         createOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
@@ -204,11 +213,14 @@ const order_resolver: IResolvers = {
 
                     const promiseOrderItem: Promise<pmDb.orderItem>[] = [];
 
+                    const promiseUpdateWeightProduct: Promise<pmDb.products>[] = [];
+
                     for (let i = 0; i < product.length; i += 1) {
                         const orderItemAttribute: orderItemCreationAttributes = {
                             orderId: newOrder.id,
                             productId: product[i].productId,
-                            quantity: product[i].quantity,
+                            quantity: product[i].quantity ?? undefined,
+                            weight: product[i].weightProduct,
                             note: product[i].description ?? undefined,
                             unitPrice: undefined,
                         };
@@ -216,9 +228,21 @@ const order_resolver: IResolvers = {
                         const newOrderItem = pmDb.orderItem.create(orderItemAttribute, { transaction: t });
 
                         promiseOrderItem.push(newOrderItem);
+
+                        // update weight product in table product
+                        // eslint-disable-next-line no-await-in-loop
+                        const updateWeightProduct = await pmDb.products.findByPk(product[i].productId, { rejectOnEmpty: new ProductNotFoundError() });
+
+                        const remainingWeight = updateWeightProduct.weight ? updateWeightProduct.weight : 0.0 - product[i].weightProduct;
+                        if (remainingWeight < 0) throw new Error('Khối lượng gỗ trong kho không đủ!!!');
+                        updateWeightProduct.weight = remainingWeight;
+
+                        promiseUpdateWeightProduct.push(updateWeightProduct.save({ transaction: t }));
                     }
 
-                    if (promiseOrderItem.length) await Promise.all(promiseOrderItem);
+                    if (promiseOrderItem.length > 0) await Promise.all(promiseOrderItem);
+
+                    if (promiseUpdateWeightProduct.length > 0) await Promise.all(promiseUpdateWeightProduct);
 
                     const newOrderProcessAttribute: orderProcessCreationAttributes = {
                         orderId: newOrder.id,

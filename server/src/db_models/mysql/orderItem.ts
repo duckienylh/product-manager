@@ -4,120 +4,124 @@ import type { orders, ordersId } from './orders';
 import type { products, productsId } from './products';
 
 export interface orderItemAttributes {
-  id: number;
-  orderId: number;
-  productId: number;
-  quantity: number;
-  unitPrice?: number;
-  note?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+    id: number;
+    orderId: number;
+    productId: number;
+    quantity?: number;
+    weight?: number;
+    unitPrice?: number;
+    note?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type orderItemPk = 'id';
 export type orderItemId = orderItem[orderItemPk];
-export type orderItemOptionalAttributes = 'id' | 'unitPrice' | 'note' | 'createdAt' | 'updatedAt';
+export type orderItemOptionalAttributes = 'id' | 'quantity' | 'weight' | 'unitPrice' | 'note' | 'createdAt' | 'updatedAt';
 export type orderItemCreationAttributes = Optional<orderItemAttributes, orderItemOptionalAttributes>;
 
 export class orderItem extends Model<orderItemAttributes, orderItemCreationAttributes> implements orderItemAttributes {
-  id!: number;
+    id!: number;
 
-  orderId!: number;
+    orderId!: number;
 
-  productId!: number;
+    productId!: number;
 
-  quantity!: number;
+    quantity?: number;
 
-  unitPrice?: number;
+    weight?: number;
 
-  note?: string;
+    unitPrice?: number;
 
-  createdAt?: Date;
+    note?: string;
 
-  updatedAt?: Date;
+    createdAt?: Date;
 
-  // orderItem belongsTo orders via orderId
-  order!: orders;
+    updatedAt?: Date;
 
-  getOrder!: Sequelize.BelongsToGetAssociationMixin<orders>;
+    // orderItem belongsTo orders via orderId
+    order!: orders;
 
-  setOrder!: Sequelize.BelongsToSetAssociationMixin<orders, ordersId>;
+    getOrder!: Sequelize.BelongsToGetAssociationMixin<orders>;
 
-  createOrder!: Sequelize.BelongsToCreateAssociationMixin<orders>;
+    setOrder!: Sequelize.BelongsToSetAssociationMixin<orders, ordersId>;
 
-  // orderItem belongsTo products via productId
-  product!: products;
+    createOrder!: Sequelize.BelongsToCreateAssociationMixin<orders>;
 
-  getProduct!: Sequelize.BelongsToGetAssociationMixin<products>;
+    // orderItem belongsTo products via productId
+    product!: products;
 
-  setProduct!: Sequelize.BelongsToSetAssociationMixin<products, productsId>;
+    getProduct!: Sequelize.BelongsToGetAssociationMixin<products>;
 
-  createProduct!: Sequelize.BelongsToCreateAssociationMixin<products>;
+    setProduct!: Sequelize.BelongsToSetAssociationMixin<products, productsId>;
 
-  static initModel(sequelize: Sequelize.Sequelize): typeof orderItem {
-    return orderItem.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    orderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'orders',
-        key: 'id'
-      }
-    },
-    productId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'products',
-        key: 'id'
-      }
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    unitPrice: {
-      type: DataTypes.FLOAT,
-      allowNull: true
-    },
-    note: {
-      type: DataTypes.STRING(100),
-      allowNull: true
+    createProduct!: Sequelize.BelongsToCreateAssociationMixin<products>;
+
+    static initModel(sequelize: Sequelize.Sequelize): typeof orderItem {
+        return orderItem.init(
+            {
+                id: {
+                    autoIncrement: true,
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                orderId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'orders',
+                        key: 'id',
+                    },
+                },
+                productId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'products',
+                        key: 'id',
+                    },
+                },
+                quantity: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                },
+                weight: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                },
+                unitPrice: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                },
+                note: {
+                    type: DataTypes.STRING(100),
+                    allowNull: true,
+                },
+            },
+            {
+                sequelize,
+                tableName: 'orderItem',
+                timestamps: true,
+                indexes: [
+                    {
+                        name: 'PRIMARY',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'fk_orderItem_1_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'orderId' }],
+                    },
+                    {
+                        name: 'fk_orderItem_2_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'productId' }],
+                    },
+                ],
+            }
+        );
     }
-  }, {
-    sequelize,
-    tableName: 'orderItem',
-    timestamps: true,
-    indexes: [
-      {
-        name: 'PRIMARY',
-        unique: true,
-        using: 'BTREE',
-        fields: [
-          { name: 'id' },
-        ]
-      },
-      {
-        name: 'fk_orderItem_1_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'orderId' },
-        ]
-      },
-      {
-        name: 'fk_orderItem_2_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'productId' },
-        ]
-      },
-    ]
-  });
-  }
 }

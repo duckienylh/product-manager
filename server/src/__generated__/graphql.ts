@@ -549,8 +549,8 @@ export type IProductInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   priceProduct: Scalars['Float']['input'];
   productId: Scalars['Int']['input'];
-  quantity: Scalars['Int']['input'];
-  weightProduct?: InputMaybe<Scalars['Float']['input']>;
+  quantity?: InputMaybe<Scalars['Int']['input']>;
+  weightProduct: Scalars['Float']['input'];
 };
 
 
