@@ -23,3 +23,5 @@ generates:
         OrderEdge: ../db_models/mysql/orders#OrderEdge
         OrderConnection: ../db_models/mysql/orders#OrderConnection
         Notification: ../db_models/mysql/init-models#notifications
+        OrderItem: ../db_models/mysql/init-models#orderItem
+        OrderProcess: ../db_models/mysql/init-models#orderProcess

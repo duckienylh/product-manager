@@ -73,6 +73,10 @@ const getProductById = importGraphqlString('./queries/product/getProductById.gra
 
 const listAllOrder = importGraphqlString('./queries/order/listAllOrder.graphql');
 
+const getOrderById = importGraphqlString('./queries/order/getOrderById.graphql');
+
+const listInformationOrder = importGraphqlString('./queries/orderProcess/listInformationOrder.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -238,6 +242,18 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: listAllOrder,
             headers: userAuth,
             variables: prettifyJsonString(variables.listAllOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Lấy đơn hàng theo ID',
+            query: getOrderById,
+            headers: userAuth,
+        },
+        {
+            endpoint: path,
+            name: 'Lấy thông tin đơn hàng theo ID',
+            query: listInformationOrder,
+            headers: userAuth,
         },
     ];
 };

@@ -1,0 +1,14 @@
+extend type Query {
+    listInformationOrder(orderId: Int!): [OrderProcess]!
+}
+
+type OrderProcess {
+    id:Int!
+    order: Order!
+    user: User!
+    fromStatus: String!
+    toStatus: String!
+    description: String
+    createdAt: Date
+    updatedAt: Date
+}

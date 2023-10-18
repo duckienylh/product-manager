@@ -101,6 +101,7 @@ export class customers extends Model<customersAttributes, customersCreationAttri
                 phoneNumber: {
                     type: DataTypes.STRING(11),
                     allowNull: false,
+                    unique: 'phoneNumber_UNIQUE',
                 },
                 email: {
                     type: DataTypes.STRING(100),
@@ -125,6 +126,12 @@ export class customers extends Model<customersAttributes, customersCreationAttri
                         unique: true,
                         using: 'BTREE',
                         fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'phoneNumber_UNIQUE',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'phoneNumber' }],
                     },
                 ],
             }

@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user, customers, categories, products, orders, notifications } from '../db_models/mysql/init-models';
+import { user, customers, categories, products, orders, notifications, orderItem, orderProcess } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
@@ -270,6 +270,7 @@ export type IOrder = {
   freightPrice?: Maybe<Scalars['Float']['output']>;
   id: Scalars['Int']['output'];
   invoiceNo: Scalars['String']['output'];
+  orderItemList?: Maybe<Array<Maybe<IOrderItem>>>;
   sale: IUser;
   status: IStatusOrder;
   totalMoney?: Maybe<Scalars['Float']['output']>;
@@ -287,6 +288,31 @@ export type IOrderEdge = {
   __typename?: 'OrderEdge';
   cursor: Scalars['String']['output'];
   node?: Maybe<IOrder>;
+};
+
+export type IOrderItem = {
+  __typename?: 'OrderItem';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  id: Scalars['Int']['output'];
+  note?: Maybe<Scalars['String']['output']>;
+  order: IOrder;
+  product: IProduct;
+  quantity?: Maybe<Scalars['Int']['output']>;
+  unitPrice?: Maybe<Scalars['Float']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
+};
+
+export type IOrderProcess = {
+  __typename?: 'OrderProcess';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  fromStatus: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  order: IOrder;
+  toStatus: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+  user: IUser;
 };
 
 export type IPageInfo = {
@@ -335,12 +361,14 @@ export type IProductEdge = {
 export type IQuery = {
   __typename?: 'Query';
   getCustomerById: ICustomer;
+  getOrderById: IOrder;
   getProductById: IProduct;
   getUserById: IUser;
   listAllCategory: Array<Maybe<ICategory>>;
   listAllCustomer: ICustomerConnection;
   listAllOrder: IListAllOrderResponse;
   listAllProduct: IProductConnection;
+  listInformationOrder: Array<Maybe<IOrderProcess>>;
   login: IUserLoginResponse;
   me: IUser;
   users: IUserConnection;
@@ -349,6 +377,11 @@ export type IQuery = {
 
 export type IQueryGetCustomerByIdArgs = {
   CustomerId: Scalars['Int']['input'];
+};
+
+
+export type IQueryGetOrderByIdArgs = {
+  orderId: Scalars['Int']['input'];
 };
 
 
@@ -374,6 +407,11 @@ export type IQueryListAllOrderArgs = {
 
 export type IQueryListAllProductArgs = {
   input: IListAllProductInput;
+};
+
+
+export type IQueryListInformationOrderArgs = {
+  orderId: Scalars['Int']['input'];
 };
 
 
@@ -474,7 +512,6 @@ export type IUpdateProductOrderInput = {
   priceProduct?: InputMaybe<Scalars['Float']['input']>;
   productId?: InputMaybe<Scalars['Int']['input']>;
   quantity?: InputMaybe<Scalars['Int']['input']>;
-  weightProduct?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type IUpdateUserInput = {
@@ -549,8 +586,7 @@ export type IProductInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   priceProduct: Scalars['Float']['input'];
   productId: Scalars['Int']['input'];
-  quantity?: InputMaybe<Scalars['Int']['input']>;
-  weightProduct: Scalars['Float']['input'];
+  quantity: Scalars['Int']['input'];
 };
 
 
@@ -653,6 +689,8 @@ export type IResolversTypes = {
   Order: ResolverTypeWrapper<orders>;
   OrderConnection: ResolverTypeWrapper<OrderConnection>;
   OrderEdge: ResolverTypeWrapper<OrderEdge>;
+  OrderItem: ResolverTypeWrapper<orderItem>;
+  OrderProcess: ResolverTypeWrapper<orderProcess>;
   PageInfo: ResolverTypeWrapper<IPageInfo>;
   PaginationInput: IPaginationInput;
   Product: ResolverTypeWrapper<products>;
@@ -712,6 +750,8 @@ export type IResolversParentTypes = {
   Order: orders;
   OrderConnection: OrderConnection;
   OrderEdge: OrderEdge;
+  OrderItem: orderItem;
+  OrderProcess: orderProcess;
   PageInfo: IPageInfo;
   PaginationInput: IPaginationInput;
   Product: products;
@@ -840,6 +880,7 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   freightPrice?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   invoiceNo?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  orderItemList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderItem']>>>, ParentType, ContextType>;
   sale?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
   status?: Resolver<IResolversTypes['StatusOrder'], ParentType, ContextType>;
   totalMoney?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
@@ -857,6 +898,31 @@ export type IOrderConnectionResolvers<ContextType = any, ParentType extends IRes
 export type IOrderEdgeResolvers<ContextType = any, ParentType extends IResolversParentTypes['OrderEdge'] = IResolversParentTypes['OrderEdge']> = {
   cursor?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<IResolversTypes['Order']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IOrderItemResolvers<ContextType = any, ParentType extends IResolversParentTypes['OrderItem'] = IResolversParentTypes['OrderItem']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  note?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  order?: Resolver<IResolversTypes['Order'], ParentType, ContextType>;
+  product?: Resolver<IResolversTypes['Product'], ParentType, ContextType>;
+  quantity?: Resolver<Maybe<IResolversTypes['Int']>, ParentType, ContextType>;
+  unitPrice?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  weight?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IOrderProcessResolvers<ContextType = any, ParentType extends IResolversParentTypes['OrderProcess'] = IResolversParentTypes['OrderProcess']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  fromStatus?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  order?: Resolver<IResolversTypes['Order'], ParentType, ContextType>;
+  toStatus?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  user?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -898,12 +964,14 @@ export type IProductEdgeResolvers<ContextType = any, ParentType extends IResolve
 
 export type IQueryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
   getCustomerById?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IQueryGetCustomerByIdArgs, 'CustomerId'>>;
+  getOrderById?: Resolver<IResolversTypes['Order'], ParentType, ContextType, RequireFields<IQueryGetOrderByIdArgs, 'orderId'>>;
   getProductById?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IQueryGetProductByIdArgs, 'productId'>>;
   getUserById?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IQueryGetUserByIdArgs, 'userId'>>;
   listAllCategory?: Resolver<Array<Maybe<IResolversTypes['Category']>>, ParentType, ContextType>;
   listAllCustomer?: Resolver<IResolversTypes['CustomerConnection'], ParentType, ContextType, RequireFields<IQueryListAllCustomerArgs, 'input'>>;
   listAllOrder?: Resolver<IResolversTypes['ListAllOrderResponse'], ParentType, ContextType, RequireFields<IQueryListAllOrderArgs, 'input'>>;
   listAllProduct?: Resolver<IResolversTypes['ProductConnection'], ParentType, ContextType, RequireFields<IQueryListAllProductArgs, 'input'>>;
+  listInformationOrder?: Resolver<Array<Maybe<IResolversTypes['OrderProcess']>>, ParentType, ContextType, RequireFields<IQueryListInformationOrderArgs, 'orderId'>>;
   login?: Resolver<IResolversTypes['UserLoginResponse'], ParentType, ContextType, RequireFields<IQueryLoginArgs, 'input'>>;
   me?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
   users?: Resolver<IResolversTypes['UserConnection'], ParentType, ContextType, RequireFields<IQueryUsersArgs, 'input'>>;
@@ -968,6 +1036,8 @@ export type IResolvers<ContextType = any> = {
   Order?: IOrderResolvers<ContextType>;
   OrderConnection?: IOrderConnectionResolvers<ContextType>;
   OrderEdge?: IOrderEdgeResolvers<ContextType>;
+  OrderItem?: IOrderItemResolvers<ContextType>;
+  OrderProcess?: IOrderProcessResolvers<ContextType>;
   PageInfo?: IPageInfoResolvers<ContextType>;
   Product?: IProductResolvers<ContextType>;
   ProductConnection?: IProductConnectionResolvers<ContextType>;

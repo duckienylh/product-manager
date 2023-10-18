@@ -36,6 +36,14 @@ const order_resolver: IResolvers = {
         status: (parent) => StatusOrderTypeResolve(parent.status),
 
         totalMoney: async (parent) => await parent.getTotalMoney(),
+
+        orderItemList: async (parent) => parent.orderItems ?? (await parent.getOrderItems()),
+    },
+
+    OrderItem: {
+        product: async (parent) => parent.product ?? (await parent.getProduct()),
+
+        order: async (parent) => parent.order ?? parent.getOrder(),
     },
 
     Query: {
@@ -177,6 +185,10 @@ const order_resolver: IResolvers = {
                 doneOrderCounter,
             };
         },
+        getOrderById: async (_parent, { orderId }, context: PmContext) => {
+            checkAuthentication(context);
+            return await pmDb.orders.findByPk(orderId, { rejectOnEmpty: new OrderNotFoundError() });
+        },
     },
 
     Mutation: {
@@ -219,10 +231,9 @@ const order_resolver: IResolvers = {
                         const orderItemAttribute: orderItemCreationAttributes = {
                             orderId: newOrder.id,
                             productId: product[i].productId,
-                            quantity: product[i].quantity ?? undefined,
-                            weight: product[i].weightProduct,
+                            quantity: product[i].quantity,
                             note: product[i].description ?? undefined,
-                            unitPrice: undefined,
+                            unitPrice: product[i].priceProduct,
                         };
 
                         const newOrderItem = pmDb.orderItem.create(orderItemAttribute, { transaction: t });
@@ -233,7 +244,7 @@ const order_resolver: IResolvers = {
                         // eslint-disable-next-line no-await-in-loop
                         const updateWeightProduct = await pmDb.products.findByPk(product[i].productId, { rejectOnEmpty: new ProductNotFoundError() });
 
-                        const remainingWeight = updateWeightProduct.weight ? updateWeightProduct.weight : 0.0 - product[i].weightProduct;
+                        const remainingWeight = updateWeightProduct.weight ? updateWeightProduct.weight : 0.0 - product[i].quantity;
                         if (remainingWeight < 0) throw new Error('Khối lượng gỗ trong kho không đủ!!!');
                         updateWeightProduct.weight = remainingWeight;
 

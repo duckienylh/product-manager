@@ -1,5 +1,7 @@
 extend type Query {
     listAllOrder(input: ListAllOrderInput!): ListAllOrderResponse!
+
+    getOrderById(orderId: Int!): Order!
 }
 
 extend type Mutation {
@@ -28,6 +30,7 @@ type Order {
     discount: Float
     freightPrice: Float
     deliverAddress: String
+    orderItemList: [OrderItem]
     createdAt: Date
     updatedAt: Date
 }
@@ -72,8 +75,7 @@ input productInput {
     description: String
     priceProduct: Float!
     productId: Int!
-    quantity: Int
-    weightProduct: Float!
+    quantity: Int!
 }
 
 input UpdateOrderInput {
@@ -95,7 +97,6 @@ input UpdateProductOrderInput {
     description: String
     priceProduct: Float
     quantity: Int
-    weightProduct: Float
 }
 
 input filterDate {

@@ -8,7 +8,6 @@ export interface orderItemAttributes {
     orderId: number;
     productId: number;
     quantity?: number;
-    weight?: number;
     unitPrice?: number;
     note?: string;
     createdAt?: Date;
@@ -17,7 +16,7 @@ export interface orderItemAttributes {
 
 export type orderItemPk = 'id';
 export type orderItemId = orderItem[orderItemPk];
-export type orderItemOptionalAttributes = 'id' | 'quantity' | 'weight' | 'unitPrice' | 'note' | 'createdAt' | 'updatedAt';
+export type orderItemOptionalAttributes = 'id' | 'quantity' | 'unitPrice' | 'note' | 'createdAt' | 'updatedAt';
 export type orderItemCreationAttributes = Optional<orderItemAttributes, orderItemOptionalAttributes>;
 
 export class orderItem extends Model<orderItemAttributes, orderItemCreationAttributes> implements orderItemAttributes {
@@ -28,8 +27,6 @@ export class orderItem extends Model<orderItemAttributes, orderItemCreationAttri
     productId!: number;
 
     quantity?: number;
-
-    weight?: number;
 
     unitPrice?: number;
 
@@ -84,10 +81,6 @@ export class orderItem extends Model<orderItemAttributes, orderItemCreationAttri
                 },
                 quantity: {
                     type: DataTypes.INTEGER,
-                    allowNull: true,
-                },
-                weight: {
-                    type: DataTypes.FLOAT,
                     allowNull: true,
                 },
                 unitPrice: {

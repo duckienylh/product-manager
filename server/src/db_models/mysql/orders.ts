@@ -170,11 +170,12 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     async getTotalMoney(): Promise<number> {
         const orderItems = this.orderItems ?? (await this.getOrderItems());
 
-        this.totalMoney = orderItems.reduce(
+        const subTotalMoney = orderItems.reduce(
             (sum, odi) => sum + (odi.productId ? parseFloat(String(odi.quantity)) * (odi.unitPrice ? parseFloat(String(odi.unitPrice)) : 0.0) : 0.0),
             0.0
         );
-
+        // add 10% VAT and freight price
+        this.totalMoney = subTotalMoney * 1.1 + (this.freightPrice ? parseFloat(String(this.freightPrice)) : 0.0);
         return this.totalMoney;
     }
 

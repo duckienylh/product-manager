@@ -1,4 +1,4 @@
-type orderItem {
+type OrderItem {
     id: Int!
     order: Order!
     product: Product!
