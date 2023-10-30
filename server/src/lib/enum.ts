@@ -13,7 +13,7 @@ export enum RoleList {
 }
 
 export enum BucketValue {
-    DEVAPP = 'dev-app',
+    DEVTEAM = 'dev-team',
 }
 
 export enum StatusOrder {

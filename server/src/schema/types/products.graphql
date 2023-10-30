@@ -10,6 +10,8 @@ extend type Mutation {
     updateProduct(input: UpdateProductInput!): SuccessResponse!
 
     deleteProduct(input: DeleteProductInput!): SuccessResponse!
+
+    importExcelProduct(input: ImportExcelProductInput!): [Product]!
 }
 
 type Product {
@@ -18,10 +20,12 @@ type Product {
     name: String!
     code: String!
     price: Float!
-    quantity: Int
+    quantity: Float
+    inventory: Float
     height: Float
     width: Float
     weight: Float
+    age: Int
     image: String
     description: String
     createdAt: Date
@@ -44,10 +48,12 @@ input CreateProductInput {
     name: String!
     code: String!
     price: Float!
-    quantity: Int
+    quantity: Float
+    inventory: Float
     height: Float
     width: Float
     weight: Float
+    age: Int
     image: Upload
     description: String
 }
@@ -58,10 +64,12 @@ input UpdateProductInput {
     name: String
     code: String
     price: Float
-    quantity: Int
+    quantity: Float
+    inventory: Float
     height: Float
     width: Float
     weight: Float
+    age: Int
     image: Upload
     description: String
 }
@@ -75,4 +83,8 @@ input ListAllProductInput {
     categoryId: Int
     checkInventory: Boolean
     args: PaginationInput
+}
+
+input ImportExcelProductInput {
+    fileExcelProducts: Upload!
 }

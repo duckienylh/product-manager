@@ -2,7 +2,7 @@ type OrderItem {
     id: Int!
     order: Order!
     product: Product!
-    quantity: Int
+    quantity: Float
     weight: Float
     unitPrice: Float
     note: String

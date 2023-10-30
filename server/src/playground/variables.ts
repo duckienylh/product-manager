@@ -150,4 +150,12 @@ export const variables = {
             queryString: '',
         },
     },
+    importExcelProduct: {
+        input: {
+            fileExcelProducts: '',
+        },
+    },
+    updateOrder: {
+        input: {},
+    },
 };

@@ -1,4 +1,7 @@
 import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs';
+import path from 'path';
+import XLSX from 'xlsx';
 import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
@@ -61,7 +64,7 @@ const product_resolver: IResolvers = {
             }
 
             if (checkInventory) {
-                andWhereOpt['$products.weight$'] = {
+                andWhereOpt['$products.inventory$'] = {
                     [Op.lte]: warningInventory,
                 };
             }
@@ -76,7 +79,7 @@ const product_resolver: IResolvers = {
     Mutation: {
         createProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            const { name, code, height, image, price, description, weight, width, quantity, categoryId } = input;
+            const { name, code, height, inventory, age, image, price, description, weight, width, quantity, categoryId } = input;
             await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryNotFoundError() });
             const productAttribute: productsCreationAttributes = {
                 categoryId,
@@ -84,6 +87,8 @@ const product_resolver: IResolvers = {
                 code,
                 price,
                 quantity: quantity ?? 0,
+                inventory: inventory ?? 0,
+                age: age ?? 0,
                 height: height ?? undefined,
                 width: width ?? undefined,
                 weight: weight ?? undefined,
@@ -96,7 +101,7 @@ const product_resolver: IResolvers = {
                         const { createReadStream, filename, mimetype } = await image.file;
                         const fileStream = createReadStream();
                         const filePath = `image_product/${newProduct.id}/${filename}`;
-                        await minIOServices.upload(BucketValue.DEVAPP, filePath, fileStream, mimetype);
+                        await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
                         newProduct.image = filePath;
                         await newProduct.save({ transaction: t });
                     }
@@ -109,7 +114,7 @@ const product_resolver: IResolvers = {
         },
         updateProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            const { id, name, code, height, image, price, description, weight, width, quantity, categoryId } = input;
+            const { id, name, code, height, inventory, age, image, price, description, weight, width, quantity, categoryId } = input;
 
             const product = await pmDb.products.findByPk(id, { rejectOnEmpty: new ProductNotFoundError() });
             if (categoryId) {
@@ -120,6 +125,8 @@ const product_resolver: IResolvers = {
             if (code) product.code = code;
             if (price) product.price = price;
             if (quantity) product.quantity = quantity;
+            if (inventory) product.inventory = inventory;
+            if (age) product.age = age;
             if (height) product.height = height;
             if (width) product.width = width;
             if (weight) product.weight = weight;
@@ -131,7 +138,7 @@ const product_resolver: IResolvers = {
                         const { createReadStream, filename, mimetype } = await image.file;
                         const fileStream = createReadStream();
                         const filePath = `image_product/${id}/${filename}`;
-                        await minIOServices.upload(BucketValue.DEVAPP, filePath, fileStream, mimetype);
+                        await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
                         product.image = filePath;
                     }
 
@@ -176,7 +183,7 @@ const product_resolver: IResolvers = {
                     await pmDb.products.destroy({ where: { id: ids }, transaction: t });
 
                     if (deleteImageProductOnS3.length > 0) {
-                        await minIOServices.deleteObjects(deleteImageProductOnS3, BucketValue.DEVAPP);
+                        await minIOServices.deleteObjects(deleteImageProductOnS3, BucketValue.DEVTEAM);
                     }
                 } catch (error) {
                     await t.rollback();
@@ -185,6 +192,91 @@ const product_resolver: IResolvers = {
             });
 
             return ISuccessResponse.Success;
+        },
+        importExcelProduct: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { fileExcelProducts } = input;
+
+            const { createReadStream, filename } = fileExcelProducts.file;
+
+            return await sequelize.transaction(async (t: Transaction) => {
+                try {
+                    const productProcess: Promise<pmDb.products>[] = [];
+                    const pathFileExcel = '../../files/upload_excel/';
+                    const pathFolderUploadExcel = '/app/src/files/upload_excel';
+
+                    if (!existsSync(pathFolderUploadExcel)) {
+                        mkdirSync(pathFolderUploadExcel, { recursive: true });
+                    }
+
+                    await new Promise((res) =>
+                        createReadStream()
+                            .pipe(createWriteStream(path.join(__dirname, pathFileExcel, filename)))
+                            .on('close', res)
+                    );
+
+                    const workbook = XLSX.readFile(path.join(__dirname, pathFileExcel, filename));
+                    const sheet_name_list = workbook.SheetNames;
+                    const xlData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+                    const productDuplicate = [];
+
+                    const getAllProduct = await pmDb.products.findAll();
+                    for (let i = 0; i < xlData?.length; i += 1) {
+                        let isDuplicate = false;
+                        for (let j = 0; j < getAllProduct.length; j += 1) {
+                            if (xlData) {
+                                if (xlData[i]['Tên'] === getAllProduct[j].name && xlData[i]['Mã sản phẩm'] === getAllProduct[j].code) {
+                                    // update inventory product when have duplicate product
+                                    getAllProduct[j].inventory += xlData[i]['Tồn kho'];
+                                    productDuplicate.push(getAllProduct[j].save());
+                                    isDuplicate = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (isDuplicate) {
+                            xlData.splice(i, 1);
+                            i -= 1; // move the index back one step after removing an item
+                        }
+                    }
+
+                    if (productDuplicate.length > 0) {
+                        await Promise.all(productDuplicate);
+                    } else {
+                        const findCategory = await pmDb.categories.findOne({
+                            where: {
+                                name: xlData[0]['Danh mục'],
+                            },
+                            rejectOnEmpty: new CategoryNotFoundError(),
+                        });
+
+                        xlData.forEach((productData) => {
+                            const createProductAttribute: productsCreationAttributes = {
+                                name: productData['Tên'],
+                                weight: productData['Trọng lượng'],
+                                price: productData['Giá'],
+                                width: productData['Chiều rộng'] ?? undefined,
+                                height: productData['Độ dài'],
+                                categoryId: Number(findCategory.id),
+                                code: productData['Mã sản phẩm'] ?? undefined,
+                                inventory: productData['Tồn kho'] ?? undefined,
+                                quantity: productData['Số lượng'] ?? undefined,
+                                age: productData['Tuổi'] ?? undefined,
+                                description: productData['Mô tả'] ?? undefined,
+                            };
+                            const newProduct = pmDb.products.create(createProductAttribute, { transaction: t });
+                            productProcess.push(newProduct);
+                        });
+                    }
+
+                    unlinkSync(path.join(__dirname, pathFileExcel, filename));
+
+                    return await Promise.all(productProcess);
+                } catch (error) {
+                    await t.rollback();
+                    throw new MySQLError(`Lỗi bất thường khi tạo sản phẩm trong cơ sở dữ liệu: ${error}`);
+                }
+            });
         },
     },
 };
