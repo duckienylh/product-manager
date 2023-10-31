@@ -134,7 +134,7 @@ export class products extends Model<productsAttributes, productsCreationAttribut
                     allowNull: false,
                 },
                 quantity: {
-                    type: DataTypes.INTEGER,
+                    type: DataTypes.FLOAT,
                     allowNull: true,
                     defaultValue: 0,
                 },
@@ -146,14 +146,17 @@ export class products extends Model<productsAttributes, productsCreationAttribut
                 height: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 width: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 weight: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 age: {
                     type: DataTypes.INTEGER,

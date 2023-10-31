@@ -80,12 +80,14 @@ export class orderItem extends Model<orderItemAttributes, orderItemCreationAttri
                     },
                 },
                 quantity: {
-                    type: DataTypes.INTEGER,
+                    type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 unitPrice: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 note: {
                     type: DataTypes.STRING(100),

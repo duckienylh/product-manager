@@ -340,20 +340,30 @@ const order_resolver: IResolvers = {
                     const orderItemUpdatePromise: Promise<pmDb.orderItem>[] = [];
 
                     if (product) {
-                        const productUpdateId = product.map((e) => e.productId);
+                        const productUpdateId = product.map((e) => e.orderItem).filter((val): val is number => !!val);
                         const orderItems = await pmDb.orderItem.findAll({ where: { orderId: id } });
-                        const oldProductId = orderItems.map((e) => e.productId);
+                        const oldProductId = orderItems.map((e) => e.id);
+                        // update xóa sản phẩm
+                        const allProductDelete = getDifferenceIds(oldProductId, productUpdateId);
 
-                        const allProductUpdate = getDifferenceIds(productUpdateId, oldProductId);
+                        if (allProductDelete) {
+                            await pmDb.orderItem.destroy({
+                                where: {
+                                    id: allProductDelete,
+                                },
+                                transaction: t,
+                            });
+                        }
 
                         for (let i = 0; i < product.length; i += 1) {
-                            if (allProductUpdate.includes(product[i].productId)) {
+                            if (product[i].orderItem) {
                                 // eslint-disable-next-line no-await-in-loop
-                                const orderItemProduct = await pmDb.orderItem.findByPk(product[i].orderItem as number, {
+                                const orderItemProduct = await pmDb.orderItem.findByPk(Number(product[i].orderItem), {
                                     rejectOnEmpty: new OrderItemNotFoundError(),
                                 });
 
                                 if (product[i].priceProduct) orderItemProduct.unitPrice = Number(product[i].priceProduct);
+                                if (product[i].productId) orderItemProduct.productId = product[i].productId;
                                 if (product[i].quantity) orderItemProduct.quantity = Number(product[i].quantity);
 
                                 orderItemUpdatePromise.push(orderItemProduct.save({ transaction: t }));
@@ -363,11 +373,12 @@ const order_resolver: IResolvers = {
                                     productId: product[i].productId,
                                     quantity: product[i].quantity ?? undefined,
                                     note: product[i].description ?? undefined,
-                                    unitPrice: product[i].priceProduct ?? 0,
+                                    unitPrice: Number(product[i].priceProduct) ?? 0,
                                 };
 
-                                // eslint-disable-next-line no-await-in-loop
-                                await pmDb.orderItem.create(orderItemAttribute, { transaction: t });
+                                const newOrderItem = pmDb.orderItem.create(orderItemAttribute, { transaction: t });
+
+                                orderItemUpdatePromise.push(newOrderItem);
                             }
                         }
                     }
