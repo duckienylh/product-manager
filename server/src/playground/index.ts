@@ -81,6 +81,8 @@ const importExcelProduct = importGraphqlString('./mutations/product/importExcelP
 
 const updateOrder = importGraphqlString('./mutations/order/updateOrder.graphql');
 
+const getCategoryById = importGraphqlString('./queries/category/getCategoryById.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -272,6 +274,13 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: updateOrder,
             headers: userAuth,
             variables: prettifyJsonString(variables.updateOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Lấy loại sản phẩm theo id',
+            query: getCategoryById,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.getCategoryById),
         },
     ];
 };

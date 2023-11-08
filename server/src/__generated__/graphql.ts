@@ -374,6 +374,7 @@ export type IProductEdge = {
 
 export type IQuery = {
   __typename?: 'Query';
+  getCategoryById: ICategory;
   getCustomerById: ICustomer;
   getOrderById: IOrder;
   getProductById: IProduct;
@@ -386,6 +387,11 @@ export type IQuery = {
   login: IUserLoginResponse;
   me: IUser;
   users: IUserConnection;
+};
+
+
+export type IQueryGetCategoryByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -984,6 +990,7 @@ export type IProductEdgeResolvers<ContextType = any, ParentType extends IResolve
 };
 
 export type IQueryResolvers<ContextType = any, ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']> = {
+  getCategoryById?: Resolver<IResolversTypes['Category'], ParentType, ContextType, RequireFields<IQueryGetCategoryByIdArgs, 'id'>>;
   getCustomerById?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IQueryGetCustomerByIdArgs, 'CustomerId'>>;
   getOrderById?: Resolver<IResolversTypes['Order'], ParentType, ContextType, RequireFields<IQueryGetOrderByIdArgs, 'orderId'>>;
   getProductById?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IQueryGetProductByIdArgs, 'productId'>>;

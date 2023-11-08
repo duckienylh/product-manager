@@ -158,4 +158,7 @@ export const variables = {
     updateOrder: {
         input: {},
     },
+    getCategoryById: {
+        id: 1,
+    },
 };

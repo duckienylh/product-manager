@@ -1,5 +1,7 @@
 extend type Query {
     listAllCategory: [Category]!
+
+    getCategoryById(id: Int!): Category!
 }
 
 extend type Mutation {
