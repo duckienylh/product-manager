@@ -1,8 +1,10 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
+import type { deliverOrder, deliverOrderId } from './deliverOrder';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { orders, ordersId } from './orders';
 import type { userNotifications, userNotificationsId } from './userNotifications';
+import type { vehicle, vehicleId } from './vehicle';
 import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
 export interface userAttributes {
@@ -58,6 +60,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     createdAt?: Date;
 
     updatedAt?: Date;
+
+    // user hasMany deliverOrder via driverId
+    deliverOrders!: deliverOrder[];
+
+    getDeliverOrders!: Sequelize.HasManyGetAssociationsMixin<deliverOrder>;
+
+    setDeliverOrders!: Sequelize.HasManySetAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    addDeliverOrder!: Sequelize.HasManyAddAssociationMixin<deliverOrder, deliverOrderId>;
+
+    addDeliverOrders!: Sequelize.HasManyAddAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    createDeliverOrder!: Sequelize.HasManyCreateAssociationMixin<deliverOrder>;
+
+    removeDeliverOrder!: Sequelize.HasManyRemoveAssociationMixin<deliverOrder, deliverOrderId>;
+
+    removeDeliverOrders!: Sequelize.HasManyRemoveAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    hasDeliverOrder!: Sequelize.HasManyHasAssociationMixin<deliverOrder, deliverOrderId>;
+
+    hasDeliverOrders!: Sequelize.HasManyHasAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    countDeliverOrders!: Sequelize.HasManyCountAssociationsMixin;
 
     // user hasMany orderProcess via userId
     orderProcesses!: orderProcess[];
@@ -127,6 +152,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasUserNotifications!: Sequelize.HasManyHasAssociationsMixin<userNotifications, userNotificationsId>;
 
     countUserNotifications!: Sequelize.HasManyCountAssociationsMixin;
+
+    // user hasMany vehicle via driverId
+    vehicles!: vehicle[];
+
+    getVehicles!: Sequelize.HasManyGetAssociationsMixin<vehicle>;
+
+    setVehicles!: Sequelize.HasManySetAssociationsMixin<vehicle, vehicleId>;
+
+    addVehicle!: Sequelize.HasManyAddAssociationMixin<vehicle, vehicleId>;
+
+    addVehicles!: Sequelize.HasManyAddAssociationsMixin<vehicle, vehicleId>;
+
+    createVehicle!: Sequelize.HasManyCreateAssociationMixin<vehicle>;
+
+    removeVehicle!: Sequelize.HasManyRemoveAssociationMixin<vehicle, vehicleId>;
+
+    removeVehicles!: Sequelize.HasManyRemoveAssociationsMixin<vehicle, vehicleId>;
+
+    hasVehicle!: Sequelize.HasManyHasAssociationMixin<vehicle, vehicleId>;
+
+    hasVehicles!: Sequelize.HasManyHasAssociationsMixin<vehicle, vehicleId>;
+
+    countVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
     static initModel(sequelize: Sequelize.Sequelize): typeof user {
         return user.init(

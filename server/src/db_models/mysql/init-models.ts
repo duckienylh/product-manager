@@ -3,6 +3,8 @@ import { categories as _categories } from './categories';
 import type { categoriesAttributes, categoriesCreationAttributes } from './categories';
 import { customers as _customers } from './customers';
 import type { customersAttributes, customersCreationAttributes } from './customers';
+import { deliverOrder as _deliverOrder } from './deliverOrder';
+import type { deliverOrderAttributes, deliverOrderCreationAttributes } from './deliverOrder';
 import { notifications as _notifications } from './notifications';
 import type { notificationsAttributes, notificationsCreationAttributes } from './notifications';
 import { orderItem as _orderItem } from './orderItem';
@@ -19,10 +21,13 @@ import { user as _user } from './user';
 import type { userAttributes, userCreationAttributes } from './user';
 import { userNotifications as _userNotifications } from './userNotifications';
 import type { userNotificationsAttributes, userNotificationsCreationAttributes } from './userNotifications';
+import { vehicle as _vehicle } from './vehicle';
+import type { vehicleAttributes, vehicleCreationAttributes } from './vehicle';
 
 export {
   _categories as categories,
   _customers as customers,
+  _deliverOrder as deliverOrder,
   _notifications as notifications,
   _orderItem as orderItem,
   _orderProcess as orderProcess,
@@ -31,6 +36,7 @@ export {
   _products as products,
   _user as user,
   _userNotifications as userNotifications,
+  _vehicle as vehicle,
 };
 
 export type {
@@ -38,6 +44,8 @@ export type {
   categoriesCreationAttributes,
   customersAttributes,
   customersCreationAttributes,
+  deliverOrderAttributes,
+  deliverOrderCreationAttributes,
   notificationsAttributes,
   notificationsCreationAttributes,
   orderItemAttributes,
@@ -54,11 +62,14 @@ export type {
   userCreationAttributes,
   userNotificationsAttributes,
   userNotificationsCreationAttributes,
+  vehicleAttributes,
+  vehicleCreationAttributes,
 };
 
 export function initModels(sequelize: Sequelize) {
   const categories = _categories.initModel(sequelize);
   const customers = _customers.initModel(sequelize);
+  const deliverOrder = _deliverOrder.initModel(sequelize);
   const notifications = _notifications.initModel(sequelize);
   const orderItem = _orderItem.initModel(sequelize);
   const orderProcess = _orderProcess.initModel(sequelize);
@@ -67,15 +78,20 @@ export function initModels(sequelize: Sequelize) {
   const products = _products.initModel(sequelize);
   const user = _user.initModel(sequelize);
   const userNotifications = _userNotifications.initModel(sequelize);
+  const vehicle = _vehicle.initModel(sequelize);
 
   products.belongsTo(categories, { as: 'category', foreignKey: 'categoryId'});
   categories.hasMany(products, { as: 'products', foreignKey: 'categoryId'});
+  deliverOrder.belongsTo(customers, { as: 'customer', foreignKey: 'customerId'});
+  customers.hasMany(deliverOrder, { as: 'deliverOrders', foreignKey: 'customerId'});
   orders.belongsTo(customers, { as: 'customer', foreignKey: 'customerId'});
   customers.hasMany(orders, { as: 'orders', foreignKey: 'customerId'});
   paymentInfor.belongsTo(customers, { as: 'customer', foreignKey: 'customerId'});
   customers.hasMany(paymentInfor, { as: 'paymentInfors', foreignKey: 'customerId'});
   userNotifications.belongsTo(notifications, { as: 'notification', foreignKey: 'notificationId'});
   notifications.hasMany(userNotifications, { as: 'userNotifications', foreignKey: 'notificationId'});
+  deliverOrder.belongsTo(orders, { as: 'order', foreignKey: 'orderId'});
+  orders.hasMany(deliverOrder, { as: 'deliverOrders', foreignKey: 'orderId'});
   notifications.belongsTo(orders, { as: 'order', foreignKey: 'orderId'});
   orders.hasMany(notifications, { as: 'notifications', foreignKey: 'orderId'});
   orderItem.belongsTo(orders, { as: 'order', foreignKey: 'orderId'});
@@ -86,16 +102,21 @@ export function initModels(sequelize: Sequelize) {
   orders.hasMany(paymentInfor, { as: 'paymentInfors', foreignKey: 'orderId'});
   orderItem.belongsTo(products, { as: 'product', foreignKey: 'productId'});
   products.hasMany(orderItem, { as: 'orderItems', foreignKey: 'productId'});
+  deliverOrder.belongsTo(user, { as: 'driver', foreignKey: 'driverId'});
+  user.hasMany(deliverOrder, { as: 'deliverOrders', foreignKey: 'driverId'});
   orderProcess.belongsTo(user, { as: 'user', foreignKey: 'userId'});
   user.hasMany(orderProcess, { as: 'orderProcesses', foreignKey: 'userId'});
   orders.belongsTo(user, { as: 'sale', foreignKey: 'saleId'});
   user.hasMany(orders, { as: 'orders', foreignKey: 'saleId'});
   userNotifications.belongsTo(user, { as: 'user', foreignKey: 'userId'});
   user.hasMany(userNotifications, { as: 'userNotifications', foreignKey: 'userId'});
+  vehicle.belongsTo(user, { as: 'driver', foreignKey: 'driverId'});
+  user.hasMany(vehicle, { as: 'vehicles', foreignKey: 'driverId'});
 
   return {
     categories,
     customers,
+    deliverOrder,
     notifications,
     orderItem,
     orderProcess,
@@ -104,5 +125,6 @@ export function initModels(sequelize: Sequelize) {
     products,
     user,
     userNotifications,
+    vehicle,
   };
 }

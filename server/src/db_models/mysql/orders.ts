@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Op, Optional } from 'sequelize';
 import type { customers, customersId } from './customers';
+import type { deliverOrder, deliverOrderId } from './deliverOrder';
 import type { notifications, notificationsId } from './notifications';
 import type { orderItem, orderItemId } from './orderItem';
 import type { orderProcess, orderProcessId } from './orderProcess';
@@ -65,6 +66,29 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     setCustomer!: Sequelize.BelongsToSetAssociationMixin<customers, customersId>;
 
     createCustomer!: Sequelize.BelongsToCreateAssociationMixin<customers>;
+
+    // orders hasMany deliverOrder via orderId
+    deliverOrders!: deliverOrder[];
+
+    getDeliverOrders!: Sequelize.HasManyGetAssociationsMixin<deliverOrder>;
+
+    setDeliverOrders!: Sequelize.HasManySetAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    addDeliverOrder!: Sequelize.HasManyAddAssociationMixin<deliverOrder, deliverOrderId>;
+
+    addDeliverOrders!: Sequelize.HasManyAddAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    createDeliverOrder!: Sequelize.HasManyCreateAssociationMixin<deliverOrder>;
+
+    removeDeliverOrder!: Sequelize.HasManyRemoveAssociationMixin<deliverOrder, deliverOrderId>;
+
+    removeDeliverOrders!: Sequelize.HasManyRemoveAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    hasDeliverOrder!: Sequelize.HasManyHasAssociationMixin<deliverOrder, deliverOrderId>;
+
+    hasDeliverOrders!: Sequelize.HasManyHasAssociationsMixin<deliverOrder, deliverOrderId>;
+
+    countDeliverOrders!: Sequelize.HasManyCountAssociationsMixin;
 
     // orders hasMany notifications via orderId
     notifications!: notifications[];
