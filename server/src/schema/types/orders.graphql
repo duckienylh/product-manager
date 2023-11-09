@@ -1,3 +1,9 @@
+extend type Query {
+    listAllOrder(input: ListAllOrderInput!): ListAllOrderResponse!
+
+    getOrderById(orderId: Int!): Order!
+}
+
 extend type Mutation {
     createOrder(input: CreateOrderInput!): Order!
 
@@ -6,7 +12,7 @@ extend type Mutation {
 
 enum StatusOrder {
     creatNew
-    Delivering
+    delivering
     successDelivery
     paymentConfirmation
     paid
@@ -19,13 +25,40 @@ type Order {
     customer: Customer!
     invoiceNo: String!
     VAT: Float
-    totalAmount: Float
+    totalMoney: Float
     status: StatusOrder!
     discount: Float
     freightPrice: Float
     deliverAddress: String
+    orderItemList: [OrderItem]
     createdAt: Date
     updatedAt: Date
+}
+
+type OrderEdge {
+    cursor: String!
+    node: Order
+}
+
+type OrderConnection {
+    edges: [OrderEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ListAllOrderResponse {
+    allOrderCounter: Int!
+    creatNewOrderCounter: Int!
+    deliveryOrderCounter: Int!
+    doneOrderCounter: Int!
+    orders: OrderConnection
+    paidOrderCounter: Int!
+    paymentConfirmationOrderCounter: Int!
+    successDeliveryOrderCounter: Int!
+    totalCompleted: Float
+    totalDeliver: Float
+    totalPaid: Float
+    totalRevenue: Float
 }
 
 input CreateOrderInput {
@@ -43,7 +76,6 @@ input productInput {
     priceProduct: Float!
     productId: Int!
     quantity: Int!
-    weightProduct: Float
 }
 
 input UpdateOrderInput {
@@ -60,10 +92,23 @@ input UpdateOrderInput {
 }
 
 input UpdateProductOrderInput {
-    orderItem: Int!
-    productId: Int
+    orderItem: Int
+    productId: Int!
     description: String
     priceProduct: Float
     quantity: Int
-    weightProduct: Float
+}
+
+input filterDate {
+    endAt: Date!
+    startAt: Date!
+}
+
+input ListAllOrderInput {
+    args: PaginationInput
+    createAt: filterDate
+    invoiceNo: String
+    queryString: String
+    saleId: Int
+    status: StatusOrder
 }

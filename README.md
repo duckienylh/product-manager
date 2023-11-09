@@ -28,17 +28,14 @@ MYSQL_PORT=3306
 MYSQL_HOST=pm-mysql-db
 
 # Minio configuration
-MINIO_DOMAIN=http://116.103.228.13/
-MINIO_BUCKET=dev-app
-#MINIO_BUCKET_ORIGINAL_FILES=original
-#MINIO_BUCKET_FINISHED_FILES=finished
-#MINIO_BUCKET_AVATAR_FILES=avatars
+MINIO_DOMAIN=https://www.s3byq.cloud/
+MINIO_BUCKET=dev-team
 MINIO_REGION=ap-northeast-1
-MINIO_ENDPOINT=116.103.228.13
-MINIO_PORT=9001
+MINIO_ENDPOINT=www.s3byq.cloud
+MINIO_PORT=9000
 MINIO_SSL=false
-MINIO_ACCESS=ii7N4rM0pT1jo20wtGGy
-MINIO_SECRET=6o2eyFLOQv2Qwhix5g1DtEJTVcVmYVH9hDBgfQJs
+MINIO_ACCESS=cgJiZ12V1uC29SV6XU6l
+MINIO_SECRET=pcDdEkDbz9XDetsRCSpMrUGAveKrRcooIivvl4PD
 ```
 2. Form folder `project-manager/server` run command install packages by:
 ```shell

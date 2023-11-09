@@ -24,6 +24,32 @@ type Customer {
     updatedAt: Date
 }
 
+type CustomerConnection {
+    edges: [CustomerEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type CustomerEdge {
+    cursor: String!
+    node: Customer
+}
+
+type ListAllOrderResponse {
+    allOrderCounter: Int!
+    creatNewOrderCounter: Int!
+    deliveryOrderCounter: Int!
+    doneOrderCounter: Int!
+    orders: OrderConnection
+    paidOrderCounter: Int!
+    paymentConfirmationOrderCounter: Int!
+    successDeliveryOrderCounter: Int!
+    totalCompleted: Float
+    totalDeliver: Float
+    totalPaid: Float
+    totalRevenue: Float
+}
+
 type Mutation {
     createCategory(input: CreateCategoryInput!): Category!
     createCustomer(input: CreateCustomerInput!): Customer!
@@ -58,12 +84,26 @@ type Order {
     VAT: Float
     createdAt: Date
     customer: Customer!
+    deliverAddress: String
+    discount: Float
+    freightPrice: Float
     id: Int!
     invoiceNo: String!
     sale: User!
-    status: Status!
-    totalAmount: Float
+    status: StatusOrder!
+    totalMoney: Float
     updatedAt: Date
+}
+
+type OrderConnection {
+    edges: [OrderEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type OrderEdge {
+    cursor: String!
+    node: Order
 }
 
 type PageInfo {
@@ -99,7 +139,12 @@ type ProductEdge {
 }
 
 type Query {
+    getCustomerById(CustomerId: Int!): Customer!
+    getProductById(productId: Int!): Product!
+    getUserById(userId: Int!): User!
     listAllCategory: [Category]!
+    listAllCustomer(input: ListAllCustomerInput!): CustomerConnection!
+    listAllOrder(input: ListAllOrderInput!): ListAllOrderResponse!
     listAllProduct(input: ListAllProductInput!): ProductConnection!
     login(input: UserLoginInput!): UserLoginResponse!
     me: User!
@@ -145,6 +190,8 @@ type UserLoginResponse {
 enum NotificationEvent {
     Common
     NewMessage
+    NewOrder
+    updateOrder
 }
 
 enum Role {
@@ -158,9 +205,9 @@ enum Role {
     TransporterManager
 }
 
-enum Status {
-    Delivering
+enum StatusOrder {
     creatNew
+    delivering
     done
     paid
     paymentConfirmation
@@ -194,9 +241,11 @@ input CreateCustomerInput {
 input CreateOrderInput {
     VAT: Float
     customerId: Int!
-    invoiceNo: String!
+    deliverAddress: String
+    discount: Float
+    freightPrice: Float
+    product: [productInput!]!
     saleId: Int!
-    status: Status!
 }
 
 input CreateProductInput {
@@ -234,6 +283,20 @@ input DeleteProductInput {
 
 input DeleteUserInput {
     ids: [Int!]!
+}
+
+input ListAllCustomerInput {
+    args: PaginationInput
+    searchQuery: String
+}
+
+input ListAllOrderInput {
+    args: PaginationInput
+    createAt: filterDate
+    invoiceNo: String
+    queryString: String
+    saleId: Int
+    status: StatusOrder
 }
 
 input ListAllProductInput {
@@ -274,10 +337,14 @@ input UpdateCustomerInput {
 input UpdateOrderInput {
     VAT: Float
     customerId: Int
+    deliverAddress: String
+    discount: Float
+    freightPrice: Float
     id: Int!
     invoiceNo: String
+    product: [UpdateProductOrderInput!]
     saleId: Int
-    status: Status
+    status: StatusOrder
 }
 
 input UpdateProductInput {
@@ -292,6 +359,15 @@ input UpdateProductInput {
     quantity: Int
     weight: Float
     width: Float
+}
+
+input UpdateProductOrderInput {
+    description: String
+    orderItem: Int!
+    priceProduct: Float
+    productId: Int
+    quantity: Int
+    weightProduct: Float
 }
 
 input UpdateUserInput {
@@ -319,4 +395,17 @@ input UsersInput {
     isActive: Boolean
     role: Role
     searchQuery: String
+}
+
+input filterDate {
+    endAt: Date!
+    startAt: Date!
+}
+
+input productInput {
+    description: String
+    priceProduct: Float!
+    productId: Int!
+    quantity: Int!
+    weightProduct: Float
 }

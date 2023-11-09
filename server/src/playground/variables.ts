@@ -145,4 +145,20 @@ export const variables = {
     getProductById: {
         productId: 1,
     },
+    listAllOrder: {
+        input: {
+            queryString: '',
+        },
+    },
+    importExcelProduct: {
+        input: {
+            fileExcelProducts: '',
+        },
+    },
+    updateOrder: {
+        input: {},
+    },
+    getCategoryById: {
+        id: 1,
+    },
 };

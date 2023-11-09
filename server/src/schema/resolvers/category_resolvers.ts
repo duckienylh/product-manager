@@ -11,6 +11,10 @@ const category_resolver: IResolvers = {
             checkAuthentication(context);
             return await pmDb.categories.findAll();
         },
+        getCategoryById: async (_parent, { id }, context: PmContext) => {
+            checkAuthentication(context);
+            return await pmDb.categories.findByPk(id, { rejectOnEmpty: new CategoryNotFoundError() });
+        },
     },
     Mutation: {
         createCategory: async (_parent, { input }, context: PmContext) => {

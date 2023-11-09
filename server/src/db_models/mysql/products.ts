@@ -11,9 +11,11 @@ export interface productsAttributes {
     code: string;
     price: number;
     quantity?: number;
+    inventory?: number;
     height?: number;
     width?: number;
     weight?: number;
+    age?: number;
     image?: string;
     description?: string;
     createdAt?: Date;
@@ -22,7 +24,18 @@ export interface productsAttributes {
 
 export type productsPk = 'id';
 export type productsId = products[productsPk];
-export type productsOptionalAttributes = 'id' | 'quantity' | 'height' | 'width' | 'weight' | 'image' | 'description' | 'createdAt' | 'updatedAt';
+export type productsOptionalAttributes =
+    | 'id'
+    | 'quantity'
+    | 'inventory'
+    | 'height'
+    | 'width'
+    | 'weight'
+    | 'age'
+    | 'image'
+    | 'description'
+    | 'createdAt'
+    | 'updatedAt';
 export type productsCreationAttributes = Optional<productsAttributes, productsOptionalAttributes>;
 
 export type ProductEdge = TRDBEdge<products>;
@@ -41,11 +54,15 @@ export class products extends Model<productsAttributes, productsCreationAttribut
 
     quantity?: number;
 
+    inventory?: number;
+
     height?: number;
 
     width?: number;
 
     weight?: number;
+
+    age?: number;
 
     image?: string;
 
@@ -117,21 +134,34 @@ export class products extends Model<productsAttributes, productsCreationAttribut
                     allowNull: false,
                 },
                 quantity: {
-                    type: DataTypes.INTEGER,
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                    defaultValue: 0,
+                },
+                inventory: {
+                    type: DataTypes.FLOAT,
                     allowNull: true,
                     defaultValue: 0,
                 },
                 height: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 width: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
                 },
                 weight: {
                     type: DataTypes.FLOAT,
                     allowNull: true,
+                    defaultValue: 0,
+                },
+                age: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    defaultValue: 0,
                 },
                 image: {
                     type: DataTypes.STRING(200),

@@ -8,6 +8,7 @@ import type { paymentInfor, paymentInforId } from './paymentInfor';
 import type { user, userId } from './user';
 import { pmDb } from '../../loader/mysql';
 import { fDateTimeForInvoiceNoDayMonYear } from '../../lib/utils/formatTime';
+import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
 export interface ordersAttributes {
     id: number;
@@ -28,6 +29,9 @@ export type ordersId = orders[ordersPk];
 export type ordersOptionalAttributes = 'id' | 'VAT' | 'discount' | 'freightPrice' | 'deliverAddress' | 'createdAt' | 'updatedAt';
 export type ordersCreationAttributes = Optional<ordersAttributes, ordersOptionalAttributes>;
 
+export type OrderEdge = TRDBEdge<orders>;
+export type OrderConnection = TRDBConnection<orders>;
+
 export class orders extends Model<ordersAttributes, ordersCreationAttributes> implements ordersAttributes {
     id!: number;
 
@@ -46,6 +50,8 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     freightPrice?: number;
 
     deliverAddress?: string;
+
+    totalMoney!: number;
 
     createdAt?: Date;
 
@@ -160,6 +166,18 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     setSale!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
 
     createSale!: Sequelize.BelongsToCreateAssociationMixin<user>;
+
+    async getTotalMoney(): Promise<number> {
+        const orderItems = this.orderItems ?? (await this.getOrderItems());
+
+        const subTotalMoney = orderItems.reduce(
+            (sum, odi) => sum + (odi.productId ? parseFloat(String(odi.quantity)) * (odi.unitPrice ? parseFloat(String(odi.unitPrice)) : 0.0) : 0.0),
+            0.0
+        );
+        // add 10% VAT and freight price
+        this.totalMoney = subTotalMoney * 1.1 + (this.freightPrice ? parseFloat(String(this.freightPrice)) : 0.0);
+        return this.totalMoney;
+    }
 
     static async invoiceNoOrderName(saleId: number) {
         const today = new Date();

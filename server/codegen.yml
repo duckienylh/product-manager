@@ -20,4 +20,8 @@ generates:
         ProductEdge: ../db_models/mysql/products#ProductEdge
         ProductConnection: ../db_models/mysql/products#ProductConnection
         Order: ../db_models/mysql/init-models#orders
+        OrderEdge: ../db_models/mysql/orders#OrderEdge
+        OrderConnection: ../db_models/mysql/orders#OrderConnection
         Notification: ../db_models/mysql/init-models#notifications
+        OrderItem: ../db_models/mysql/init-models#orderItem
+        OrderProcess: ../db_models/mysql/init-models#orderProcess

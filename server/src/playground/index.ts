@@ -71,6 +71,18 @@ const listAllCustomer = importGraphqlString('./queries/customer/listAllCustomer.
 
 const getProductById = importGraphqlString('./queries/product/getProductById.graphql');
 
+const listAllOrder = importGraphqlString('./queries/order/listAllOrder.graphql');
+
+const getOrderById = importGraphqlString('./queries/order/getOrderById.graphql');
+
+const listInformationOrder = importGraphqlString('./queries/orderProcess/listInformationOrder.graphql');
+
+const importExcelProduct = importGraphqlString('./mutations/product/importExcelProduct.graphql');
+
+const updateOrder = importGraphqlString('./mutations/order/updateOrder.graphql');
+
+const getCategoryById = importGraphqlString('./queries/category/getCategoryById.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -229,6 +241,46 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: getProductById,
             headers: userAuth,
             variables: prettifyJsonString(variables.getProductById),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách đơn hàng',
+            query: listAllOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.listAllOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Lấy đơn hàng theo ID',
+            query: getOrderById,
+            headers: userAuth,
+        },
+        {
+            endpoint: path,
+            name: 'Lấy thông tin đơn hàng theo ID',
+            query: listInformationOrder,
+            headers: userAuth,
+        },
+        {
+            endpoint: path,
+            name: 'Import file sản phẩm',
+            query: importExcelProduct,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.importExcelProduct),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật đơn hàng',
+            query: updateOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Lấy loại sản phẩm theo id',
+            query: getCategoryById,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.getCategoryById),
         },
     ];
 };

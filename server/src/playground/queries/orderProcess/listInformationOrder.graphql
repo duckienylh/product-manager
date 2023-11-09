@@ -1,6 +1,9 @@
-query Login($input: UserLoginInput!) {
-    login(input: $input) {
-        token
+query ListInformationOrder {
+    listInformationOrder(orderId: 2) {
+        id
+        order {
+            id
+        }
         user {
             id
             email
@@ -13,8 +16,11 @@ query Login($input: UserLoginInput!) {
             avatarURL
             isActive
             role
-            createdAt
-            updatedAt
         }
+        fromStatus
+        toStatus
+        description
+        createdAt
+        updatedAt
     }
 }

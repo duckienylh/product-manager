@@ -152,6 +152,7 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
                 phoneNumber: {
                     type: DataTypes.STRING(11),
                     allowNull: false,
+                    unique: 'phoneNumber_UNIQUE',
                 },
                 firstName: {
                     type: DataTypes.STRING(45),
@@ -194,6 +195,12 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
                         unique: true,
                         using: 'BTREE',
                         fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'phoneNumber_UNIQUE',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'phoneNumber' }],
                     },
                 ],
             }
