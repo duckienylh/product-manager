@@ -3,6 +3,7 @@ import customer from './customer_resolvers';
 import category from './category_resolvers';
 import product from './product_resolvers';
 import order from './order_resolvers';
-import orderProcess_resolver from './orderProcess_resolver';
+import orderProcess from './orderProcess_resolver';
+import deliverOrder from './deliverOrder_resolver';
 
-export default [user, customer, category, product, order, orderProcess_resolver];
+export default [user, customer, category, product, order, orderProcess, deliverOrder];

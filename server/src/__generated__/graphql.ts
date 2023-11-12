@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user, customers, categories, products, orders, notifications, orderItem, orderProcess } from '../db_models/mysql/init-models';
+import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
@@ -44,6 +44,16 @@ export type ICreateCustomerInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   phoneNumber: Scalars['String']['input'];
+};
+
+export type ICreateDeliverOrderInput = {
+  createdBy: Scalars['Int']['input'];
+  customerId: Scalars['Int']['input'];
+  deliveryDate: Scalars['Date']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  driverId?: InputMaybe<Scalars['Int']['input']>;
+  orderId: Scalars['Int']['input'];
+  receivingNote?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ICreateOrderInput = {
@@ -120,6 +130,19 @@ export type IDeleteUserInput = {
   ids: Array<Scalars['Int']['input']>;
 };
 
+export type IDeliverOrder = {
+  __typename?: 'DeliverOrder';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  customer: ICustomer;
+  deliveryDate: Scalars['Date']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  driver?: Maybe<IUser>;
+  id: Scalars['Int']['output'];
+  order: IOrder;
+  receivingNote?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+};
+
 export type IImportExcelProductInput = {
   fileExcelProducts: Scalars['Upload']['input'];
 };
@@ -165,6 +188,7 @@ export type IMutation = {
   __typename?: 'Mutation';
   createCategory: ICategory;
   createCustomer: ICustomer;
+  createDeliverOrder: IDeliverOrder;
   createOrder: IOrder;
   createProduct: IProduct;
   createUser: IUser;
@@ -174,6 +198,7 @@ export type IMutation = {
   importExcelProduct: Array<Maybe<IProduct>>;
   updateCategory: ISuccessResponse;
   updateCustomer: ISuccessResponse;
+  updateDeliverOrder: ISuccessResponse;
   updateOrder: ISuccessResponse;
   updateProduct: ISuccessResponse;
   updateUser: ISuccessResponse;
@@ -187,6 +212,11 @@ export type IMutationCreateCategoryArgs = {
 
 export type IMutationCreateCustomerArgs = {
   input: ICreateCustomerInput;
+};
+
+
+export type IMutationCreateDeliverOrderArgs = {
+  input: ICreateDeliverOrderInput;
 };
 
 
@@ -232,6 +262,11 @@ export type IMutationUpdateCategoryArgs = {
 
 export type IMutationUpdateCustomerArgs = {
   input: IUpdateCustomerInput;
+};
+
+
+export type IMutationUpdateDeliverOrderArgs = {
+  input: IUpdateDeliverOrderInput;
 };
 
 
@@ -457,6 +492,7 @@ export enum IRole {
 
 export enum IStatusOrder {
   CreatNew = 'creatNew',
+  CreateExportOrder = 'createExportOrder',
   Delivering = 'delivering',
   Done = 'done',
   Paid = 'paid',
@@ -497,6 +533,16 @@ export type IUpdateCustomerInput = {
   id: Scalars['Int']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   phoneNumber?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IUpdateDeliverOrderInput = {
+  customerId?: InputMaybe<Scalars['Int']['input']>;
+  deliveryDate?: InputMaybe<Scalars['Date']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  driverId?: InputMaybe<Scalars['Int']['input']>;
+  id: Scalars['Int']['input'];
+  orderId?: InputMaybe<Scalars['Int']['input']>;
+  receivingNote?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type IUpdateOrderInput = {
@@ -686,6 +732,7 @@ export type IResolversTypes = {
   Category: ResolverTypeWrapper<categories>;
   CreateCategoryInput: ICreateCategoryInput;
   CreateCustomerInput: ICreateCustomerInput;
+  CreateDeliverOrderInput: ICreateDeliverOrderInput;
   CreateOrderInput: ICreateOrderInput;
   CreateProductInput: ICreateProductInput;
   CreateUserInput: ICreateUserInput;
@@ -697,6 +744,7 @@ export type IResolversTypes = {
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
+  DeliverOrder: ResolverTypeWrapper<deliverOrder>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ImportExcelProductInput: IImportExcelProductInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -728,6 +776,7 @@ export type IResolversTypes = {
   SuccessResponse: ISuccessResponse;
   UpdateCategoryInput: IUpdateCategoryInput;
   UpdateCustomerInput: IUpdateCustomerInput;
+  UpdateDeliverOrderInput: IUpdateDeliverOrderInput;
   UpdateOrderInput: IUpdateOrderInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
@@ -749,6 +798,7 @@ export type IResolversParentTypes = {
   Category: categories;
   CreateCategoryInput: ICreateCategoryInput;
   CreateCustomerInput: ICreateCustomerInput;
+  CreateDeliverOrderInput: ICreateDeliverOrderInput;
   CreateOrderInput: ICreateOrderInput;
   CreateProductInput: ICreateProductInput;
   CreateUserInput: ICreateUserInput;
@@ -760,6 +810,7 @@ export type IResolversParentTypes = {
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
+  DeliverOrder: deliverOrder;
   Float: Scalars['Float']['output'];
   ImportExcelProductInput: IImportExcelProductInput;
   Int: Scalars['Int']['output'];
@@ -787,6 +838,7 @@ export type IResolversParentTypes = {
   Subscription: {};
   UpdateCategoryInput: IUpdateCategoryInput;
   UpdateCustomerInput: IUpdateCustomerInput;
+  UpdateDeliverOrderInput: IUpdateDeliverOrderInput;
   UpdateOrderInput: IUpdateOrderInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
@@ -843,6 +895,19 @@ export interface IDateScalarConfig extends GraphQLScalarTypeConfig<IResolversTyp
   name: 'Date';
 }
 
+export type IDeliverOrderResolvers<ContextType = any, ParentType extends IResolversParentTypes['DeliverOrder'] = IResolversParentTypes['DeliverOrder']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  customer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType>;
+  deliveryDate?: Resolver<IResolversTypes['Date'], ParentType, ContextType>;
+  description?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  driver?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  order?: Resolver<IResolversTypes['Order'], ParentType, ContextType>;
+  receivingNote?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['JSON'], any> {
   name: 'JSON';
 }
@@ -866,6 +931,7 @@ export type IListAllOrderResponseResolvers<ContextType = any, ParentType extends
 export type IMutationResolvers<ContextType = any, ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']> = {
   createCategory?: Resolver<IResolversTypes['Category'], ParentType, ContextType, RequireFields<IMutationCreateCategoryArgs, 'input'>>;
   createCustomer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IMutationCreateCustomerArgs, 'input'>>;
+  createDeliverOrder?: Resolver<IResolversTypes['DeliverOrder'], ParentType, ContextType, RequireFields<IMutationCreateDeliverOrderArgs, 'input'>>;
   createOrder?: Resolver<IResolversTypes['Order'], ParentType, ContextType, RequireFields<IMutationCreateOrderArgs, 'input'>>;
   createProduct?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IMutationCreateProductArgs, 'input'>>;
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
@@ -875,6 +941,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   importExcelProduct?: Resolver<Array<Maybe<IResolversTypes['Product']>>, ParentType, ContextType, RequireFields<IMutationImportExcelProductArgs, 'input'>>;
   updateCategory?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateCategoryArgs, 'input'>>;
   updateCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateCustomerArgs, 'input'>>;
+  updateDeliverOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateDeliverOrderArgs, 'input'>>;
   updateOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateOrderArgs, 'input'>>;
   updateProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateProductArgs, 'input'>>;
   updateUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateUserArgs, 'input'>>;
@@ -1056,6 +1123,7 @@ export type IResolvers<ContextType = any> = {
   CustomerConnection?: ICustomerConnectionResolvers<ContextType>;
   CustomerEdge?: ICustomerEdgeResolvers<ContextType>;
   Date?: GraphQLScalarType;
+  DeliverOrder?: IDeliverOrderResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   ListAllOrderResponse?: IListAllOrderResponseResolvers<ContextType>;
   Mutation?: IMutationResolvers<ContextType>;

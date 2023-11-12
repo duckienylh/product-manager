@@ -26,6 +26,7 @@ export enum PM_ERROR_CODE {
     ProductNotFound = 'ProductNotFound',
     OrderNotFound = 'OrderNotFound',
     OrderItemNotFound = 'OrderItemNotFound',
+    DeliverOrderNotFound = 'DeliverOrderNotFound',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -153,6 +154,16 @@ export class OrderItemNotFoundError extends GraphQLError {
         super(message || 'Chi tiết đơn hàng không tồn tại', {
             extensions: {
                 code: PM_ERROR_CODE.OrderItemNotFound,
+            },
+        });
+    }
+}
+
+export class DeliverOrderNotFoundError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Vận chuyển đơn hàng không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.DeliverOrderNotFound,
             },
         });
     }

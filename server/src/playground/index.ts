@@ -83,6 +83,8 @@ const updateOrder = importGraphqlString('./mutations/order/updateOrder.graphql')
 
 const getCategoryById = importGraphqlString('./queries/category/getCategoryById.graphql');
 
+const createDeliverOrder = importGraphqlString('./mutations/deliverOrder/createDeliverOrder.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -281,6 +283,13 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: getCategoryById,
             headers: userAuth,
             variables: prettifyJsonString(variables.getCategoryById),
+        },
+        {
+            endpoint: path,
+            name: 'Tạo lệnh xuất hàng',
+            query: createDeliverOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createDeliverOrder),
         },
     ];
 };

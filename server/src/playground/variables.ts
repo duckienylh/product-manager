@@ -161,4 +161,15 @@ export const variables = {
     getCategoryById: {
         id: 1,
     },
+    createDeliverOrder: {
+        input: {
+            createdBy: 1,
+            customerId: 1,
+            orderId: 1,
+            driverId: 5,
+            deliveryDate: '2023/10/10',
+            description: '',
+            receivingNote: '',
+        },
+    },
 };

@@ -12,6 +12,7 @@ extend type Mutation {
 
 enum StatusOrder {
     creatNew
+    createExportOrder
     delivering
     successDelivery
     paymentConfirmation

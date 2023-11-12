@@ -18,6 +18,7 @@ export enum BucketValue {
 
 export enum StatusOrder {
     creatNew = 'Tạo mới',
+    createExportOrder = 'Chốt đơn - Tạo lệnh xuất hàng',
     delivering = 'Đang giao hàng',
     successDelivery = 'Giao hàng thành công',
     paymentConfirmation = 'Xác nhận thanh toán và hồ sơ',
