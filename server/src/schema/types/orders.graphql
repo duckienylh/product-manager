@@ -50,6 +50,7 @@ type OrderConnection {
 type ListAllOrderResponse {
     allOrderCounter: Int!
     creatNewOrderCounter: Int!
+    createExportOrderCounter: Int!
     deliveryOrderCounter: Int!
     doneOrderCounter: Int!
     orders: OrderConnection
@@ -81,7 +82,7 @@ input productInput {
 
 input UpdateOrderInput {
     id:Int!
-    saleId: Int
+    saleId: Int!
     customerId: Int
     invoiceNo: String
     VAT: Float

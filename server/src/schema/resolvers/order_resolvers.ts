@@ -152,6 +152,7 @@ const order_resolver: IResolvers = {
             const totalRevenue = allOrder.reduce((sumRevenue, od) => sumRevenue + (od ? parseFloat(String(od.totalMoney)) : 0.0), 0.0);
             const allOrderCounter = allOrder.length;
             const creatNewOrderCounter = allOrder.filter((e) => e.status === StatusOrder.creatNew).length;
+            const createExportOrderCounter = allOrder.filter((e) => e.status === StatusOrder.createExportOrder).length;
             const successDeliveryOrderCounter = allOrder.filter((e) => e.status === StatusOrder.successDelivery).length;
             const paymentConfirmationOrderCounter = allOrder.filter((e) => e.status === StatusOrder.paymentConfirmation).length;
             const orderCompleted = allOrder.filter((e) => e.status === StatusOrder.done);
@@ -180,6 +181,7 @@ const order_resolver: IResolvers = {
                 totalDeliver,
                 allOrderCounter,
                 creatNewOrderCounter,
+                createExportOrderCounter,
                 deliveryOrderCounter,
                 successDeliveryOrderCounter,
                 paymentConfirmationOrderCounter,
@@ -312,21 +314,19 @@ const order_resolver: IResolvers = {
         },
         updateOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            // TODO: check lai doan nay quyen tao order
+            // TODO: check lai doan nay quyen sua order cua sale
             const { id, saleId, customerId, invoiceNo, VAT, status, discount, freightPrice, deliverAddress, product } = input;
 
-            // const checkSale = await pmDb.user.findAll({
-            //     where: {
-            //         id: saleId as number,
-            //         role: RoleList.sales,
-            //     },
-            // });
-            // if (!checkSale.length) throw new UserNotFoundError('sale không tồn tại');
+            const checkSale = await pmDb.user.findAll({
+                where: {
+                    id: saleId,
+                    role: RoleList.sales,
+                },
+            });
+            if (!checkSale.length) throw new UserNotFoundError('sale không tồn tại');
 
             const order = await pmDb.orders.findByPk(id, { rejectOnEmpty: new OrderNotFoundError() });
 
-            // check update doan nay co the no ko can thiet
-            if (saleId) order.saleId = saleId;
             if (customerId) order.customerId = customerId;
             if (invoiceNo) order.invoiceNo = invoiceNo;
 
@@ -337,13 +337,13 @@ const order_resolver: IResolvers = {
 
             return await sequelize.transaction(async (t: Transaction) => {
                 try {
-                    const orderItemUpdatePromise: Promise<pmDb.orderItem>[] = [];
+                    const orderItemUpdatePromise: Promise<pmDb.orderItem | pmDb.products>[] = [];
 
                     if (product) {
                         const productUpdateId = product.map((e) => e.orderItem).filter((val): val is number => !!val);
                         const orderItems = await pmDb.orderItem.findAll({ where: { orderId: id } });
                         const oldProductId = orderItems.map((e) => e.id);
-                        // update xóa sản phẩm
+                        // update delete product
                         const allProductDelete = getDifferenceIds(oldProductId, productUpdateId);
 
                         if (allProductDelete) {
@@ -359,14 +359,53 @@ const order_resolver: IResolvers = {
                             if (product[i].orderItem) {
                                 // eslint-disable-next-line no-await-in-loop
                                 const orderItemProduct = await pmDb.orderItem.findByPk(Number(product[i].orderItem), {
+                                    include: [
+                                        {
+                                            model: pmDb.products,
+                                            as: 'product',
+                                            required: false,
+                                        },
+                                    ],
                                     rejectOnEmpty: new OrderItemNotFoundError(),
                                 });
 
                                 if (product[i].priceProduct) orderItemProduct.unitPrice = Number(product[i].priceProduct);
-                                if (product[i].productId) orderItemProduct.productId = product[i].productId;
-                                if (product[i].quantity) orderItemProduct.quantity = Number(product[i].quantity);
+
+                                // update inventory product
+                                if (product[i].productId) {
+                                    // eslint-disable-next-line no-await-in-loop
+                                    const updateInventoryProd = await pmDb.products.findByPk(product[i].productId, {
+                                        rejectOnEmpty: new ProductNotFoundError(),
+                                    });
+
+                                    if (product[i].quantity) {
+                                        if (updateInventoryProd.inventory) {
+                                            updateInventoryProd.inventory =
+                                                updateInventoryProd.inventory -
+                                                Number(product[i].quantity) +
+                                                (orderItemProduct.quantity ? orderItemProduct.quantity : 0);
+
+                                            orderItemUpdatePromise.push(updateInventoryProd.save({ transaction: t }));
+                                        }
+                                        orderItemProduct.quantity = Number(product[i].quantity);
+                                    }
+
+                                    if (orderItemProduct.product.inventory)
+                                        orderItemProduct.product.inventory += orderItemProduct.quantity ? orderItemProduct.quantity : 0;
+
+                                    orderItemProduct.productId = product[i].productId;
+                                } else if (product[i].quantity) {
+                                    if (orderItemProduct.product.inventory)
+                                        orderItemProduct.product.inventory =
+                                            orderItemProduct.product.inventory -
+                                            Number(product[i].quantity) +
+                                            (orderItemProduct.quantity ? orderItemProduct.quantity : 0);
+
+                                    orderItemProduct.quantity = Number(product[i].quantity);
+                                }
 
                                 orderItemUpdatePromise.push(orderItemProduct.save({ transaction: t }));
+                                orderItemUpdatePromise.push(orderItemProduct.product.save({ transaction: t }));
                             } else {
                                 const orderItemAttribute: orderItemCreationAttributes = {
                                     orderId: id,
@@ -432,7 +471,6 @@ const order_resolver: IResolvers = {
                         message: `Đơn hàng ${invoiceNo} vừa được cập nhật`,
                         order,
                     });
-                    // TODO: chuaw lam update ton kho
 
                     return ISuccessResponse.Success;
                 } catch (error) {
