@@ -54,9 +54,9 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
 
     totalMoney!: number;
 
-    createdAt?: Date;
+    createdAt!: Date;
 
-    updatedAt?: Date;
+    updatedAt!: Date;
 
     // orders belongsTo customers via customerId
     customer!: customers;

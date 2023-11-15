@@ -172,4 +172,24 @@ export const variables = {
             receivingNote: '',
         },
     },
+    salesReportRevenueByWeek: {
+        input: {
+            saleId: 1,
+            startAt: '2023-11-12',
+            endAt: '2023-11-19',
+        },
+    },
+    salesReportRevenueByMonth: {
+        input: {
+            saleId: 1,
+            startAt: '2023-11-12',
+            endAt: '2023-11-19',
+        },
+    },
+    adminReportRevenueByMonth: {
+        input: {
+            startAt: '2023-11-1',
+            endAt: '2023-12-1',
+        },
+    },
 };

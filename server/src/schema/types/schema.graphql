@@ -6,6 +6,12 @@ schema {
     subscription: Subscription
 }
 
+type AdminReportRevenueByMonthResponse {
+    sale: String!
+    totalOrder: Int!
+    totalRevenue: Float!
+}
+
 type Category {
     createdAt: Date
     id: Int!
@@ -35,6 +41,18 @@ type CustomerEdge {
     node: Customer
 }
 
+type DeliverOrder {
+    createdAt: Date
+    customer: Customer!
+    deliveryDate: Date!
+    description: String
+    driver: User
+    id: Int!
+    order: Order!
+    receivingNote: String
+    updatedAt: Date
+}
+
 type ListAllOrderResponse {
     allOrderCounter: Int!
     creatNewOrderCounter: Int!
@@ -53,14 +71,17 @@ type ListAllOrderResponse {
 type Mutation {
     createCategory(input: CreateCategoryInput!): Category!
     createCustomer(input: CreateCustomerInput!): Customer!
+    createDeliverOrder(input: CreateDeliverOrderInput!): DeliverOrder!
     createOrder(input: CreateOrderInput!): Order!
     createProduct(input: CreateProductInput!): Product!
     createUser(input: CreateUserInput!): User!
     deleteCustomer(input: DeleteCustomerInput!): SuccessResponse!
     deleteProduct(input: DeleteProductInput!): SuccessResponse!
     deleteUser(input: DeleteUserInput!): SuccessResponse!
+    importExcelProduct(input: ImportExcelProductInput!): [Product]!
     updateCategory(input: UpdateCategoryInput!): SuccessResponse!
     updateCustomer(input: UpdateCustomerInput!): SuccessResponse!
+    updateDeliverOrder(input: UpdateDeliverOrderInput!): SuccessResponse!
     updateOrder(input: UpdateOrderInput!): SuccessResponse!
     updateProduct(input: UpdateProductInput!): SuccessResponse!
     updateUser(input: UpdateUserInput!): SuccessResponse!
@@ -89,6 +110,7 @@ type Order {
     freightPrice: Float
     id: Int!
     invoiceNo: String!
+    orderItemList: [OrderItem]
     sale: User!
     status: StatusOrder!
     totalMoney: Float
@@ -106,12 +128,36 @@ type OrderEdge {
     node: Order
 }
 
+type OrderItem {
+    createdAt: Date
+    id: Int!
+    note: String
+    order: Order!
+    product: Product!
+    quantity: Float
+    unitPrice: Float
+    updatedAt: Date
+    weight: Float
+}
+
+type OrderProcess {
+    createdAt: Date
+    description: String
+    fromStatus: String!
+    id: Int!
+    order: Order!
+    toStatus: String!
+    updatedAt: Date
+    user: User!
+}
+
 type PageInfo {
     endCursor: Cursor
     hasNextPage: Boolean!
 }
 
 type Product {
+    age: Int
     category: Category!
     code: String!
     createdAt: Date
@@ -119,9 +165,10 @@ type Product {
     height: Float
     id: Int!
     image: String
+    inventory: Float
     name: String!
     price: Float!
-    quantity: Int
+    quantity: Float
     updatedAt: Date
     weight: Float
     width: Float
@@ -139,16 +186,32 @@ type ProductEdge {
 }
 
 type Query {
+    adminReportRevenueByMonth(input: AdminReportRevenueByMonthInput!): [AdminReportRevenueByMonthResponse]!
+    getCategoryById(id: Int!): Category!
     getCustomerById(CustomerId: Int!): Customer!
+    getOrderById(orderId: Int!): Order!
     getProductById(productId: Int!): Product!
     getUserById(userId: Int!): User!
     listAllCategory: [Category]!
     listAllCustomer(input: ListAllCustomerInput!): CustomerConnection!
     listAllOrder(input: ListAllOrderInput!): ListAllOrderResponse!
     listAllProduct(input: ListAllProductInput!): ProductConnection!
+    listInformationOrder(orderId: Int!): [OrderProcess]!
     login(input: UserLoginInput!): UserLoginResponse!
     me: User!
+    salesReportRevenueByMonth(input: SalesReportRevenueByMonthInput!): [SalesReportRevenueByMonthResponse]!
+    salesReportRevenueByWeek(input: SalesReportRevenueByWeekInput!): [SalesReportRevenueByWeekResponse]!
     users(input: UsersInput!): UserConnection!
+}
+
+type SalesReportRevenueByMonthResponse {
+    month: Int!
+    totalRevenue: Float!
+}
+
+type SalesReportRevenueByWeekResponse {
+    date: Date!
+    totalRevenue: Float!
 }
 
 type Subscription {
@@ -207,6 +270,7 @@ enum Role {
 
 enum StatusOrder {
     creatNew
+    createExportOrder
     delivering
     done
     paid
@@ -226,6 +290,11 @@ scalar JSON
 
 scalar Upload
 
+input AdminReportRevenueByMonthInput {
+    endAt: Date!
+    startAt: Date!
+}
+
 input CreateCategoryInput {
     name: String!
 }
@@ -236,6 +305,16 @@ input CreateCustomerInput {
     email: String
     name: String
     phoneNumber: String!
+}
+
+input CreateDeliverOrderInput {
+    createdBy: Int!
+    customerId: Int!
+    deliveryDate: Date!
+    description: String
+    driverId: Int
+    orderId: Int!
+    receivingNote: String
 }
 
 input CreateOrderInput {
@@ -249,14 +328,16 @@ input CreateOrderInput {
 }
 
 input CreateProductInput {
+    age: Int
     categoryId: Int!
     code: String!
     description: String
     height: Float
     image: Upload
+    inventory: Float
     name: String!
     price: Float!
-    quantity: Int
+    quantity: Float
     weight: Float
     width: Float
 }
@@ -283,6 +364,10 @@ input DeleteProductInput {
 
 input DeleteUserInput {
     ids: [Int!]!
+}
+
+input ImportExcelProductInput {
+    fileExcelProducts: Upload!
 }
 
 input ListAllCustomerInput {
@@ -313,6 +398,18 @@ input PaginationInput {
     last: Int
 }
 
+input SalesReportRevenueByMonthInput {
+    endAt: Date!
+    saleId: Int!
+    startAt: Date!
+}
+
+input SalesReportRevenueByWeekInput {
+    endAt: Date!
+    saleId: Int!
+    startAt: Date!
+}
+
 input SubscribeNotificationsInput {
     "excludingEvent: Khi user không muốn nhận thông từ 1 sự kiện nào đó"
     excludingEvent: [NotificationEvent!]
@@ -334,6 +431,16 @@ input UpdateCustomerInput {
     phoneNumber: String
 }
 
+input UpdateDeliverOrderInput {
+    customerId: Int
+    deliveryDate: Date
+    description: String
+    driverId: Int
+    id: Int!
+    orderId: Int
+    receivingNote: String
+}
+
 input UpdateOrderInput {
     VAT: Float
     customerId: Int
@@ -348,26 +455,27 @@ input UpdateOrderInput {
 }
 
 input UpdateProductInput {
+    age: Int
     categoryId: Int
     code: String
     description: String
     height: Float
     id: Int!
     image: Upload
+    inventory: Float
     name: String
     price: Float
-    quantity: Int
+    quantity: Float
     weight: Float
     width: Float
 }
 
 input UpdateProductOrderInput {
     description: String
-    orderItem: Int!
+    orderItem: Int
     priceProduct: Float
-    productId: Int
+    productId: Int!
     quantity: Int
-    weightProduct: Float
 }
 
 input UpdateUserInput {
@@ -407,5 +515,4 @@ input productInput {
     priceProduct: Float!
     productId: Int!
     quantity: Int!
-    weightProduct: Float
 }
