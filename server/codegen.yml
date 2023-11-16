@@ -25,3 +25,4 @@ generates:
         Notification: ../db_models/mysql/init-models#notifications
         OrderItem: ../db_models/mysql/init-models#orderItem
         OrderProcess: ../db_models/mysql/init-models#orderProcess
+        DeliverOrder: ../db_models/mysql/init-models#deliverOrder

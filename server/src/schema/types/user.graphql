@@ -6,6 +6,12 @@ extend type Query {
     users(input: UsersInput!): UserConnection!
 
     getUserById(userId: Int!): User!
+
+    salesReportRevenueByWeek(input: SalesReportRevenueByWeekInput!): [SalesReportRevenueByWeekResponse]!
+
+    salesReportRevenueByMonth(input: SalesReportRevenueByMonthInput!): [SalesReportRevenueByMonthResponse]!
+
+    adminReportRevenueByMonth(input: AdminReportRevenueByMonthInput!): [AdminReportRevenueByMonthResponse]!
 }
 
 extend type Mutation {
@@ -68,6 +74,22 @@ type NotificationResponse {
     notification: Notification
 }
 
+type SalesReportRevenueByWeekResponse {
+    date: Date!
+    totalRevenue: Float!
+}
+
+type SalesReportRevenueByMonthResponse {
+    month: Int!
+    totalRevenue: Float!
+}
+
+type AdminReportRevenueByMonthResponse {
+    sale: String!
+    totalOrder: Int!
+    totalRevenue: Float!
+}
+
 input UserLoginInput {
     account: String!
     password: String!
@@ -116,4 +138,21 @@ input SubscribeNotificationsInput {
     excludingEvent: [NotificationEvent!]
     "#### User Id: ID của user sẽ nhận đc các thông báo"
     userId: Int!
+}
+
+input SalesReportRevenueByWeekInput {
+    saleId: Int
+    startAt: Date!
+    endAt: Date!
+}
+
+input SalesReportRevenueByMonthInput {
+    saleId: Int
+    startAt: Date!
+    endAt: Date!
+}
+
+input AdminReportRevenueByMonthInput {
+    endAt: Date!
+    startAt: Date!
 }

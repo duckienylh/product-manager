@@ -1,0 +1,41 @@
+#extend type Query {
+#    listAllDeliverOrder(input: ListAllDeliverOrderInput!): ListAllDeliverOrderResponse!
+#}
+
+extend type Mutation {
+    createDeliverOrder(input: CreateDeliverOrderInput!): DeliverOrder!
+
+    updateDeliverOrder(input: UpdateDeliverOrderInput!): SuccessResponse!
+}
+
+type DeliverOrder {
+    id: Int!
+    customer: Customer!
+    order: Order!
+    driver: User
+    deliveryDate: Date!
+    description: String
+    receivingNote: String
+    createdAt: Date
+    updatedAt: Date
+}
+
+input CreateDeliverOrderInput {
+    createdBy: Int!
+    customerId: Int!
+    orderId: Int!
+    driverId: Int
+    deliveryDate: Date!
+    description: String
+    receivingNote: String
+}
+
+input UpdateDeliverOrderInput {
+    id: Int!
+    customerId: Int
+    orderId: Int
+    driverId: Int
+    deliveryDate: Date
+    description: String
+    receivingNote: String
+}

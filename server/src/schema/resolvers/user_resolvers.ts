@@ -1,17 +1,24 @@
-import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
+import { FindAndCountOptions, FindOptions, Op, Transaction, WhereOptions } from 'sequelize';
 import bcrypt from 'bcrypt';
-import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
+import {
+    IAdminReportRevenueByMonthResponse,
+    IResolvers,
+    ISalesReportRevenueByMonthResponse,
+    ISalesReportRevenueByWeekResponse,
+    ISuccessResponse,
+} from '../../__generated__/graphql';
 import { pmDb, sequelize } from '../../loader/mysql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { MySQLError, PermissionError, UserAlreadyExistError, UserNotFoundError } from '../../lib/classes/graphqlErrors';
 import { generateJWT, USER_JWT } from '../../lib/utils/jwt';
 import { iNotificationEventToValueResolve, iRoleToNumber, roleNumberToIRole } from '../../lib/resolver_enum';
-import { BucketValue, DefaultHashValue, RoleList } from '../../lib/enum';
+import { BucketValue, DefaultHashValue, RoleList, StatusOrder } from '../../lib/enum';
 import { userCreationAttributes } from '../../db_models/mysql/user';
 import { minIOServices, pubsubService } from '../../lib/classes';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 import { NotificationEvent, PublishMessage } from '../../lib/classes/PubSubService';
+import { getNextNDayFromDate } from '../../lib/utils/formatTime';
 
 const user_resolvers: IResolvers = {
     UserEdge: rdbEdgeResolver,
@@ -114,6 +121,153 @@ const user_resolvers: IResolvers = {
             return await pmDb.user.findByPk(userId, {
                 rejectOnEmpty: new UserNotFoundError('Người dùng không tồn tại'),
             });
+        },
+        salesReportRevenueByWeek: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { saleId, startAt, endAt } = input;
+            const revenueByWeekArr: ISalesReportRevenueByWeekResponse[] = [];
+
+            const option: FindOptions<pmDb.orders> = {
+                include: [
+                    {
+                        model: pmDb.user,
+                        as: 'sale',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                ],
+            };
+
+            const whereOpt: WhereOptions<pmDb.orders> = {};
+
+            if (saleId) {
+                whereOpt['$orders.saleId$'] = saleId;
+            }
+            whereOpt['$orders.status$'] = StatusOrder.done;
+
+            whereOpt['$orders.createdAt$'] = { [Op.between]: [startAt, getNextNDayFromDate(endAt, 1)] };
+
+            option.where = whereOpt;
+
+            const orderByWeek = await pmDb.orders.findAll(option);
+
+            const arrayTotalMoney = orderByWeek.map((order) => order.getTotalMoney());
+            await Promise.all(arrayTotalMoney);
+
+            for (let i = new Date(startAt); i <= new Date(endAt); i = getNextNDayFromDate(i, 1)) {
+                const weeklySales = orderByWeek
+                    ? orderByWeek.filter((order) => order.createdAt >= i && order.createdAt <= getNextNDayFromDate(i, 1))
+                    : [];
+
+                const totalRevenue = weeklySales.reduce(
+                    (sumRevenue, order) => sumRevenue + (order ? parseFloat(String(order.totalMoney)) : 0.0),
+                    0.0
+                );
+
+                revenueByWeekArr.push({ date: i, totalRevenue });
+            }
+
+            return revenueByWeekArr;
+        },
+        salesReportRevenueByMonth: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { saleId, startAt, endAt } = input;
+            const revenueByMonthArr: ISalesReportRevenueByMonthResponse[] = [];
+
+            const option: FindOptions<pmDb.orders> = {
+                include: [
+                    {
+                        model: pmDb.user,
+                        as: 'sale',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                ],
+            };
+
+            const whereOpt: WhereOptions<pmDb.orders> = {};
+
+            if (saleId) {
+                whereOpt['$orders.saleId$'] = saleId;
+            }
+
+            whereOpt['$orders.status$'] = StatusOrder.done;
+
+            whereOpt['$orders.createdAt$'] = { [Op.between]: [startAt, getNextNDayFromDate(endAt, 1)] };
+
+            option.where = whereOpt;
+
+            const orderByMonth = await pmDb.orders.findAll(option);
+
+            const arrayTotalMoney = orderByMonth.map((order) => order.getTotalMoney());
+            await Promise.all(arrayTotalMoney);
+
+            for (let i = 0; i < 12; i += 1) {
+                const monthlySales = orderByMonth.filter((order) => order.createdAt.getMonth() === i);
+
+                const totalRevenue = monthlySales.reduce(
+                    (sumRevenue, order) => sumRevenue + (order ? parseFloat(String(order.totalMoney)) : 0.0),
+                    0.0
+                );
+
+                revenueByMonthArr.push({ month: i, totalRevenue });
+            }
+
+            return revenueByMonthArr;
+        },
+        adminReportRevenueByMonth: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { startAt, endAt } = input;
+            const revenueByMonthArr: IAdminReportRevenueByMonthResponse[] = [];
+
+            const orderByMonth = await pmDb.orders.findAll({
+                where: {
+                    status: StatusOrder.done,
+                    createdAt: { [Op.between]: [startAt, endAt] },
+                },
+                include: [
+                    {
+                        model: pmDb.user,
+                        as: 'sale',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                ],
+            });
+
+            const arrayTotalMoney = orderByMonth.map((order) => order.getTotalMoney());
+            await Promise.all(arrayTotalMoney);
+
+            const allSale = await pmDb.user.findAll({
+                where: {
+                    role: RoleList.sales,
+                },
+            });
+
+            for (let i = 0; i < allSale.length; i += 1) {
+                const monthlySale = orderByMonth.filter((order) => order.saleId === allSale[i].id);
+                const totalOrder = monthlySale.length;
+                const totalRevenue = monthlySale.reduce(
+                    (sumRevenue, order) => sumRevenue + (order ? parseFloat(String(order.totalMoney)) : 0.0),
+                    0.0
+                );
+
+                revenueByMonthArr.push({ sale: allSale[i].fullName, totalRevenue, totalOrder });
+            }
+
+            return revenueByMonthArr;
         },
     },
     Mutation: {

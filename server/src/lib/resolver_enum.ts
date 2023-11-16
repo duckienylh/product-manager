@@ -68,6 +68,8 @@ export const StatusOrderTypeResolve = (input: string | undefined) => {
     switch (input) {
         case StatusOrder.creatNew:
             return IStatusOrder.CreatNew;
+        case StatusOrder.createExportOrder:
+            return IStatusOrder.CreateExportOrder;
         case StatusOrder.delivering:
             return IStatusOrder.Delivering;
         case StatusOrder.successDelivery:
@@ -87,6 +89,8 @@ export const IStatusOrderToStatusOrder = (iStatusOrderInput: IStatusOrder) => {
     switch (iStatusOrderInput) {
         case IStatusOrder.CreatNew:
             return StatusOrder.creatNew;
+        case IStatusOrder.CreateExportOrder:
+            return StatusOrder.createExportOrder;
         case IStatusOrder.Delivering:
             return StatusOrder.delivering;
         case IStatusOrder.SuccessDelivery:
