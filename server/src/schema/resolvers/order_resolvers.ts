@@ -323,7 +323,7 @@ const order_resolver: IResolvers = {
                     role: RoleList.sales,
                 },
             });
-            if (!checkSale.length) throw new UserNotFoundError('sale không tồn tại');
+            if (!checkSale.length) throw new UserNotFoundError('Người dùng này không được phép cập nhật đơn hàng này!');
 
             const order = await pmDb.orders.findByPk(id, { rejectOnEmpty: new OrderNotFoundError() });
 
@@ -340,16 +340,36 @@ const order_resolver: IResolvers = {
                     const orderItemUpdatePromise: Promise<pmDb.orderItem | pmDb.products>[] = [];
 
                     if (product) {
-                        const productUpdateId = product.map((e) => e.orderItem).filter((val): val is number => !!val);
-                        const orderItems = await pmDb.orderItem.findAll({ where: { orderId: id } });
-                        const oldProductId = orderItems.map((e) => e.id);
-                        // update delete product
-                        const allProductDelete = getDifferenceIds(oldProductId, productUpdateId);
+                        const productUpdateOIId = product.map((e) => e.orderItem).filter((val): val is number => !!val);
+                        const orderItems = await pmDb.orderItem.findAll({
+                            where: { orderId: id },
+                            include: [
+                                {
+                                    model: pmDb.products,
+                                    as: 'product',
+                                    required: false,
+                                },
+                            ],
+                        });
+                        const oldOrderItemId = orderItems.map((e) => e.id);
 
-                        if (allProductDelete) {
+                        // update delete product
+                        const allOrderItemIdDelete = getDifferenceIds(oldOrderItemId, productUpdateOIId);
+
+                        // update inventory when delete product
+                        allOrderItemIdDelete.forEach((e) => {
+                            const updateInventoryProd = orderItems.filter((oi) => oi.id === e);
+
+                            if (updateInventoryProd[0].product.inventory)
+                                updateInventoryProd[0].product.inventory += updateInventoryProd[0].quantity ? updateInventoryProd[0].quantity : 0;
+
+                            orderItemUpdatePromise.push(updateInventoryProd[0].product.save({ transaction: t }));
+                        });
+
+                        if (allOrderItemIdDelete) {
                             await pmDb.orderItem.destroy({
                                 where: {
-                                    id: allProductDelete,
+                                    id: allOrderItemIdDelete,
                                 },
                                 transaction: t,
                             });
@@ -390,9 +410,6 @@ const order_resolver: IResolvers = {
                                         orderItemProduct.quantity = Number(product[i].quantity);
                                     }
 
-                                    if (orderItemProduct.product.inventory)
-                                        orderItemProduct.product.inventory += orderItemProduct.quantity ? orderItemProduct.quantity : 0;
-
                                     orderItemProduct.productId = product[i].productId;
                                 } else if (product[i].quantity) {
                                     if (orderItemProduct.product.inventory)
@@ -415,8 +432,22 @@ const order_resolver: IResolvers = {
                                     unitPrice: Number(product[i].priceProduct) ?? 0,
                                 };
 
-                                const newOrderItem = pmDb.orderItem.create(orderItemAttribute, { transaction: t });
+                                const newOrderItem = pmDb.orderItem.create(orderItemAttribute, {
+                                    transaction: t,
+                                });
 
+                                // eslint-disable-next-line no-await-in-loop
+                                const updateInventoryProduct = await pmDb.products.findByPk(product[i].productId, {
+                                    rejectOnEmpty: new ProductNotFoundError(),
+                                });
+
+                                console.log('newOrderItem.product', updateInventoryProduct);
+
+                                // update inventory when add product into order
+                                if (updateInventoryProduct.inventory)
+                                    updateInventoryProduct.inventory -= product[i].quantity ? Number(product[i].quantity) : 0;
+
+                                orderItemUpdatePromise.push(updateInventoryProduct.save({ transaction: t }));
                                 orderItemUpdatePromise.push(newOrderItem);
                             }
                         }
