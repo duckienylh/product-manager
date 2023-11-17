@@ -40,6 +40,7 @@ export const storageConfig = {
         domain: process.env.MINIO_DOMAIN || 'https://www.s3byq.cloud/',
         bucket: process.env.MINIO_BUCKET || 'dev-team',
         endPoint: process.env.MINIO_ENDPOINT || 'www.s3byq.cloud',
+        region: process.env.MINIO_REGION || 'ap-northeast-1',
         port: parseInt(process.env.MINIO_PORT || '9001', 10),
         useSSL: process.env.MINIO_SSL === 'true',
         accessKey: process.env.MINIO_ACCESS || '',
