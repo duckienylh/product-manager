@@ -100,7 +100,7 @@ const product_resolver: IResolvers = {
                     if (image) {
                         const { createReadStream, filename, mimetype } = await image.file;
                         const fileStream = createReadStream();
-                        const filePath = `image_product/${newProduct.id}/${filename}`;
+                        const filePath = `image_product/${filename}`;
                         await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
                         newProduct.image = filePath;
                         await newProduct.save({ transaction: t });
@@ -137,7 +137,7 @@ const product_resolver: IResolvers = {
                     if (image) {
                         const { createReadStream, filename, mimetype } = await image.file;
                         const fileStream = createReadStream();
-                        const filePath = `image_product/${id}/${filename}`;
+                        const filePath = `image_product/${filename}`;
                         await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
                         product.image = filePath;
                     }
@@ -262,6 +262,7 @@ const product_resolver: IResolvers = {
                                 inventory: productData['Tồn kho'] ?? undefined,
                                 quantity: productData['Số lượng'] ?? undefined,
                                 age: productData['Tuổi'] ?? undefined,
+                                image: productData['Hình ảnh'] ?? undefined,
                                 description: productData['Mô tả'] ?? undefined,
                             };
                             const newProduct = pmDb.products.create(createProductAttribute, { transaction: t });

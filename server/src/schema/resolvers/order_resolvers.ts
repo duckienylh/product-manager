@@ -40,6 +40,8 @@ const order_resolver: IResolvers = {
         totalMoney: async (parent) => await parent.getTotalMoney(),
 
         orderItemList: async (parent) => parent.orderItems ?? (await parent.getOrderItems()),
+
+        deliverOrderList: async (parent) => parent.deliverOrders ?? (await parent.getDeliverOrders()),
     },
 
     OrderItem: {

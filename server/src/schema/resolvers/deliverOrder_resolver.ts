@@ -1,4 +1,4 @@
-import { Transaction } from 'sequelize';
+import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
 import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
@@ -11,8 +11,127 @@ import { notificationsCreationAttributes } from '../../db_models/mysql/notificat
 import { NotificationEvent } from '../../lib/classes/PubSubService';
 import { userNotificationsCreationAttributes } from '../../db_models/mysql/userNotifications';
 import { pubsubService } from '../../lib/classes';
+import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 
 const deliverOrder_resolver: IResolvers = {
+    DeliverOrderEdge: rdbEdgeResolver,
+
+    DeliverOrderConnection: rdbConnectionResolver,
+
+    DeliverOrder: {
+        order: async (parent) => parent.order ?? (await parent.getOrder()),
+
+        customer: async (parent) => parent.customer ?? (await parent.getCustomer()),
+
+        driver: async (parent) => parent.driver ?? (await parent.getDriver()),
+    },
+    Query: {
+        listAllDeliverOrder: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+
+            const { driverId, queryString, saleId, status, args } = input;
+            const { limit, offset, limitForLast } = getRDBPaginationParams(args);
+            const commonOption: FindAndCountOptions = {
+                include: [
+                    {
+                        model: pmDb.orders,
+                        as: 'order',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.user,
+                        as: 'driver',
+                        required: false,
+                    },
+                ],
+                order: [['id', 'DESC']],
+            };
+
+            const limitOption: FindAndCountOptions = {
+                ...commonOption,
+                limit,
+                offset,
+            };
+
+            const whereOpt: WhereOptions<pmDb.deliverOrder> = {};
+            const whereOptFilter: WhereOptions<pmDb.deliverOrder> = {};
+
+            if (driverId) {
+                whereOpt['$deliverOrder.driverId$'] = {
+                    [Op.eq]: driverId,
+                };
+            }
+
+            if (queryString) {
+                whereOptFilter['$customer.name$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                whereOptFilter['$order.invoiceNo$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+                whereOptFilter['$customer.phoneNumber$'] = {
+                    [Op.like]: `%${queryString.replace(/([\\%_])/, '\\$1')}%`,
+                };
+            }
+
+            if (saleId) {
+                whereOpt['$order.saleId$'] = {
+                    [Op.eq]: saleId,
+                };
+            }
+
+            if (status) {
+                if (status === StatusOrder.done || status === StatusOrder.creatNew) {
+                    whereOpt['$order.status$'] = {
+                        [Op.eq]: status,
+                    };
+                } else {
+                    whereOpt['$order.status$'] = {
+                        [Op.and]: [{ [Op.not]: StatusOrder.done }, { [Op.not]: StatusOrder.creatNew }],
+                    };
+                }
+            }
+
+            limitOption.where = !queryString
+                ? whereOpt
+                : {
+                      [Op.and]: whereOpt,
+                      [Op.or]: whereOptFilter,
+                  };
+
+            const result = await pmDb.deliverOrder.findAndCountAll(limitOption);
+            const deliverOrderConnection = convertRDBRowsToConnection(result, offset, limitForLast);
+
+            const whereOptNoStatus: WhereOptions<pmDb.deliverOrder> = whereOpt;
+            if (status) delete whereOptNoStatus['$order.status$'];
+
+            commonOption.where = !queryString
+                ? whereOptNoStatus
+                : {
+                      [Op.and]: whereOptNoStatus,
+                      [Op.or]: whereOptFilter,
+                  };
+
+            const allDeliverOrder = await pmDb.deliverOrder.findAll(commonOption);
+            const allOrderCounter = allDeliverOrder.length;
+            const inProcessingCounter = allDeliverOrder.filter(
+                (e) => e.order.status !== StatusOrder.creatNew && e.order.status !== StatusOrder.done
+            ).length;
+            const orderCompleted = allDeliverOrder.filter((e) => e.order.status === StatusOrder.done).length;
+
+            return {
+                deliverOrder: deliverOrderConnection,
+                allOrderCounter,
+                inProcessingCounter,
+                doneOrderCounter: orderCompleted,
+            };
+        },
+    },
     Mutation: {
         createDeliverOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);

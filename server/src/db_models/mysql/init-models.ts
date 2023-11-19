@@ -5,6 +5,8 @@ import { customers as _customers } from './customers';
 import type { customersAttributes, customersCreationAttributes } from './customers';
 import { deliverOrder as _deliverOrder } from './deliverOrder';
 import type { deliverOrderAttributes, deliverOrderCreationAttributes } from './deliverOrder';
+import { imageOfProduct as _imageOfProduct } from './imageOfProduct';
+import type { imageOfProductAttributes, imageOfProductCreationAttributes } from './imageOfProduct';
 import { notifications as _notifications } from './notifications';
 import type { notificationsAttributes, notificationsCreationAttributes } from './notifications';
 import { orderItem as _orderItem } from './orderItem';
@@ -28,6 +30,7 @@ export {
   _categories as categories,
   _customers as customers,
   _deliverOrder as deliverOrder,
+  _imageOfProduct as imageOfProduct,
   _notifications as notifications,
   _orderItem as orderItem,
   _orderProcess as orderProcess,
@@ -46,6 +49,8 @@ export type {
   customersCreationAttributes,
   deliverOrderAttributes,
   deliverOrderCreationAttributes,
+  imageOfProductAttributes,
+  imageOfProductCreationAttributes,
   notificationsAttributes,
   notificationsCreationAttributes,
   orderItemAttributes,
@@ -70,6 +75,7 @@ export function initModels(sequelize: Sequelize) {
   const categories = _categories.initModel(sequelize);
   const customers = _customers.initModel(sequelize);
   const deliverOrder = _deliverOrder.initModel(sequelize);
+  const imageOfProduct = _imageOfProduct.initModel(sequelize);
   const notifications = _notifications.initModel(sequelize);
   const orderItem = _orderItem.initModel(sequelize);
   const orderProcess = _orderProcess.initModel(sequelize);
@@ -104,6 +110,8 @@ export function initModels(sequelize: Sequelize) {
   products.hasMany(orderItem, { as: 'orderItems', foreignKey: 'productId'});
   deliverOrder.belongsTo(user, { as: 'driver', foreignKey: 'driverId'});
   user.hasMany(deliverOrder, { as: 'deliverOrders', foreignKey: 'driverId'});
+  imageOfProduct.belongsTo(user, { as: 'uploadBy_user', foreignKey: 'uploadBy'});
+  user.hasMany(imageOfProduct, { as: 'imageOfProducts', foreignKey: 'uploadBy'});
   orderProcess.belongsTo(user, { as: 'user', foreignKey: 'userId'});
   user.hasMany(orderProcess, { as: 'orderProcesses', foreignKey: 'userId'});
   orders.belongsTo(user, { as: 'sale', foreignKey: 'saleId'});
@@ -117,6 +125,7 @@ export function initModels(sequelize: Sequelize) {
     categories,
     customers,
     deliverOrder,
+    imageOfProduct,
     notifications,
     orderItem,
     orderProcess,

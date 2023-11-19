@@ -4,6 +4,7 @@ import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
 import { OrderEdge, OrderConnection } from '../db_models/mysql/orders';
+import { DeliverOrderEdge, DeliverOrderConnection } from '../db_models/mysql/deliverOrder';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -155,6 +156,19 @@ export type IDeliverOrder = {
   updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
+export type IDeliverOrderConnection = {
+  __typename?: 'DeliverOrderConnection';
+  edges?: Maybe<Array<Maybe<IDeliverOrderEdge>>>;
+  pageInfo: IPageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type IDeliverOrderEdge = {
+  __typename?: 'DeliverOrderEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<IDeliverOrder>;
+};
+
 export type IImportExcelProductInput = {
   fileExcelProducts: Scalars['Upload']['input'];
 };
@@ -162,6 +176,22 @@ export type IImportExcelProductInput = {
 export type IListAllCustomerInput = {
   args?: InputMaybe<IPaginationInput>;
   searchQuery?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IListAllDeliverOrderInput = {
+  args?: InputMaybe<IPaginationInput>;
+  driverId?: InputMaybe<Scalars['Int']['input']>;
+  queryString?: InputMaybe<Scalars['String']['input']>;
+  saleId?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IListAllDeliverOrderResponse = {
+  __typename?: 'ListAllDeliverOrderResponse';
+  allOrderCounter: Scalars['Int']['output'];
+  deliverOrder?: Maybe<IDeliverOrderConnection>;
+  doneOrderCounter: Scalars['Int']['output'];
+  inProcessingCounter: Scalars['Int']['output'];
 };
 
 export type IListAllOrderInput = {
@@ -326,6 +356,7 @@ export type IOrder = {
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer: ICustomer;
   deliverAddress?: Maybe<Scalars['String']['output']>;
+  deliverOrderList?: Maybe<Array<Maybe<IDeliverOrder>>>;
   discount?: Maybe<Scalars['Float']['output']>;
   freightPrice?: Maybe<Scalars['Float']['output']>;
   id: Scalars['Int']['output'];
@@ -430,6 +461,7 @@ export type IQuery = {
   getUserById: IUser;
   listAllCategory: Array<Maybe<ICategory>>;
   listAllCustomer: ICustomerConnection;
+  listAllDeliverOrder: IListAllDeliverOrderResponse;
   listAllOrder: IListAllOrderResponse;
   listAllProduct: IProductConnection;
   listInformationOrder: Array<Maybe<IOrderProcess>>;
@@ -473,6 +505,11 @@ export type IQueryGetUserByIdArgs = {
 
 export type IQueryListAllCustomerArgs = {
   input: IListAllCustomerInput;
+};
+
+
+export type IQueryListAllDeliverOrderArgs = {
+  input: IListAllDeliverOrderInput;
 };
 
 
@@ -802,11 +839,15 @@ export type IResolversTypes = {
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
   DeliverOrder: ResolverTypeWrapper<deliverOrder>;
+  DeliverOrderConnection: ResolverTypeWrapper<DeliverOrderConnection>;
+  DeliverOrderEdge: ResolverTypeWrapper<DeliverOrderEdge>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ImportExcelProductInput: IImportExcelProductInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   ListAllCustomerInput: IListAllCustomerInput;
+  ListAllDeliverOrderInput: IListAllDeliverOrderInput;
+  ListAllDeliverOrderResponse: ResolverTypeWrapper<Omit<IListAllDeliverOrderResponse, 'deliverOrder'> & { deliverOrder?: Maybe<IResolversTypes['DeliverOrderConnection']> }>;
   ListAllOrderInput: IListAllOrderInput;
   ListAllOrderResponse: ResolverTypeWrapper<Omit<IListAllOrderResponse, 'orders'> & { orders?: Maybe<IResolversTypes['OrderConnection']> }>;
   ListAllProductInput: IListAllProductInput;
@@ -874,11 +915,15 @@ export type IResolversParentTypes = {
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
   DeliverOrder: deliverOrder;
+  DeliverOrderConnection: DeliverOrderConnection;
+  DeliverOrderEdge: DeliverOrderEdge;
   Float: Scalars['Float']['output'];
   ImportExcelProductInput: IImportExcelProductInput;
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
   ListAllCustomerInput: IListAllCustomerInput;
+  ListAllDeliverOrderInput: IListAllDeliverOrderInput;
+  ListAllDeliverOrderResponse: Omit<IListAllDeliverOrderResponse, 'deliverOrder'> & { deliverOrder?: Maybe<IResolversParentTypes['DeliverOrderConnection']> };
   ListAllOrderInput: IListAllOrderInput;
   ListAllOrderResponse: Omit<IListAllOrderResponse, 'orders'> & { orders?: Maybe<IResolversParentTypes['OrderConnection']> };
   ListAllProductInput: IListAllProductInput;
@@ -982,9 +1027,30 @@ export type IDeliverOrderResolvers<ContextType = any, ParentType extends IResolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type IDeliverOrderConnectionResolvers<ContextType = any, ParentType extends IResolversParentTypes['DeliverOrderConnection'] = IResolversParentTypes['DeliverOrderConnection']> = {
+  edges?: Resolver<Maybe<Array<Maybe<IResolversTypes['DeliverOrderEdge']>>>, ParentType, ContextType>;
+  pageInfo?: Resolver<IResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IDeliverOrderEdgeResolvers<ContextType = any, ParentType extends IResolversParentTypes['DeliverOrderEdge'] = IResolversParentTypes['DeliverOrderEdge']> = {
+  cursor?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<IResolversTypes['DeliverOrder']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['JSON'], any> {
   name: 'JSON';
 }
+
+export type IListAllDeliverOrderResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['ListAllDeliverOrderResponse'] = IResolversParentTypes['ListAllDeliverOrderResponse']> = {
+  allOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  deliverOrder?: Resolver<Maybe<IResolversTypes['DeliverOrderConnection']>, ParentType, ContextType>;
+  doneOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  inProcessingCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type IListAllOrderResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['ListAllOrderResponse'] = IResolversParentTypes['ListAllOrderResponse']> = {
   allOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
@@ -1043,6 +1109,7 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType>;
   deliverAddress?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  deliverOrderList?: Resolver<Maybe<Array<Maybe<IResolversTypes['DeliverOrder']>>>, ParentType, ContextType>;
   discount?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   freightPrice?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
@@ -1140,6 +1207,7 @@ export type IQueryResolvers<ContextType = any, ParentType extends IResolversPare
   getUserById?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IQueryGetUserByIdArgs, 'userId'>>;
   listAllCategory?: Resolver<Array<Maybe<IResolversTypes['Category']>>, ParentType, ContextType>;
   listAllCustomer?: Resolver<IResolversTypes['CustomerConnection'], ParentType, ContextType, RequireFields<IQueryListAllCustomerArgs, 'input'>>;
+  listAllDeliverOrder?: Resolver<IResolversTypes['ListAllDeliverOrderResponse'], ParentType, ContextType, RequireFields<IQueryListAllDeliverOrderArgs, 'input'>>;
   listAllOrder?: Resolver<IResolversTypes['ListAllOrderResponse'], ParentType, ContextType, RequireFields<IQueryListAllOrderArgs, 'input'>>;
   listAllProduct?: Resolver<IResolversTypes['ProductConnection'], ParentType, ContextType, RequireFields<IQueryListAllProductArgs, 'input'>>;
   listInformationOrder?: Resolver<Array<Maybe<IResolversTypes['OrderProcess']>>, ParentType, ContextType, RequireFields<IQueryListInformationOrderArgs, 'orderId'>>;
@@ -1215,7 +1283,10 @@ export type IResolvers<ContextType = any> = {
   CustomerEdge?: ICustomerEdgeResolvers<ContextType>;
   Date?: GraphQLScalarType;
   DeliverOrder?: IDeliverOrderResolvers<ContextType>;
+  DeliverOrderConnection?: IDeliverOrderConnectionResolvers<ContextType>;
+  DeliverOrderEdge?: IDeliverOrderEdgeResolvers<ContextType>;
   JSON?: GraphQLScalarType;
+  ListAllDeliverOrderResponse?: IListAllDeliverOrderResponseResolvers<ContextType>;
   ListAllOrderResponse?: IListAllOrderResponseResolvers<ContextType>;
   Mutation?: IMutationResolvers<ContextType>;
   Notification?: INotificationResolvers<ContextType>;

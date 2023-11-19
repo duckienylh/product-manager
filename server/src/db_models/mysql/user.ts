@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { deliverOrder, deliverOrderId } from './deliverOrder';
+import type { imageOfProduct, imageOfProductId } from './imageOfProduct';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { orders, ordersId } from './orders';
 import type { userNotifications, userNotificationsId } from './userNotifications';
@@ -83,6 +84,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasDeliverOrders!: Sequelize.HasManyHasAssociationsMixin<deliverOrder, deliverOrderId>;
 
     countDeliverOrders!: Sequelize.HasManyCountAssociationsMixin;
+
+    // user hasMany imageOfProduct via uploadBy
+    imageOfProducts!: imageOfProduct[];
+
+    getImageOfProducts!: Sequelize.HasManyGetAssociationsMixin<imageOfProduct>;
+
+    setImageOfProducts!: Sequelize.HasManySetAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    addImageOfProduct!: Sequelize.HasManyAddAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    addImageOfProducts!: Sequelize.HasManyAddAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    createImageOfProduct!: Sequelize.HasManyCreateAssociationMixin<imageOfProduct>;
+
+    removeImageOfProduct!: Sequelize.HasManyRemoveAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    removeImageOfProducts!: Sequelize.HasManyRemoveAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    hasImageOfProduct!: Sequelize.HasManyHasAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    hasImageOfProducts!: Sequelize.HasManyHasAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    countImageOfProducts!: Sequelize.HasManyCountAssociationsMixin;
 
     // user hasMany orderProcess via userId
     orderProcesses!: orderProcess[];
