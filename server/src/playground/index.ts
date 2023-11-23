@@ -93,6 +93,8 @@ const adminReportRevenueByMonth = importGraphqlString('./queries/user/adminRepor
 
 const listAllDeliverOrder = importGraphqlString('./queries/deliverOrder/listAllDeliverOrder.graphql');
 
+const updateDeliverOrder = importGraphqlString('./mutations/deliverOrder/updateDeliverOrder.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -326,6 +328,13 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: listAllDeliverOrder,
             headers: userAuth,
             variables: prettifyJsonString(variables.listAllDeliverOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật Lệnh xuất hàng',
+            query: updateDeliverOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateDeliverOrder),
         },
     ];
 };

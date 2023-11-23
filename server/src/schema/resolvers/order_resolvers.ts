@@ -331,7 +331,6 @@ const order_resolver: IResolvers = {
 
             if (customerId) order.customerId = customerId;
             if (invoiceNo) order.invoiceNo = invoiceNo;
-
             if (VAT) order.VAT = VAT;
             if (discount) order.discount = discount;
             if (freightPrice) order.freightPrice = freightPrice;

@@ -180,6 +180,7 @@ export type IListAllCustomerInput = {
 
 export type IListAllDeliverOrderInput = {
   args?: InputMaybe<IPaginationInput>;
+  createAt?: InputMaybe<IFilterDate>;
   driverId?: InputMaybe<Scalars['Int']['input']>;
   queryString?: InputMaybe<Scalars['String']['input']>;
   saleId?: InputMaybe<Scalars['Int']['input']>;
@@ -189,6 +190,7 @@ export type IListAllDeliverOrderInput = {
 export type IListAllDeliverOrderResponse = {
   __typename?: 'ListAllDeliverOrderResponse';
   allOrderCounter: Scalars['Int']['output'];
+  createExportOrderCounter: Scalars['Int']['output'];
   deliverOrder?: Maybe<IDeliverOrderConnection>;
   doneOrderCounter: Scalars['Int']['output'];
   inProcessingCounter: Scalars['Int']['output'];
@@ -1046,6 +1048,7 @@ export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTyp
 
 export type IListAllDeliverOrderResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['ListAllDeliverOrderResponse'] = IResolversParentTypes['ListAllDeliverOrderResponse']> = {
   allOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  createExportOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   deliverOrder?: Resolver<Maybe<IResolversTypes['DeliverOrderConnection']>, ParentType, ContextType>;
   doneOrderCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   inProcessingCounter?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;

@@ -12,6 +12,7 @@ import { NotificationEvent } from '../../lib/classes/PubSubService';
 import { userNotificationsCreationAttributes } from '../../db_models/mysql/userNotifications';
 import { pubsubService } from '../../lib/classes';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
+import { getNextNDayFromDate } from '../../lib/utils/formatTime';
 
 const deliverOrder_resolver: IResolvers = {
     DeliverOrderEdge: rdbEdgeResolver,
@@ -29,7 +30,7 @@ const deliverOrder_resolver: IResolvers = {
         listAllDeliverOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
 
-            const { driverId, queryString, saleId, status, args } = input;
+            const { driverId, queryString, saleId, status, createAt, args } = input;
             const { limit, offset, limitForLast } = getRDBPaginationParams(args);
             const commonOption: FindAndCountOptions = {
                 include: [
@@ -85,14 +86,20 @@ const deliverOrder_resolver: IResolvers = {
                 };
             }
 
+            if (createAt) {
+                whereOpt['$orders.createdAt$'] = {
+                    [Op.between]: [createAt.startAt, getNextNDayFromDate(createAt.endAt, 1)],
+                };
+            }
+
             if (status) {
-                if (status === StatusOrder.done || status === StatusOrder.creatNew) {
+                if (status === StatusOrder.done || status === StatusOrder.createExportOrder) {
                     whereOpt['$order.status$'] = {
                         [Op.eq]: status,
                     };
                 } else {
                     whereOpt['$order.status$'] = {
-                        [Op.and]: [{ [Op.not]: StatusOrder.done }, { [Op.not]: StatusOrder.creatNew }],
+                        [Op.and]: [{ [Op.not]: StatusOrder.done }, { [Op.not]: StatusOrder.createExportOrder }],
                     };
                 }
             }
@@ -108,6 +115,7 @@ const deliverOrder_resolver: IResolvers = {
             const deliverOrderConnection = convertRDBRowsToConnection(result, offset, limitForLast);
 
             const whereOptNoStatus: WhereOptions<pmDb.deliverOrder> = whereOpt;
+
             if (status) delete whereOptNoStatus['$order.status$'];
 
             commonOption.where = !queryString
@@ -119,14 +127,17 @@ const deliverOrder_resolver: IResolvers = {
 
             const allDeliverOrder = await pmDb.deliverOrder.findAll(commonOption);
             const allOrderCounter = allDeliverOrder.length;
+            const createExportOrderCounter = allDeliverOrder.filter((e) => e.order.status === StatusOrder.createExportOrder).length;
             const inProcessingCounter = allDeliverOrder.filter(
-                (e) => e.order.status !== StatusOrder.creatNew && e.order.status !== StatusOrder.done
+                (e) =>
+                    e.order.status !== StatusOrder.creatNew && e.order.status !== StatusOrder.done && e.order.status !== StatusOrder.createExportOrder
             ).length;
             const orderCompleted = allDeliverOrder.filter((e) => e.order.status === StatusOrder.done).length;
 
             return {
                 deliverOrder: deliverOrderConnection,
                 allOrderCounter,
+                createExportOrderCounter,
                 inProcessingCounter,
                 doneOrderCounter: orderCompleted,
             };
@@ -212,6 +223,10 @@ const deliverOrder_resolver: IResolvers = {
                         message: `Đơn của khách: ${order.customer.name ?? order.customer.phoneNumber} đã được chốt và tạo phiếu xuất hàng`,
                         order,
                     });
+
+                    order.status = StatusOrder.createExportOrder;
+
+                    await order.save({ transaction: t });
 
                     return await pmDb.deliverOrder.create(deliverOrderCreate, { transaction: t });
                 } catch (error) {

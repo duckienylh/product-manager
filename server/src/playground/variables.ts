@@ -198,4 +198,12 @@ export const variables = {
             driverId: 5,
         },
     },
+    updateDeliverOrder: {
+        input: {
+            id: 1,
+            customerId: 1,
+            driverId: 5,
+            receivingNote: 'hehe',
+        },
+    },
 };

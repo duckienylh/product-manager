@@ -23,6 +23,7 @@ type DeliverOrder {
 type ListAllDeliverOrderResponse{
     deliverOrder: DeliverOrderConnection
     allOrderCounter: Int!
+    createExportOrderCounter: Int!
     inProcessingCounter: Int!
     doneOrderCounter: Int!
 }
@@ -63,5 +64,6 @@ input ListAllDeliverOrderInput{
     saleId: Int
     queryString: String
     status: String
+    createAt: filterDate
     args: PaginationInput
 }
