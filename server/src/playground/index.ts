@@ -95,6 +95,10 @@ const listAllDeliverOrder = importGraphqlString('./queries/deliverOrder/listAllD
 
 const updateDeliverOrder = importGraphqlString('./mutations/deliverOrder/updateDeliverOrder.graphql');
 
+const updateStatusUserNotification = importGraphqlString('./mutations/userNotification/updateStatusUserNotification.graphql');
+
+const listArrayUserNotification = importGraphqlString('./queries/userNotification/listArrayUserNotification.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -335,6 +339,20 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: updateDeliverOrder,
             headers: userAuth,
             variables: prettifyJsonString(variables.updateDeliverOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật trạng thái thông báo người dùng',
+            query: updateStatusUserNotification,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateStatusUserNotification),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách thông báo người dùng',
+            query: listArrayUserNotification,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.listArrayUserNotification),
         },
     ];
 };

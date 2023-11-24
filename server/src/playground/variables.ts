@@ -206,4 +206,16 @@ export const variables = {
             receivingNote: 'hehe',
         },
     },
+    updateStatusUserNotification: {
+        input: {
+            id: [],
+            isRead: true,
+        },
+    },
+    listArrayUserNotification: {
+        input: {
+            userId: 1,
+            event: '',
+        },
+    },
 };

@@ -28,3 +28,4 @@ generates:
         DeliverOrder: ../db_models/mysql/init-models#deliverOrder
         DeliverOrderEdge: ../db_models/mysql/deliverOrder#DeliverOrderEdge
         DeliverOrderConnection: ../db_models/mysql/deliverOrder#DeliverOrderConnection
+        UserNotification: ../db_models/mysql/init-models#userNotifications
