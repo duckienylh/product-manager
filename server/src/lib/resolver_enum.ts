@@ -15,12 +15,8 @@ export const iRoleToNumber = (role: IRole) => {
             return RoleList.accountant;
         case IRole.Sales:
             return RoleList.sales;
-        case IRole.TransporterManager:
-            return RoleList.transporterManager;
         case IRole.Driver:
             return RoleList.driver;
-        case IRole.AssistantDriver:
-            return RoleList.assistantDriver;
         default:
             throw new InValidRoleError();
     }
@@ -38,12 +34,8 @@ export const roleNumberToIRole = (roleNumber: RoleList) => {
             return IRole.Accountant;
         case RoleList.sales:
             return IRole.Sales;
-        case RoleList.transporterManager:
-            return IRole.TransporterManager;
         case RoleList.driver:
             return IRole.Driver;
-        case RoleList.assistantDriver:
-            return IRole.AssistantDriver;
         default:
             throw new InValidRoleError();
     }
@@ -65,6 +57,8 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.NewDeliverOrder;
         case INotificationEvent.UpdatedDeliverOrder:
             return NotificationEvent.UpdatedDeliverOrder;
+        case INotificationEvent.NewPayment:
+            return NotificationEvent.NewPayment;
     }
 };
 

@@ -33,6 +33,8 @@ type Order {
     deliverAddress: String
     orderItemList: [OrderItem]
     deliverOrderList: [DeliverOrder]
+    paymentList: [PaymentInfor]
+    remainingPaymentMoney: Float
     createdAt: Date
     updatedAt: Date
 }

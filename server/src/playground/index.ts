@@ -99,6 +99,12 @@ const updateStatusUserNotification = importGraphqlString('./mutations/userNotifi
 
 const listArrayUserNotification = importGraphqlString('./queries/userNotification/listArrayUserNotification.graphql');
 
+const createPaymentInfo = importGraphqlString('./mutations/paymentInfor/createPaymentInfo.graphql');
+
+const updatePaymentInfo = importGraphqlString('./mutations/paymentInfor/updatePaymentInfo.graphql');
+
+const deletePaymentInfo = importGraphqlString('./mutations/paymentInfor/deletePaymentInfo.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -353,6 +359,27 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: listArrayUserNotification,
             headers: userAuth,
             variables: prettifyJsonString(variables.listArrayUserNotification),
+        },
+        {
+            endpoint: path,
+            name: 'Tạo thanh toán cho đơn hàng',
+            query: createPaymentInfo,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createPaymentInfo),
+        },
+        {
+            endpoint: path,
+            name: 'Sửa thanh toán đơn hàng',
+            query: updatePaymentInfo,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updatePaymentInfo),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa thanh toán đơn hàng',
+            query: deletePaymentInfo,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.deletePaymentInfo),
         },
     ];
 };

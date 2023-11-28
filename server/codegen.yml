@@ -29,3 +29,4 @@ generates:
         DeliverOrderEdge: ../db_models/mysql/deliverOrder#DeliverOrderEdge
         DeliverOrderConnection: ../db_models/mysql/deliverOrder#DeliverOrderConnection
         UserNotification: ../db_models/mysql/init-models#userNotifications
+        PaymentInfor: ../db_models/mysql/init-models#paymentInfor

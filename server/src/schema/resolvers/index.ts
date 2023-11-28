@@ -7,5 +7,6 @@ import orderProcess from './orderProcess_resolver';
 import deliverOrder from './deliverOrder_resolver';
 import userNotification from './userNotification_resolvers';
 import notification from './notification_resolvers';
+import paymentInfor from './paymentInfor_resolvers';
 
-export default [user, customer, category, product, order, orderProcess, deliverOrder, userNotification, notification];
+export default [user, customer, category, product, order, orderProcess, deliverOrder, userNotification, notification, paymentInfor];
