@@ -4,7 +4,7 @@ const notification_resolver: IResolvers = {
     Notification: {
         id: (parent) => parent.id,
 
-        Order: async (parent) => (parent.order ? await parent.getOrder() : null),
+        // order: async (parent) => (parent.order ? await parent.getOrder() : null),
     },
 };
 

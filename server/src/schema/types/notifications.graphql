@@ -2,7 +2,7 @@ type Notification {
     id: Int!
     event: NotificationEvent!
     content: String!
-    Order: Order
+    order: Order
     createdAt: Date!
     updatedAt: Date!
 }
@@ -12,4 +12,6 @@ enum NotificationEvent {
     NewMessage
     NewOrder
     UpdateOrder
+    NewDeliverOrder
+    UpdatedDeliverOrder
 }

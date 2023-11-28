@@ -26,7 +26,7 @@ const userNotification_resolver: IResolvers = {
                     {
                         model: pmDb.notifications,
                         as: 'notification',
-                        required: true,
+                        required: false,
                         include: [
                             {
                                 model: pmDb.orders,
@@ -36,7 +36,7 @@ const userNotification_resolver: IResolvers = {
                         ],
                     },
                 ],
-                // distinct: true,
+                distinct: true,
                 order: [['id', 'DESC']],
             };
 
@@ -62,6 +62,7 @@ const userNotification_resolver: IResolvers = {
                 }
                 return uniqueList;
             }, []);
+            // return allUserNotification;
         },
     },
     Mutation: {

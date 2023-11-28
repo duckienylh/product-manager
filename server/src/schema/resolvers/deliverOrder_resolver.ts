@@ -198,7 +198,7 @@ const deliverOrder_resolver: IResolvers = {
 
                     const notificationAttribute: notificationsCreationAttributes = {
                         orderId: order.id,
-                        event: NotificationEvent.NewOrder,
+                        event: NotificationEvent.NewDeliverOrder,
                         content: `Đơn của khách: ${order.customer.name ?? order.customer.phoneNumber} đã được chốt và tạo phiếu xuất hàng`,
                     };
 
@@ -219,7 +219,7 @@ const deliverOrder_resolver: IResolvers = {
                     });
 
                     if (userNotificationPromise.length > 0) await Promise.all(userNotificationPromise);
-                    pubsubService.publishToUsers(userIds, NotificationEvent.NewOrder, {
+                    pubsubService.publishToUsers(userIds, NotificationEvent.NewDeliverOrder, {
                         message: `Đơn của khách: ${order.customer.name ?? order.customer.phoneNumber} đã được chốt và tạo phiếu xuất hàng`,
                         order,
                     });
@@ -264,10 +264,7 @@ const deliverOrder_resolver: IResolvers = {
             });
 
             if (deliveryDate) deliverOrder.deliveryDate = deliveryDate;
-            if (driverId) {
-                await pmDb.user.findByPk(driverId, { rejectOnEmpty: new UserNotFoundError('Lái xe này không tồn tại') });
-                deliverOrder.driverId = driverId;
-            }
+
             if (receivingNote) deliverOrder.receivingNote = receivingNote;
             if (description) deliverOrder.description = description;
             if (customerId) {
@@ -283,19 +280,31 @@ const deliverOrder_resolver: IResolvers = {
                 try {
                     const notificationForUsers = await pmDb.user.findAll({
                         where: {
-                            role: [RoleList.sales, RoleList.admin, RoleList.director, RoleList.accountant],
+                            [Op.or]: {
+                                role: [RoleList.sales, RoleList.admin, RoleList.director, RoleList.accountant, RoleList.manager],
+                            },
                         },
                         attributes: ['id'],
                     });
 
                     const userIds = notificationForUsers.map((e) => e.id);
 
+                    let message = `Đơn của khách: ${deliverOrder.order.customer.name ?? deliverOrder.order.customer.phoneNumber} vừa được cập nhật`;
+
+                    if (driverId) {
+                        const driver = await pmDb.user.findByPk(driverId, { rejectOnEmpty: new UserNotFoundError('Lái xe này không tồn tại') });
+                        deliverOrder.driverId = driverId;
+
+                        userIds.push(driverId);
+                        message = `Đơn của khách: ${
+                            deliverOrder.order.customer.name ?? deliverOrder.order.customer.phoneNumber
+                        } vừa được giao cho lái xe ${driver.fullName}`;
+                    }
+
                     const notificationAttribute: notificationsCreationAttributes = {
                         orderId: deliverOrder.orderId,
-                        event: NotificationEvent.NewOrder,
-                        content: `Đơn của khách: ${
-                            deliverOrder.order.customer.name ?? deliverOrder.order.customer.phoneNumber
-                        } đã được chốt và tạo phiếu xuất hàng`,
+                        event: NotificationEvent.UpdatedDeliverOrder,
+                        content: message,
                     };
 
                     const notification: pmDb.notifications = await pmDb.notifications.create(notificationAttribute, { transaction: t });
@@ -315,10 +324,8 @@ const deliverOrder_resolver: IResolvers = {
                     });
 
                     if (userNotificationPromise.length > 0) await Promise.all(userNotificationPromise);
-                    pubsubService.publishToUsers(userIds, NotificationEvent.NewOrder, {
-                        message: `Đơn của khách: ${
-                            deliverOrder.order.customer.name ?? deliverOrder.order.customer.phoneNumber
-                        } đã được chốt và tạo phiếu xuất hàng`,
+                    pubsubService.publishToUsers(userIds, NotificationEvent.UpdatedDeliverOrder, {
+                        message,
                         order: deliverOrder.order,
                     });
 

@@ -342,19 +342,21 @@ export type IMutationUpdateUserArgs = {
 
 export type INotification = {
   __typename?: 'Notification';
-  Order?: Maybe<IOrder>;
   content: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   event: INotificationEvent;
   id: Scalars['Int']['output'];
+  order?: Maybe<IOrder>;
   updatedAt: Scalars['Date']['output'];
 };
 
 export enum INotificationEvent {
   Common = 'Common',
+  NewDeliverOrder = 'NewDeliverOrder',
   NewMessage = 'NewMessage',
   NewOrder = 'NewOrder',
-  UpdateOrder = 'UpdateOrder'
+  UpdateOrder = 'UpdateOrder',
+  UpdatedDeliverOrder = 'UpdatedDeliverOrder'
 }
 
 export type INotificationResponse = {
@@ -1131,11 +1133,11 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
 };
 
 export type INotificationResolvers<ContextType = any, ParentType extends IResolversParentTypes['Notification'] = IResolversParentTypes['Notification']> = {
-  Order?: Resolver<Maybe<IResolversTypes['Order']>, ParentType, ContextType>;
   content?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<IResolversTypes['Date'], ParentType, ContextType>;
   event?: Resolver<IResolversTypes['NotificationEvent'], ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  order?: Resolver<Maybe<IResolversTypes['Order']>, ParentType, ContextType>;
   updatedAt?: Resolver<IResolversTypes['Date'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
