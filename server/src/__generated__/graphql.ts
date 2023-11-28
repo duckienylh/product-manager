@@ -143,6 +143,11 @@ export type IDeleteCustomerInput = {
   ids: Array<Scalars['Int']['input']>;
 };
 
+export type IDeletePaymentInfoInput = {
+  deleteBy: Scalars['Int']['input'];
+  ids: Array<Scalars['Int']['input']>;
+};
+
 export type IDeleteProductInput = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -252,6 +257,7 @@ export type IMutation = {
   createProduct: IProduct;
   createUser: IUser;
   deleteCustomer: ISuccessResponse;
+  deletePaymentInfo: ISuccessResponse;
   deleteProduct: ISuccessResponse;
   deleteUser: ISuccessResponse;
   importExcelProduct: Array<Maybe<IProduct>>;
@@ -259,6 +265,7 @@ export type IMutation = {
   updateCustomer: ISuccessResponse;
   updateDeliverOrder: ISuccessResponse;
   updateOrder: ISuccessResponse;
+  updatePaymentInfo: ISuccessResponse;
   updateProduct: ISuccessResponse;
   updateStatusUserNotification: ISuccessResponse;
   updateUser: ISuccessResponse;
@@ -305,6 +312,11 @@ export type IMutationDeleteCustomerArgs = {
 };
 
 
+export type IMutationDeletePaymentInfoArgs = {
+  input: IDeletePaymentInfoInput;
+};
+
+
 export type IMutationDeleteProductArgs = {
   input: IDeleteProductInput;
 };
@@ -337,6 +349,11 @@ export type IMutationUpdateDeliverOrderArgs = {
 
 export type IMutationUpdateOrderArgs = {
   input: IUpdateOrderInput;
+};
+
+
+export type IMutationUpdatePaymentInfoArgs = {
+  input: IUpdatePaymentInfoInput;
 };
 
 
@@ -599,12 +616,10 @@ export type IQueryUsersArgs = {
 export enum IRole {
   Accountant = 'Accountant',
   Admin = 'Admin',
-  AssistantDriver = 'AssistantDriver',
   Director = 'Director',
   Driver = 'Driver',
   Manager = 'Manager',
-  Sales = 'Sales',
-  TransporterManager = 'TransporterManager'
+  Sales = 'Sales'
 }
 
 export type ISalesReportRevenueByMonthInput = {
@@ -697,6 +712,15 @@ export type IUpdateOrderInput = {
   product?: InputMaybe<Array<IUpdateProductOrderInput>>;
   saleId: Scalars['Int']['input'];
   status?: InputMaybe<IStatusOrder>;
+};
+
+export type IUpdatePaymentInfoInput = {
+  customerId?: InputMaybe<Scalars['Int']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  money?: InputMaybe<Scalars['Float']['input']>;
+  orderId?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['Int']['input'];
 };
 
 export type IUpdateProductInput = {
@@ -901,6 +925,7 @@ export type IResolversTypes = {
   CustomerEdge: ResolverTypeWrapper<CustomerEdge>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DeleteCustomerInput: IDeleteCustomerInput;
+  DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
   DeliverOrder: ResolverTypeWrapper<deliverOrder>;
@@ -947,6 +972,7 @@ export type IResolversTypes = {
   UpdateCustomerInput: IUpdateCustomerInput;
   UpdateDeliverOrderInput: IUpdateDeliverOrderInput;
   UpdateOrderInput: IUpdateOrderInput;
+  UpdatePaymentInfoInput: IUpdatePaymentInfoInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
   UpdateStatusUserNotificationInput: IUpdateStatusUserNotificationInput;
@@ -982,6 +1008,7 @@ export type IResolversParentTypes = {
   CustomerEdge: CustomerEdge;
   Date: Scalars['Date']['output'];
   DeleteCustomerInput: IDeleteCustomerInput;
+  DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
   DeliverOrder: deliverOrder;
@@ -1024,6 +1051,7 @@ export type IResolversParentTypes = {
   UpdateCustomerInput: IUpdateCustomerInput;
   UpdateDeliverOrderInput: IUpdateDeliverOrderInput;
   UpdateOrderInput: IUpdateOrderInput;
+  UpdatePaymentInfoInput: IUpdatePaymentInfoInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
   UpdateStatusUserNotificationInput: IUpdateStatusUserNotificationInput;
@@ -1153,6 +1181,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   createProduct?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IMutationCreateProductArgs, 'input'>>;
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
   deleteCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteCustomerArgs, 'input'>>;
+  deletePaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeletePaymentInfoArgs, 'input'>>;
   deleteProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteProductArgs, 'input'>>;
   deleteUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteUserArgs, 'input'>>;
   importExcelProduct?: Resolver<Array<Maybe<IResolversTypes['Product']>>, ParentType, ContextType, RequireFields<IMutationImportExcelProductArgs, 'input'>>;
@@ -1160,6 +1189,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   updateCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateCustomerArgs, 'input'>>;
   updateDeliverOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateDeliverOrderArgs, 'input'>>;
   updateOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateOrderArgs, 'input'>>;
+  updatePaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdatePaymentInfoArgs, 'input'>>;
   updateProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateProductArgs, 'input'>>;
   updateStatusUserNotification?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateStatusUserNotificationArgs, 'input'>>;
   updateUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateUserArgs, 'input'>>;

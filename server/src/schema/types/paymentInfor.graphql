@@ -1,9 +1,9 @@
 extend type Mutation {
     createPaymentInfo(input: CreatePaymentInfoInput!): SuccessResponse!
 
-#    updatePaymentInfo(input: UpdatePaymentInfoInput!): SuccessResponse!
-#
-#    deletePaymentInfo(input: DeletePaymentInfoInput!): SuccessResponse!
+    updatePaymentInfo(input: UpdatePaymentInfoInput!): SuccessResponse!
+
+    deletePaymentInfo(input: DeletePaymentInfoInput!): SuccessResponse!
 }
 
 type PaymentInfor {
@@ -22,4 +22,18 @@ input CreatePaymentInfoInput {
     orderId: Int!
     money: Float!
     description: String
+}
+
+input UpdatePaymentInfoInput {
+    id: Int!
+    userId: Int!
+    customerId: Int
+    orderId: Int
+    money: Float
+    description: String
+}
+
+input DeletePaymentInfoInput {
+    ids:[Int!]!
+    deleteBy: Int!
 }

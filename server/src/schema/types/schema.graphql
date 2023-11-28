@@ -97,6 +97,7 @@ type Mutation {
     createProduct(input: CreateProductInput!): Product!
     createUser(input: CreateUserInput!): User!
     deleteCustomer(input: DeleteCustomerInput!): SuccessResponse!
+    deletePaymentInfo(input: DeletePaymentInfoInput!): SuccessResponse!
     deleteProduct(input: DeleteProductInput!): SuccessResponse!
     deleteUser(input: DeleteUserInput!): SuccessResponse!
     importExcelProduct(input: ImportExcelProductInput!): [Product]!
@@ -104,6 +105,7 @@ type Mutation {
     updateCustomer(input: UpdateCustomerInput!): SuccessResponse!
     updateDeliverOrder(input: UpdateDeliverOrderInput!): SuccessResponse!
     updateOrder(input: UpdateOrderInput!): SuccessResponse!
+    updatePaymentInfo(input: UpdatePaymentInfoInput!): SuccessResponse!
     updateProduct(input: UpdateProductInput!): SuccessResponse!
     updateStatusUserNotification(input: UpdateStatusUserNotificationInput!): SuccessResponse!
     updateUser(input: UpdateUserInput!): SuccessResponse!
@@ -135,6 +137,7 @@ type Order {
     invoiceNo: String!
     orderItemList: [OrderItem]
     paymentList: [PaymentInfor]
+    remainingPaymentMoney: Float
     sale: User!
     status: StatusOrder!
     totalMoney: Float
@@ -308,12 +311,10 @@ enum NotificationEvent {
 enum Role {
     Accountant
     Admin
-    AssistantDriver
     Director
     Driver
     Manager
     Sales
-    TransporterManager
 }
 
 enum StatusOrder {
@@ -411,6 +412,11 @@ input CreateUserInput {
 }
 
 input DeleteCustomerInput {
+    ids: [Int!]!
+}
+
+input DeletePaymentInfoInput {
+    deleteBy: Int!
     ids: [Int!]!
 }
 
@@ -522,6 +528,15 @@ input UpdateOrderInput {
     product: [UpdateProductOrderInput!]
     saleId: Int!
     status: StatusOrder
+}
+
+input UpdatePaymentInfoInput {
+    customerId: Int
+    description: String
+    id: Int!
+    money: Float
+    orderId: Int
+    userId: Int!
 }
 
 input UpdateProductInput {

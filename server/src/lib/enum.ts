@@ -20,6 +20,6 @@ export enum StatusOrder {
     delivering = 'Đang giao hàng',
     successDelivery = 'Giao hàng thành công',
     paymentConfirmation = 'Xác nhận thanh toán và hồ sơ',
-    paid = 'Đã thanh toán',
+    paid = 'Đang thanh toán',
     done = 'Đơn hàng hoàn thành',
 }

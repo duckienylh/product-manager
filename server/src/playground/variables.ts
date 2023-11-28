@@ -227,4 +227,19 @@ export const variables = {
             description: 'thanh toan lan 1',
         },
     },
+    updatePaymentInfo: {
+        input: {
+            id: 1,
+            customerId: 1,
+            orderId: 1,
+            money: 100000,
+            description: 'thanh toan lan 1',
+        },
+    },
+    deletePaymentInfo: {
+        input: {
+            ids: [],
+            deleteBy: 1,
+        },
+    },
 };
