@@ -1,0 +1,26 @@
+extend type Query {
+    listArrayUserNotification(input: ListArrayUserNotificationInput!): [UserNotification]!
+}
+
+extend type Mutation {
+    updateStatusUserNotification(input: UpdateStatusUserNotificationInput!): SuccessResponse!
+}
+
+input ListArrayUserNotificationInput{
+    userId: Int!
+    event: NotificationEvent
+}
+
+input UpdateStatusUserNotificationInput {
+    userNotificationIds: [Int!]!
+    isRead: Boolean!
+}
+
+type UserNotification {
+    id:Int!
+    user: User!
+    notification: Notification!
+    isRead: Boolean!
+    createdAt: Date
+    updatedAt: Date
+}

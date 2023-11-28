@@ -192,4 +192,30 @@ export const variables = {
             endAt: '2023-12-1',
         },
     },
+    listAllDeliverOrder: {
+        input: {
+            queryString: '',
+            driverId: 5,
+        },
+    },
+    updateDeliverOrder: {
+        input: {
+            id: 1,
+            customerId: 1,
+            driverId: 5,
+            receivingNote: 'hehe',
+        },
+    },
+    updateStatusUserNotification: {
+        input: {
+            id: [],
+            isRead: true,
+        },
+    },
+    listArrayUserNotification: {
+        input: {
+            userId: 1,
+            event: '',
+        },
+    },
 };

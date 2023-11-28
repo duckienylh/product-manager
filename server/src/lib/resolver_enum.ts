@@ -61,6 +61,10 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.NewOrder;
         case INotificationEvent.UpdateOrder:
             return NotificationEvent.UpdateOrder;
+        case INotificationEvent.NewDeliverOrder:
+            return NotificationEvent.NewDeliverOrder;
+        case INotificationEvent.UpdatedDeliverOrder:
+            return NotificationEvent.UpdatedDeliverOrder;
     }
 };
 

@@ -40,6 +40,8 @@ const order_resolver: IResolvers = {
         totalMoney: async (parent) => await parent.getTotalMoney(),
 
         orderItemList: async (parent) => parent.orderItems ?? (await parent.getOrderItems()),
+
+        deliverOrderList: async (parent) => parent.deliverOrders ?? (await parent.getDeliverOrders()),
     },
 
     OrderItem: {
@@ -329,7 +331,6 @@ const order_resolver: IResolvers = {
 
             if (customerId) order.customerId = customerId;
             if (invoiceNo) order.invoiceNo = invoiceNo;
-
             if (VAT) order.VAT = VAT;
             if (discount) order.discount = discount;
             if (freightPrice) order.freightPrice = freightPrice;
@@ -441,8 +442,6 @@ const order_resolver: IResolvers = {
                                     rejectOnEmpty: new ProductNotFoundError(),
                                 });
 
-                                console.log('newOrderItem.product', updateInventoryProduct);
-
                                 // update inventory when add product into order
                                 if (updateInventoryProduct.inventory)
                                     updateInventoryProduct.inventory -= product[i].quantity ? Number(product[i].quantity) : 0;
@@ -478,7 +477,7 @@ const order_resolver: IResolvers = {
                     const notificationAttribute: notificationsCreationAttributes = {
                         orderId: id,
                         event: NotificationEvent.UpdateOrder,
-                        content: `Đơn hàng ${invoiceNo} vừa được cập nhật`,
+                        content: `Đơn hàng ${order.invoiceNo} vừa được cập nhật`,
                     };
 
                     const notification: pmDb.notifications = await pmDb.notifications.create(notificationAttribute, { transaction: t });
@@ -499,7 +498,7 @@ const order_resolver: IResolvers = {
 
                     if (userNotificationPromise.length > 0) await Promise.all(userNotificationPromise);
                     pubsubService.publishToUsers(userIds, NotificationEvent.UpdateOrder, {
-                        message: `Đơn hàng ${invoiceNo} vừa được cập nhật`,
+                        message: `Đơn hàng ${order.invoiceNo} vừa được cập nhật`,
                         order,
                     });
 

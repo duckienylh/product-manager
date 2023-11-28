@@ -9,6 +9,8 @@ export enum NotificationEvent {
     NewMessage = 'NewMessage',
     NewOrder = 'NewOrder',
     UpdateOrder = 'UpdateOrder',
+    NewDeliverOrder = 'NewDeliverOrder',
+    UpdatedDeliverOrder = 'UpdatedDeliverOrder',
 }
 
 export interface IPubSubConfig {

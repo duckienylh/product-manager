@@ -9,6 +9,7 @@ import * as notificationsType from './notifications.graphql';
 import * as orderItemType from './orderItem.graphql';
 import * as orderProcessType from './orderProcess.graphql';
 import * as deliverOderType from './deliverOrder.graphql';
+import * as userNotificationType from './userNotifications.graphql';
 
 export default [
     root,
@@ -21,4 +22,5 @@ export default [
     orderItemType,
     orderProcessType,
     deliverOderType,
+    userNotificationType,
 ];

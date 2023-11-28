@@ -91,6 +91,14 @@ const salesReportRevenueByMonth = importGraphqlString('./queries/user/salesRepor
 
 const adminReportRevenueByMonth = importGraphqlString('./queries/user/adminReportRevenueByMonth.graphql');
 
+const listAllDeliverOrder = importGraphqlString('./queries/deliverOrder/listAllDeliverOrder.graphql');
+
+const updateDeliverOrder = importGraphqlString('./mutations/deliverOrder/updateDeliverOrder.graphql');
+
+const updateStatusUserNotification = importGraphqlString('./mutations/userNotification/updateStatusUserNotification.graphql');
+
+const listArrayUserNotification = importGraphqlString('./queries/userNotification/listArrayUserNotification.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -317,6 +325,34 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: adminReportRevenueByMonth,
             headers: userAuth,
             variables: prettifyJsonString(variables.adminReportRevenueByMonth),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách lệnh xuất hàng',
+            query: listAllDeliverOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.listAllDeliverOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật Lệnh xuất hàng',
+            query: updateDeliverOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateDeliverOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật trạng thái thông báo người dùng',
+            query: updateStatusUserNotification,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateStatusUserNotification),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách thông báo người dùng',
+            query: listArrayUserNotification,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.listArrayUserNotification),
         },
     ];
 };

@@ -5,8 +5,8 @@ subscription Notifications {
             id
             event
             content
-            Order {
-                orderId
+            order {
+                id
                 invoiceNo
             }
             createdAt

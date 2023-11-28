@@ -32,6 +32,7 @@ type Order {
     freightPrice: Float
     deliverAddress: String
     orderItemList: [OrderItem]
+    deliverOrderList: [DeliverOrder]
     createdAt: Date
     updatedAt: Date
 }
