@@ -218,4 +218,13 @@ export const variables = {
             event: '',
         },
     },
+    createPaymentInfo: {
+        input: {
+            createById: 1,
+            customerId: 1,
+            orderId: 1,
+            money: 100000,
+            description: 'thanh toan lan 1',
+        },
+    },
 };

@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications } from '../db_models/mysql/init-models';
+import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications, paymentInfor } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
@@ -77,6 +77,14 @@ export type ICreateOrderInput = {
   freightPrice?: InputMaybe<Scalars['Float']['input']>;
   product: Array<IProductInput>;
   saleId: Scalars['Int']['input'];
+};
+
+export type ICreatePaymentInfoInput = {
+  createById: Scalars['Int']['input'];
+  customerId: Scalars['Int']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  money: Scalars['Float']['input'];
+  orderId: Scalars['Int']['input'];
 };
 
 export type ICreateProductInput = {
@@ -240,6 +248,7 @@ export type IMutation = {
   createCustomer: ICustomer;
   createDeliverOrder: IDeliverOrder;
   createOrder: IOrder;
+  createPaymentInfo: ISuccessResponse;
   createProduct: IProduct;
   createUser: IUser;
   deleteCustomer: ISuccessResponse;
@@ -273,6 +282,11 @@ export type IMutationCreateDeliverOrderArgs = {
 
 export type IMutationCreateOrderArgs = {
   input: ICreateOrderInput;
+};
+
+
+export type IMutationCreatePaymentInfoArgs = {
+  input: ICreatePaymentInfoInput;
 };
 
 
@@ -355,6 +369,7 @@ export enum INotificationEvent {
   NewDeliverOrder = 'NewDeliverOrder',
   NewMessage = 'NewMessage',
   NewOrder = 'NewOrder',
+  NewPayment = 'NewPayment',
   UpdateOrder = 'UpdateOrder',
   UpdatedDeliverOrder = 'UpdatedDeliverOrder'
 }
@@ -377,6 +392,8 @@ export type IOrder = {
   id: Scalars['Int']['output'];
   invoiceNo: Scalars['String']['output'];
   orderItemList?: Maybe<Array<Maybe<IOrderItem>>>;
+  paymentList?: Maybe<Array<Maybe<IPaymentInfor>>>;
+  remainingPaymentMoney?: Maybe<Scalars['Float']['output']>;
   sale: IUser;
   status: IStatusOrder;
   totalMoney?: Maybe<Scalars['Float']['output']>;
@@ -432,6 +449,17 @@ export type IPaginationInput = {
   before?: InputMaybe<Scalars['Cursor']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type IPaymentInfor = {
+  __typename?: 'PaymentInfor';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  customer: ICustomer;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  money?: Maybe<Scalars['Float']['output']>;
+  order: IOrder;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type IProduct = {
@@ -864,6 +892,7 @@ export type IResolversTypes = {
   CreateCustomerInput: ICreateCustomerInput;
   CreateDeliverOrderInput: ICreateDeliverOrderInput;
   CreateOrderInput: ICreateOrderInput;
+  CreatePaymentInfoInput: ICreatePaymentInfoInput;
   CreateProductInput: ICreateProductInput;
   CreateUserInput: ICreateUserInput;
   Cursor: ResolverTypeWrapper<Scalars['Cursor']['output']>;
@@ -899,6 +928,7 @@ export type IResolversTypes = {
   OrderProcess: ResolverTypeWrapper<orderProcess>;
   PageInfo: ResolverTypeWrapper<IPageInfo>;
   PaginationInput: IPaginationInput;
+  PaymentInfor: ResolverTypeWrapper<paymentInfor>;
   Product: ResolverTypeWrapper<products>;
   ProductConnection: ResolverTypeWrapper<ProductConnection>;
   ProductEdge: ResolverTypeWrapper<ProductEdge>;
@@ -943,6 +973,7 @@ export type IResolversParentTypes = {
   CreateCustomerInput: ICreateCustomerInput;
   CreateDeliverOrderInput: ICreateDeliverOrderInput;
   CreateOrderInput: ICreateOrderInput;
+  CreatePaymentInfoInput: ICreatePaymentInfoInput;
   CreateProductInput: ICreateProductInput;
   CreateUserInput: ICreateUserInput;
   Cursor: Scalars['Cursor']['output'];
@@ -977,6 +1008,7 @@ export type IResolversParentTypes = {
   OrderProcess: orderProcess;
   PageInfo: IPageInfo;
   PaginationInput: IPaginationInput;
+  PaymentInfor: paymentInfor;
   Product: products;
   ProductConnection: ProductConnection;
   ProductEdge: ProductEdge;
@@ -1117,6 +1149,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   createCustomer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IMutationCreateCustomerArgs, 'input'>>;
   createDeliverOrder?: Resolver<IResolversTypes['DeliverOrder'], ParentType, ContextType, RequireFields<IMutationCreateDeliverOrderArgs, 'input'>>;
   createOrder?: Resolver<IResolversTypes['Order'], ParentType, ContextType, RequireFields<IMutationCreateOrderArgs, 'input'>>;
+  createPaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationCreatePaymentInfoArgs, 'input'>>;
   createProduct?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IMutationCreateProductArgs, 'input'>>;
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
   deleteCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteCustomerArgs, 'input'>>;
@@ -1159,6 +1192,8 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   invoiceNo?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   orderItemList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderItem']>>>, ParentType, ContextType>;
+  paymentList?: Resolver<Maybe<Array<Maybe<IResolversTypes['PaymentInfor']>>>, ParentType, ContextType>;
+  remainingPaymentMoney?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   sale?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
   status?: Resolver<IResolversTypes['StatusOrder'], ParentType, ContextType>;
   totalMoney?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
@@ -1207,6 +1242,17 @@ export type IOrderProcessResolvers<ContextType = any, ParentType extends IResolv
 export type IPageInfoResolvers<ContextType = any, ParentType extends IResolversParentTypes['PageInfo'] = IResolversParentTypes['PageInfo']> = {
   endCursor?: Resolver<Maybe<IResolversTypes['Cursor']>, ParentType, ContextType>;
   hasNextPage?: Resolver<IResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IPaymentInforResolvers<ContextType = any, ParentType extends IResolversParentTypes['PaymentInfor'] = IResolversParentTypes['PaymentInfor']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  customer?: Resolver<IResolversTypes['Customer'], ParentType, ContextType>;
+  description?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  money?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
+  order?: Resolver<IResolversTypes['Order'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1352,6 +1398,7 @@ export type IResolvers<ContextType = any> = {
   OrderItem?: IOrderItemResolvers<ContextType>;
   OrderProcess?: IOrderProcessResolvers<ContextType>;
   PageInfo?: IPageInfoResolvers<ContextType>;
+  PaymentInfor?: IPaymentInforResolvers<ContextType>;
   Product?: IProductResolvers<ContextType>;
   ProductConnection?: IProductConnectionResolvers<ContextType>;
   ProductEdge?: IProductEdgeResolvers<ContextType>;

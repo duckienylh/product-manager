@@ -10,6 +10,7 @@ import * as orderItemType from './orderItem.graphql';
 import * as orderProcessType from './orderProcess.graphql';
 import * as deliverOderType from './deliverOrder.graphql';
 import * as userNotificationType from './userNotifications.graphql';
+import * as paymentInforType from './paymentInfor.graphql';
 
 export default [
     root,
@@ -23,4 +24,5 @@ export default [
     orderProcessType,
     deliverOderType,
     userNotificationType,
+    paymentInforType,
 ];

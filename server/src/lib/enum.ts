@@ -7,9 +7,7 @@ export enum RoleList {
     manager = 9,
     accountant = 5,
     sales = 1,
-    transporterManager = 2,
     driver = 3,
-    assistantDriver = 4,
 }
 
 export enum BucketValue {

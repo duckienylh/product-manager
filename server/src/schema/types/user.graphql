@@ -32,9 +32,7 @@ enum Role {
     Manager
     Accountant
     Sales
-    TransporterManager
     Driver
-    AssistantDriver
 }
 
 type User {

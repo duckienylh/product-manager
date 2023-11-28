@@ -54,6 +54,8 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
 
     totalMoney!: number;
 
+    remainingPaymentMoney!: number;
+
     createdAt!: Date;
 
     updatedAt!: Date;
@@ -201,6 +203,22 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
         // add 10% VAT and freight price
         this.totalMoney = subTotalMoney * 1.1 + (this.freightPrice ? parseFloat(String(this.freightPrice)) : 0.0);
         return this.totalMoney;
+    }
+
+    async calculateRemainingPaymentMoney() {
+        const oPayment =
+            this.paymentInfors ??
+            (await pmDb.paymentInfor.findAll({
+                where: {
+                    orderId: this.id,
+                },
+            }));
+
+        await this.getTotalMoney();
+
+        this.remainingPaymentMoney = this.totalMoney - oPayment.reduce((sum, opm) => sum + (opm.id ? parseFloat(String(opm.money)) : 0.0), 0.0);
+
+        return this.remainingPaymentMoney;
     }
 
     static async invoiceNoOrderName(saleId: number) {
