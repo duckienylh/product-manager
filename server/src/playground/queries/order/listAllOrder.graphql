@@ -61,6 +61,7 @@ query ListAllOrder($input: ListAllOrderInput!) {
                         createdAt
                         updatedAt
                     }
+                    remainingPaymentMoney
                     invoiceNo
                     VAT
                     totalMoney

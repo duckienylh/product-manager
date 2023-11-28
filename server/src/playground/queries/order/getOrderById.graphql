@@ -74,6 +74,7 @@ query GetOrderById {
             createdAt
             updatedAt
         }
+        remainingPaymentMoney
         invoiceNo
         VAT
         totalMoney
