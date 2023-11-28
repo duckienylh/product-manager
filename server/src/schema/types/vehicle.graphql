@@ -1,0 +1,35 @@
+extend type Query {
+    listAllVehicle(input: ListAllVehiclesInput!): ListAllVehiclesResponse!
+
+    listDriverUnselectedVehicle: [User]!
+}
+
+extend type Mutation {
+    createVehicle(input: CreateVehiclesInput!): Vehicle!
+
+    updateVehicle(input: UpdateVehicleInput!): SuccessResponse!
+
+    deleteVehicles(input: DeleteVehiclesInput!): SuccessResponse!
+}
+
+type Vehicles {
+    id: Int!
+    driver: User!
+    typeVehicle: String!
+    weight: Float!
+    licensePlates: String!
+    registerDate: Date!
+    renewRegisterDate: Date!
+    vehicleImage:[ImageOfVehicle]
+    registrationImage:[ImageOfVehicle]
+    licenseImage:[ImageOfVehicle]
+    note: String
+    createdAt: Date
+    updatedAt: Date
+}
+
+input ListAllVehiclesInput {
+    stringQuery: String
+    driverId: Int
+    args: PaginationInput
+}

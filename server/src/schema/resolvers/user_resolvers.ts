@@ -322,7 +322,6 @@ const user_resolvers: IResolvers = {
                         const fileStream = createReadStream();
                         const filePath = `avatar/users/${newUser.id}/${filename}`;
                         await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
-                        // await minIOServices.upload('dev-app', filePath, fileStream, mimetype);
                         newUser.avatarURL = filePath;
                         await newUser.save({ transaction: t });
                     }

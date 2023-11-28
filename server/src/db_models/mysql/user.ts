@@ -2,6 +2,7 @@ import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { deliverOrder, deliverOrderId } from './deliverOrder';
 import type { imageOfProduct, imageOfProductId } from './imageOfProduct';
+import type { imageOfVehicle, imageOfVehicleId } from './imageOfVehicle';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { orders, ordersId } from './orders';
 import type { userNotifications, userNotificationsId } from './userNotifications';
@@ -107,6 +108,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasImageOfProducts!: Sequelize.HasManyHasAssociationsMixin<imageOfProduct, imageOfProductId>;
 
     countImageOfProducts!: Sequelize.HasManyCountAssociationsMixin;
+
+    // user hasMany imageOfVehicle via uploadBy
+    imageOfVehicles!: imageOfVehicle[];
+
+    getImageOfVehicles!: Sequelize.HasManyGetAssociationsMixin<imageOfVehicle>;
+
+    setImageOfVehicles!: Sequelize.HasManySetAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+    addImageOfVehicle!: Sequelize.HasManyAddAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+    addImageOfVehicles!: Sequelize.HasManyAddAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+    createImageOfVehicle!: Sequelize.HasManyCreateAssociationMixin<imageOfVehicle>;
+
+    removeImageOfVehicle!: Sequelize.HasManyRemoveAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+    removeImageOfVehicles!: Sequelize.HasManyRemoveAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+    hasImageOfVehicle!: Sequelize.HasManyHasAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+    hasImageOfVehicles!: Sequelize.HasManyHasAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+    countImageOfVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
     // user hasMany orderProcess via userId
     orderProcesses!: orderProcess[];

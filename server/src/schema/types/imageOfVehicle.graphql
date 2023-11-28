@@ -1,0 +1,11 @@
+type ImageOfVehicle {
+    id: Int!
+    vehicle: Vehicle!
+    fileName: String!
+    uploadBy: User
+    mineType: String
+    keyPath: String!
+    encoding: String
+    createdAt: Date
+    updatedAt: Date
+}
