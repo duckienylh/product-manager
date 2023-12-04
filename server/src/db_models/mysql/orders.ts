@@ -3,6 +3,7 @@ import { DataTypes, Model, Op, Optional } from 'sequelize';
 import type { customers, customersId } from './customers';
 import type { deliverOrder, deliverOrderId } from './deliverOrder';
 import type { notifications, notificationsId } from './notifications';
+import type { orderDocument, orderDocumentId } from './orderDocument';
 import type { orderItem, orderItemId } from './orderItem';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { paymentInfor, paymentInforId } from './paymentInfor';
@@ -114,6 +115,29 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     hasNotifications!: Sequelize.HasManyHasAssociationsMixin<notifications, notificationsId>;
 
     countNotifications!: Sequelize.HasManyCountAssociationsMixin;
+
+    // orders hasMany orderDocument via orderId
+    orderDocuments!: orderDocument[];
+
+    getOrderDocuments!: Sequelize.HasManyGetAssociationsMixin<orderDocument>;
+
+    setOrderDocuments!: Sequelize.HasManySetAssociationsMixin<orderDocument, orderDocumentId>;
+
+    addOrderDocument!: Sequelize.HasManyAddAssociationMixin<orderDocument, orderDocumentId>;
+
+    addOrderDocuments!: Sequelize.HasManyAddAssociationsMixin<orderDocument, orderDocumentId>;
+
+    createOrderDocument!: Sequelize.HasManyCreateAssociationMixin<orderDocument>;
+
+    removeOrderDocument!: Sequelize.HasManyRemoveAssociationMixin<orderDocument, orderDocumentId>;
+
+    removeOrderDocuments!: Sequelize.HasManyRemoveAssociationsMixin<orderDocument, orderDocumentId>;
+
+    hasOrderDocument!: Sequelize.HasManyHasAssociationMixin<orderDocument, orderDocumentId>;
+
+    hasOrderDocuments!: Sequelize.HasManyHasAssociationsMixin<orderDocument, orderDocumentId>;
+
+    countOrderDocuments!: Sequelize.HasManyCountAssociationsMixin;
 
     // orders hasMany orderItem via orderId
     orderItems!: orderItem[];

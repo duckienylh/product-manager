@@ -1,11 +1,11 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { deliverOrder, deliverOrderId } from './deliverOrder';
+import type { file, fileId } from './file';
 import type { imageOfProduct, imageOfProductId } from './imageOfProduct';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { orders, ordersId } from './orders';
 import type { userNotifications, userNotificationsId } from './userNotifications';
-import type { vehicle, vehicleId } from './vehicle';
 import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
 export interface userAttributes {
@@ -58,9 +58,9 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
 
     role!: number;
 
-    createdAt?: Date;
+    createdAt!: Date;
 
-    updatedAt?: Date;
+    updatedAt!: Date;
 
     // user hasMany deliverOrder via driverId
     deliverOrders!: deliverOrder[];
@@ -84,6 +84,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasDeliverOrders!: Sequelize.HasManyHasAssociationsMixin<deliverOrder, deliverOrderId>;
 
     countDeliverOrders!: Sequelize.HasManyCountAssociationsMixin;
+
+    // user hasMany file via uploadBy
+    files!: file[];
+
+    getFiles!: Sequelize.HasManyGetAssociationsMixin<file>;
+
+    setFiles!: Sequelize.HasManySetAssociationsMixin<file, fileId>;
+
+    addFile!: Sequelize.HasManyAddAssociationMixin<file, fileId>;
+
+    addFiles!: Sequelize.HasManyAddAssociationsMixin<file, fileId>;
+
+    createFile!: Sequelize.HasManyCreateAssociationMixin<file>;
+
+    removeFile!: Sequelize.HasManyRemoveAssociationMixin<file, fileId>;
+
+    removeFiles!: Sequelize.HasManyRemoveAssociationsMixin<file, fileId>;
+
+    hasFile!: Sequelize.HasManyHasAssociationMixin<file, fileId>;
+
+    hasFiles!: Sequelize.HasManyHasAssociationsMixin<file, fileId>;
+
+    countFiles!: Sequelize.HasManyCountAssociationsMixin;
 
     // user hasMany imageOfProduct via uploadBy
     imageOfProducts!: imageOfProduct[];
@@ -176,29 +199,6 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasUserNotifications!: Sequelize.HasManyHasAssociationsMixin<userNotifications, userNotificationsId>;
 
     countUserNotifications!: Sequelize.HasManyCountAssociationsMixin;
-
-    // user hasMany vehicle via driverId
-    vehicles!: vehicle[];
-
-    getVehicles!: Sequelize.HasManyGetAssociationsMixin<vehicle>;
-
-    setVehicles!: Sequelize.HasManySetAssociationsMixin<vehicle, vehicleId>;
-
-    addVehicle!: Sequelize.HasManyAddAssociationMixin<vehicle, vehicleId>;
-
-    addVehicles!: Sequelize.HasManyAddAssociationsMixin<vehicle, vehicleId>;
-
-    createVehicle!: Sequelize.HasManyCreateAssociationMixin<vehicle>;
-
-    removeVehicle!: Sequelize.HasManyRemoveAssociationMixin<vehicle, vehicleId>;
-
-    removeVehicles!: Sequelize.HasManyRemoveAssociationsMixin<vehicle, vehicleId>;
-
-    hasVehicle!: Sequelize.HasManyHasAssociationMixin<vehicle, vehicleId>;
-
-    hasVehicles!: Sequelize.HasManyHasAssociationsMixin<vehicle, vehicleId>;
-
-    countVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
     static initModel(sequelize: Sequelize.Sequelize): typeof user {
         return user.init(

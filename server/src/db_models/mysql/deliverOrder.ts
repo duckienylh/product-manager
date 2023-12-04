@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { customers, customersId } from './customers';
+import type { orderDocument, orderDocumentId } from './orderDocument';
 import type { orders, ordersId } from './orders';
 import type { user, userId } from './user';
 import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
@@ -52,6 +53,29 @@ export class deliverOrder extends Model<deliverOrderAttributes, deliverOrderCrea
     setCustomer!: Sequelize.BelongsToSetAssociationMixin<customers, customersId>;
 
     createCustomer!: Sequelize.BelongsToCreateAssociationMixin<customers>;
+
+    // deliverOrder hasMany orderDocument via deliverOrderId
+    orderDocuments!: orderDocument[];
+
+    getOrderDocuments!: Sequelize.HasManyGetAssociationsMixin<orderDocument>;
+
+    setOrderDocuments!: Sequelize.HasManySetAssociationsMixin<orderDocument, orderDocumentId>;
+
+    addOrderDocument!: Sequelize.HasManyAddAssociationMixin<orderDocument, orderDocumentId>;
+
+    addOrderDocuments!: Sequelize.HasManyAddAssociationsMixin<orderDocument, orderDocumentId>;
+
+    createOrderDocument!: Sequelize.HasManyCreateAssociationMixin<orderDocument>;
+
+    removeOrderDocument!: Sequelize.HasManyRemoveAssociationMixin<orderDocument, orderDocumentId>;
+
+    removeOrderDocuments!: Sequelize.HasManyRemoveAssociationsMixin<orderDocument, orderDocumentId>;
+
+    hasOrderDocument!: Sequelize.HasManyHasAssociationMixin<orderDocument, orderDocumentId>;
+
+    hasOrderDocuments!: Sequelize.HasManyHasAssociationsMixin<orderDocument, orderDocumentId>;
+
+    countOrderDocuments!: Sequelize.HasManyCountAssociationsMixin;
 
     // deliverOrder belongsTo orders via orderId
     order!: orders;
