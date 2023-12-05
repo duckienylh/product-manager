@@ -1,129 +1,98 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import type { deliverOrder, deliverOrderId } from './deliverOrder';
 import type { file, fileId } from './file';
 import type { orders, ordersId } from './orders';
 
 export interface orderDocumentAttributes {
-  id: number;
-  orderId: number;
-  deliverOrderId: number;
-  fileId: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+    id: number;
+    orderId: number;
+    fileId: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type orderDocumentPk = 'id';
 export type orderDocumentId = orderDocument[orderDocumentPk];
-export type orderDocumentOptionalAttributes = 'createdAt' | 'updatedAt';
+export type orderDocumentOptionalAttributes = 'id' | 'createdAt' | 'updatedAt';
 export type orderDocumentCreationAttributes = Optional<orderDocumentAttributes, orderDocumentOptionalAttributes>;
 
 export class orderDocument extends Model<orderDocumentAttributes, orderDocumentCreationAttributes> implements orderDocumentAttributes {
-  id!: number;
+    id!: number;
 
-  orderId!: number;
+    orderId!: number;
 
-  deliverOrderId!: number;
+    fileId!: number;
 
-  fileId!: number;
+    createdAt?: Date;
 
-  createdAt?: Date;
+    updatedAt?: Date;
 
-  updatedAt?: Date;
+    // orderDocument belongsTo file via fileId
+    file!: file;
 
-  // orderDocument belongsTo deliverOrder via deliverOrderId
-  deliverOrder!: deliverOrder;
+    getFile!: Sequelize.BelongsToGetAssociationMixin<file>;
 
-  getDeliverOrder!: Sequelize.BelongsToGetAssociationMixin<deliverOrder>;
+    setFile!: Sequelize.BelongsToSetAssociationMixin<file, fileId>;
 
-  setDeliverOrder!: Sequelize.BelongsToSetAssociationMixin<deliverOrder, deliverOrderId>;
+    createFile!: Sequelize.BelongsToCreateAssociationMixin<file>;
 
-  createDeliverOrder!: Sequelize.BelongsToCreateAssociationMixin<deliverOrder>;
+    // orderDocument belongsTo orders via orderId
+    order!: orders;
 
-  // orderDocument belongsTo file via fileId
-  file!: file;
+    getOrder!: Sequelize.BelongsToGetAssociationMixin<orders>;
 
-  getFile!: Sequelize.BelongsToGetAssociationMixin<file>;
+    setOrder!: Sequelize.BelongsToSetAssociationMixin<orders, ordersId>;
 
-  setFile!: Sequelize.BelongsToSetAssociationMixin<file, fileId>;
+    createOrder!: Sequelize.BelongsToCreateAssociationMixin<orders>;
 
-  createFile!: Sequelize.BelongsToCreateAssociationMixin<file>;
-
-  // orderDocument belongsTo orders via orderId
-  order!: orders;
-
-  getOrder!: Sequelize.BelongsToGetAssociationMixin<orders>;
-
-  setOrder!: Sequelize.BelongsToSetAssociationMixin<orders, ordersId>;
-
-  createOrder!: Sequelize.BelongsToCreateAssociationMixin<orders>;
-
-  static initModel(sequelize: Sequelize.Sequelize): typeof orderDocument {
-    return orderDocument.init({
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    orderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'orders',
-        key: 'id'
-      }
-    },
-    deliverOrderId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'deliverOrder',
-        key: 'id'
-      }
-    },
-    fileId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'file',
-        key: 'id'
-      }
+    static initModel(sequelize: Sequelize.Sequelize): typeof orderDocument {
+        return orderDocument.init(
+            {
+                id: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                orderId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'orders',
+                        key: 'id',
+                    },
+                },
+                fileId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'file',
+                        key: 'id',
+                    },
+                },
+            },
+            {
+                sequelize,
+                tableName: 'orderDocument',
+                timestamps: true,
+                indexes: [
+                    {
+                        name: 'PRIMARY',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'fk_orderDocument_1_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'orderId' }],
+                    },
+                    {
+                        name: 'fk_orderDocument_3_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'fileId' }],
+                    },
+                ],
+            }
+        );
     }
-  }, {
-    sequelize,
-    tableName: 'orderDocument',
-    timestamps: true,
-    indexes: [
-      {
-        name: 'PRIMARY',
-        unique: true,
-        using: 'BTREE',
-        fields: [
-          { name: 'id' },
-        ]
-      },
-      {
-        name: 'fk_orderDocument_1_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'orderId' },
-        ]
-      },
-      {
-        name: 'fk_orderDocument_2_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'deliverOrderId' },
-        ]
-      },
-      {
-        name: 'fk_orderDocument_3_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'fileId' },
-        ]
-      },
-    ]
-  });
-  }
 }

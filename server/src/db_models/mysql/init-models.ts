@@ -100,8 +100,6 @@ export function initModels(sequelize: Sequelize) {
   customers.hasMany(orders, { as: 'orders', foreignKey: 'customerId'});
   paymentInfor.belongsTo(customers, { as: 'customer', foreignKey: 'customerId'});
   customers.hasMany(paymentInfor, { as: 'paymentInfors', foreignKey: 'customerId'});
-  orderDocument.belongsTo(deliverOrder, { as: 'deliverOrder', foreignKey: 'deliverOrderId'});
-  deliverOrder.hasMany(orderDocument, { as: 'orderDocuments', foreignKey: 'deliverOrderId'});
   orderDocument.belongsTo(file, { as: 'file', foreignKey: 'fileId'});
   file.hasMany(orderDocument, { as: 'orderDocuments', foreignKey: 'fileId'});
   userNotifications.belongsTo(notifications, { as: 'notification', foreignKey: 'notificationId'});

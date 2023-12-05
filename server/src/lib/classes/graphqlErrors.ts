@@ -29,6 +29,7 @@ export enum PM_ERROR_CODE {
     DeliverOrderNotFound = 'DeliverOrderNotFound',
     UserNotificationNotFound = 'UserNotificationNotFound',
     PaymentInfoNotFound = 'PaymentInfoNotFound',
+    FileNotFound = 'FileNotFound',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -186,6 +187,16 @@ export class PaymentInfoNotFoundError extends GraphQLError {
         super(message || 'Thông tin thanh toán không tồn tại', {
             extensions: {
                 code: PM_ERROR_CODE.PaymentInfoNotFound,
+            },
+        });
+    }
+}
+
+export class FileNotFoundError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Tài liệu không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.FileNotFound,
             },
         });
     }
