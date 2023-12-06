@@ -36,6 +36,7 @@ type Order {
     orderItemList: [OrderItem]
     deliverOrderList: [DeliverOrder]
     paymentList: [PaymentInfor]
+    orderDocumentList: [OrderDocument]
     remainingPaymentMoney: Float
     createdAt: Date
     updatedAt: Date
@@ -123,7 +124,7 @@ input ListAllOrderInput {
 input UpdateStatusOrderInput {
     orderId: Int!
     userId: Int!
-    statusOrder: StatusOrder!
+    statusOrder: StatusOrder
     removeFiles: [Int!] #id of orderDocument
     newFiles: [Upload!]
 }

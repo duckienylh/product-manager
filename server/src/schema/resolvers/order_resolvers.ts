@@ -23,8 +23,8 @@ import { orderProcessCreationAttributes } from '../../db_models/mysql/orderProce
 import { IStatusOrderToStatusOrder, StatusOrderTypeResolve } from '../../lib/resolver_enum';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 import { getNextNDayFromDate } from '../../lib/utils/formatTime';
-import { fileCreationAttributes } from '../../db_models/mysql/file';
 import { orderDocumentCreationAttributes } from '../../db_models/mysql/orderDocument';
+import { fileCreationAttributes } from '../../db_models/mysql/file';
 
 const getDifferenceIds = (arr1: number[], arr2: number[]) => arr1.filter((element) => !arr2.includes(element));
 
@@ -49,6 +49,20 @@ const order_resolver: IResolvers = {
         paymentList: async (parent) => parent.paymentInfors ?? (await parent.getPaymentInfors()),
 
         remainingPaymentMoney: async (parent) => await parent.calculateRemainingPaymentMoney(),
+
+        orderDocumentList: async (parent) => parent.orderDocuments ?? (await parent.getOrderDocuments()),
+    },
+
+    OrderDocument: {
+        order: async (parent) => parent.order ?? (await parent.getOrder()),
+
+        file: async (parent) => parent.file ?? (await parent.getFile()),
+    },
+
+    File: {
+        uploadBy: async (parent) => parent.uploadBy_user ?? (await parent.getUploadBy_user()),
+
+        url: async (parent) => await minIOServices.generateDownloadURL(parent.keyPath, BucketValue.DEVTEAM),
     },
 
     OrderItem: {
@@ -74,6 +88,18 @@ const order_resolver: IResolvers = {
                         model: pmDb.customers,
                         as: 'customer',
                         required: true,
+                    },
+                    {
+                        model: pmDb.orderDocument,
+                        as: 'orderDocuments',
+                        required: false,
+                        include: [
+                            {
+                                model: pmDb.file,
+                                as: 'file',
+                                required: false,
+                            },
+                        ],
                     },
                 ],
                 distinct: true,
@@ -543,11 +569,13 @@ const order_resolver: IResolvers = {
                     let deleteFilesOnS3: string[] = [];
                     const deleteFilesOD: Promise<number>[] = [];
 
-                    order.status = IStatusOrderToStatusOrder(statusOrder);
                     if (newFiles) {
                         for (let i = 0; i < newFiles.length; i += 1) {
+                            console.log('abc0');
+
                             // eslint-disable-next-line no-await-in-loop
-                            const { createReadStream, filename, mimetype, encoding } = await newFiles[i];
+                            const { createReadStream, filename, mimetype, encoding } = await newFiles[i].file;
+
                             const filePath = `order/${order.id}/${filename}`;
                             const fileStream = createReadStream();
 
@@ -558,7 +586,6 @@ const order_resolver: IResolvers = {
                                 keyPath: filePath,
                                 encoding: encoding || undefined,
                             };
-
                             // eslint-disable-next-line no-await-in-loop
                             const newFile = await pmDb.file.create(fileAttributes, { transaction: t });
 
@@ -612,65 +639,69 @@ const order_resolver: IResolvers = {
                         deleteFilesOD.push(removeFile);
                     }
 
-                    // notifications
-                    const newOrderProcess: orderProcessCreationAttributes = {
-                        orderId: order.id,
-                        userId,
-                        fromStatus: StatusOrder.creatNew,
-                        toStatus: StatusOrder.createExportOrder,
-                        description: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
-                            statusOrder
-                        )}`,
-                    };
+                    if (statusOrder) {
+                        order.status = IStatusOrderToStatusOrder(statusOrder);
 
-                    await pmDb.orderProcess.create(newOrderProcess, { transaction: t });
-
-                    const notificationForUsers = await pmDb.user.findAll({
-                        where: {
-                            role: [RoleList.sales, RoleList.admin, RoleList.director, RoleList.accountant],
-                        },
-                        attributes: ['id'],
-                    });
-
-                    const userIds = notificationForUsers.map((e) => e.id);
-
-                    if (order.deliverOrders[0].driverId) userIds.push(order.deliverOrders[0].driverId);
-
-                    const notificationAttribute: notificationsCreationAttributes = {
-                        orderId: order.id,
-                        event: NotificationEvent.NewDeliverOrder,
-                        content: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
-                            statusOrder
-                        )}`,
-                    };
-
-                    const notification: pmDb.notifications = await pmDb.notifications.create(notificationAttribute, { transaction: t });
-
-                    const userNotificationPromise: Promise<pmDb.userNotifications>[] = [];
-
-                    userIds.forEach((userIdNoti) => {
-                        const userNotificationAttribute: userNotificationsCreationAttributes = {
-                            userId: userIdNoti,
-                            notificationId: notification.id,
-                            isRead: false,
+                        // notifications
+                        const newOrderProcess: orderProcessCreationAttributes = {
+                            orderId: order.id,
+                            userId,
+                            fromStatus: StatusOrder.creatNew,
+                            toStatus: StatusOrder.createExportOrder,
+                            description: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
+                                statusOrder
+                            )}`,
                         };
 
-                        const createUserNotification = pmDb.userNotifications.create(userNotificationAttribute, { transaction: t });
+                        await pmDb.orderProcess.create(newOrderProcess, { transaction: t });
 
-                        userNotificationPromise.push(createUserNotification);
-                    });
+                        const notificationForUsers = await pmDb.user.findAll({
+                            where: {
+                                role: [RoleList.sales, RoleList.admin, RoleList.director, RoleList.accountant],
+                            },
+                            attributes: ['id'],
+                        });
 
-                    if (userNotificationPromise.length > 0) await Promise.all(userNotificationPromise);
+                        const userIds = notificationForUsers.map((e) => e.id);
 
-                    pubsubService.publishToUsers(userIds, NotificationEvent.UpdateOrder, {
-                        message: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
-                            statusOrder
-                        )}`,
-                        notification,
-                        order,
-                    });
+                        if (order.deliverOrders[0].driverId) userIds.push(order.deliverOrders[0].driverId);
 
-                    await order.save({ transaction: t });
+                        const notificationAttribute: notificationsCreationAttributes = {
+                            orderId: order.id,
+                            event: NotificationEvent.NewDeliverOrder,
+                            content: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
+                                statusOrder
+                            )}`,
+                        };
+
+                        const notification: pmDb.notifications = await pmDb.notifications.create(notificationAttribute, { transaction: t });
+
+                        const userNotificationPromise: Promise<pmDb.userNotifications>[] = [];
+
+                        userIds.forEach((userIdNoti) => {
+                            const userNotificationAttribute: userNotificationsCreationAttributes = {
+                                userId: userIdNoti,
+                                notificationId: notification.id,
+                                isRead: false,
+                            };
+
+                            const createUserNotification = pmDb.userNotifications.create(userNotificationAttribute, { transaction: t });
+
+                            userNotificationPromise.push(createUserNotification);
+                        });
+
+                        if (userNotificationPromise.length > 0) await Promise.all(userNotificationPromise);
+
+                        pubsubService.publishToUsers(userIds, NotificationEvent.UpdateOrder, {
+                            message: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
+                                statusOrder
+                            )}`,
+                            notification,
+                            order,
+                        });
+
+                        await order.save({ transaction: t });
+                    }
 
                     if (uploadFileOnS3.length > 0) await Promise.all(uploadFileOnS3);
 

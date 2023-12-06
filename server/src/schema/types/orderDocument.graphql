@@ -1,7 +1,6 @@
 type OrderDocument {
     id: Int!
     order: Order!
-    deliverOrder: DeliverOrder!
     file: File!
     createdAt: Date
     updatedAt: Date
