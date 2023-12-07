@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
+import type { imageOfVehicle, imageOfVehicleId } from './imageOfVehicle';
 import type { orderDocument, orderDocumentId } from './orderDocument';
 import type { user, userId } from './user';
 
@@ -35,6 +36,29 @@ export class file extends Model<fileAttributes, fileCreationAttributes> implemen
   createdAt?: Date;
 
   updatedAt?: Date;
+
+  // file hasMany imageOfVehicle via fileId
+  imageOfVehicles!: imageOfVehicle[];
+
+  getImageOfVehicles!: Sequelize.HasManyGetAssociationsMixin<imageOfVehicle>;
+
+  setImageOfVehicles!: Sequelize.HasManySetAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+  addImageOfVehicle!: Sequelize.HasManyAddAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+  addImageOfVehicles!: Sequelize.HasManyAddAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+  createImageOfVehicle!: Sequelize.HasManyCreateAssociationMixin<imageOfVehicle>;
+
+  removeImageOfVehicle!: Sequelize.HasManyRemoveAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+  removeImageOfVehicles!: Sequelize.HasManyRemoveAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+  hasImageOfVehicle!: Sequelize.HasManyHasAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+
+  hasImageOfVehicles!: Sequelize.HasManyHasAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+
+  countImageOfVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
   // file hasMany orderDocument via fileId
   orderDocuments!: orderDocument[];
