@@ -8,6 +8,8 @@ extend type Mutation {
     createOrder(input: CreateOrderInput!): Order!
 
     updateOrder(input: UpdateOrderInput!): SuccessResponse!
+
+    updateStatusOrder(input: UpdateStatusOrderInput!): SuccessResponse!
 }
 
 enum StatusOrder {
@@ -34,6 +36,7 @@ type Order {
     orderItemList: [OrderItem]
     deliverOrderList: [DeliverOrder]
     paymentList: [PaymentInfor]
+    orderDocumentList: [OrderDocument]
     remainingPaymentMoney: Float
     createdAt: Date
     updatedAt: Date
@@ -116,4 +119,12 @@ input ListAllOrderInput {
     queryString: String
     saleId: Int
     status: StatusOrder
+}
+
+input UpdateStatusOrderInput {
+    orderId: Int!
+    userId: Int!
+    statusOrder: StatusOrder
+    removeFiles: [Int!] #id of orderDocument
+    newFiles: [Upload!]
 }

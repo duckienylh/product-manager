@@ -30,3 +30,5 @@ generates:
         DeliverOrderConnection: ../db_models/mysql/deliverOrder#DeliverOrderConnection
         UserNotification: ../db_models/mysql/init-models#userNotifications
         PaymentInfor: ../db_models/mysql/init-models#paymentInfor
+        OrderDocument: ../db_models/mysql/init-models#orderDocument
+        File: ../db_models/mysql/init-models#file

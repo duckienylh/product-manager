@@ -1,0 +1,11 @@
+type File {
+    id: Int!
+    fileName: String!
+    uploadBy: User
+    mimeType: String
+    keyPath: String!
+    url: String!
+    encoding: String
+    createdAt: Date
+    updatedAt: Date
+}

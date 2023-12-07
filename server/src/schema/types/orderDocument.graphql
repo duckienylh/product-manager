@@ -1,0 +1,7 @@
+type OrderDocument {
+    id: Int!
+    order: Order!
+    file: File!
+    createdAt: Date
+    updatedAt: Date
+}

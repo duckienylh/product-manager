@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications, paymentInfor } from '../db_models/mysql/init-models';
+import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications, paymentInfor, orderDocument, file } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
@@ -182,6 +182,19 @@ export type IDeliverOrderEdge = {
   node?: Maybe<IDeliverOrder>;
 };
 
+export type IFile = {
+  __typename?: 'File';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  encoding?: Maybe<Scalars['String']['output']>;
+  fileName: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  keyPath: Scalars['String']['output'];
+  mimeType?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+  uploadBy?: Maybe<IUser>;
+  url: Scalars['String']['output'];
+};
+
 export type IImportExcelProductInput = {
   fileExcelProducts: Scalars['Upload']['input'];
 };
@@ -267,6 +280,7 @@ export type IMutation = {
   updateOrder: ISuccessResponse;
   updatePaymentInfo: ISuccessResponse;
   updateProduct: ISuccessResponse;
+  updateStatusOrder: ISuccessResponse;
   updateStatusUserNotification: ISuccessResponse;
   updateUser: ISuccessResponse;
 };
@@ -362,6 +376,11 @@ export type IMutationUpdateProductArgs = {
 };
 
 
+export type IMutationUpdateStatusOrderArgs = {
+  input: IUpdateStatusOrderInput;
+};
+
+
 export type IMutationUpdateStatusUserNotificationArgs = {
   input: IUpdateStatusUserNotificationInput;
 };
@@ -408,6 +427,7 @@ export type IOrder = {
   freightPrice?: Maybe<Scalars['Float']['output']>;
   id: Scalars['Int']['output'];
   invoiceNo: Scalars['String']['output'];
+  orderDocumentList?: Maybe<Array<Maybe<IOrderDocument>>>;
   orderItemList?: Maybe<Array<Maybe<IOrderItem>>>;
   paymentList?: Maybe<Array<Maybe<IPaymentInfor>>>;
   remainingPaymentMoney?: Maybe<Scalars['Float']['output']>;
@@ -422,6 +442,15 @@ export type IOrderConnection = {
   edges?: Maybe<Array<Maybe<IOrderEdge>>>;
   pageInfo: IPageInfo;
   totalCount: Scalars['Int']['output'];
+};
+
+export type IOrderDocument = {
+  __typename?: 'OrderDocument';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  file: IFile;
+  id: Scalars['Int']['output'];
+  order: IOrder;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
 };
 
 export type IOrderEdge = {
@@ -747,6 +776,14 @@ export type IUpdateProductOrderInput = {
   quantity?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type IUpdateStatusOrderInput = {
+  newFiles?: InputMaybe<Array<Scalars['Upload']['input']>>;
+  orderId: Scalars['Int']['input'];
+  removeFiles?: InputMaybe<Array<Scalars['Int']['input']>>;
+  statusOrder?: InputMaybe<IStatusOrder>;
+  userId: Scalars['Int']['input'];
+};
+
 export type IUpdateStatusUserNotificationInput = {
   isRead: Scalars['Boolean']['input'];
   userNotificationIds: Array<Scalars['Int']['input']>;
@@ -931,6 +968,7 @@ export type IResolversTypes = {
   DeliverOrder: ResolverTypeWrapper<deliverOrder>;
   DeliverOrderConnection: ResolverTypeWrapper<DeliverOrderConnection>;
   DeliverOrderEdge: ResolverTypeWrapper<DeliverOrderEdge>;
+  File: ResolverTypeWrapper<file>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ImportExcelProductInput: IImportExcelProductInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -948,6 +986,7 @@ export type IResolversTypes = {
   NotificationResponse: ResolverTypeWrapper<Omit<INotificationResponse, 'notification'> & { notification?: Maybe<IResolversTypes['Notification']> }>;
   Order: ResolverTypeWrapper<orders>;
   OrderConnection: ResolverTypeWrapper<OrderConnection>;
+  OrderDocument: ResolverTypeWrapper<orderDocument>;
   OrderEdge: ResolverTypeWrapper<OrderEdge>;
   OrderItem: ResolverTypeWrapper<orderItem>;
   OrderProcess: ResolverTypeWrapper<orderProcess>;
@@ -975,6 +1014,7 @@ export type IResolversTypes = {
   UpdatePaymentInfoInput: IUpdatePaymentInfoInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
+  UpdateStatusOrderInput: IUpdateStatusOrderInput;
   UpdateStatusUserNotificationInput: IUpdateStatusUserNotificationInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
@@ -1014,6 +1054,7 @@ export type IResolversParentTypes = {
   DeliverOrder: deliverOrder;
   DeliverOrderConnection: DeliverOrderConnection;
   DeliverOrderEdge: DeliverOrderEdge;
+  File: file;
   Float: Scalars['Float']['output'];
   ImportExcelProductInput: IImportExcelProductInput;
   Int: Scalars['Int']['output'];
@@ -1030,6 +1071,7 @@ export type IResolversParentTypes = {
   NotificationResponse: Omit<INotificationResponse, 'notification'> & { notification?: Maybe<IResolversParentTypes['Notification']> };
   Order: orders;
   OrderConnection: OrderConnection;
+  OrderDocument: orderDocument;
   OrderEdge: OrderEdge;
   OrderItem: orderItem;
   OrderProcess: orderProcess;
@@ -1054,6 +1096,7 @@ export type IResolversParentTypes = {
   UpdatePaymentInfoInput: IUpdatePaymentInfoInput;
   UpdateProductInput: IUpdateProductInput;
   UpdateProductOrderInput: IUpdateProductOrderInput;
+  UpdateStatusOrderInput: IUpdateStatusOrderInput;
   UpdateStatusUserNotificationInput: IUpdateStatusUserNotificationInput;
   UpdateUserInput: IUpdateUserInput;
   Upload: Scalars['Upload']['output'];
@@ -1142,6 +1185,19 @@ export type IDeliverOrderEdgeResolvers<ContextType = any, ParentType extends IRe
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type IFileResolvers<ContextType = any, ParentType extends IResolversParentTypes['File'] = IResolversParentTypes['File']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  encoding?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  fileName?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  keyPath?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  mimeType?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  uploadBy?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>;
+  url?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface IJsonScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['JSON'], any> {
   name: 'JSON';
 }
@@ -1191,6 +1247,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   updateOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateOrderArgs, 'input'>>;
   updatePaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdatePaymentInfoArgs, 'input'>>;
   updateProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateProductArgs, 'input'>>;
+  updateStatusOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateStatusOrderArgs, 'input'>>;
   updateStatusUserNotification?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateStatusUserNotificationArgs, 'input'>>;
   updateUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationUpdateUserArgs, 'input'>>;
 };
@@ -1221,6 +1278,7 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   freightPrice?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   invoiceNo?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  orderDocumentList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderDocument']>>>, ParentType, ContextType>;
   orderItemList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderItem']>>>, ParentType, ContextType>;
   paymentList?: Resolver<Maybe<Array<Maybe<IResolversTypes['PaymentInfor']>>>, ParentType, ContextType>;
   remainingPaymentMoney?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
@@ -1235,6 +1293,15 @@ export type IOrderConnectionResolvers<ContextType = any, ParentType extends IRes
   edges?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderEdge']>>>, ParentType, ContextType>;
   pageInfo?: Resolver<IResolversTypes['PageInfo'], ParentType, ContextType>;
   totalCount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IOrderDocumentResolvers<ContextType = any, ParentType extends IResolversParentTypes['OrderDocument'] = IResolversParentTypes['OrderDocument']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  file?: Resolver<IResolversTypes['File'], ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  order?: Resolver<IResolversTypes['Order'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1416,6 +1483,7 @@ export type IResolvers<ContextType = any> = {
   DeliverOrder?: IDeliverOrderResolvers<ContextType>;
   DeliverOrderConnection?: IDeliverOrderConnectionResolvers<ContextType>;
   DeliverOrderEdge?: IDeliverOrderEdgeResolvers<ContextType>;
+  File?: IFileResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   ListAllDeliverOrderResponse?: IListAllDeliverOrderResponseResolvers<ContextType>;
   ListAllOrderResponse?: IListAllOrderResponseResolvers<ContextType>;
@@ -1424,6 +1492,7 @@ export type IResolvers<ContextType = any> = {
   NotificationResponse?: INotificationResponseResolvers<ContextType>;
   Order?: IOrderResolvers<ContextType>;
   OrderConnection?: IOrderConnectionResolvers<ContextType>;
+  OrderDocument?: IOrderDocumentResolvers<ContextType>;
   OrderEdge?: IOrderEdgeResolvers<ContextType>;
   OrderItem?: IOrderItemResolvers<ContextType>;
   OrderProcess?: IOrderProcessResolvers<ContextType>;

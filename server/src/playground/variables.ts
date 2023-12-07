@@ -242,4 +242,13 @@ export const variables = {
             deleteBy: 1,
         },
     },
+    updateStatusOrder: {
+        input: {
+            orderId: 1,
+            userId: 1,
+            statusOrder: 'done',
+            removeFiles: [],
+            newFiles: [],
+        },
+    },
 };

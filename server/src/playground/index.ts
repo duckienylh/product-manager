@@ -105,6 +105,8 @@ const updatePaymentInfo = importGraphqlString('./mutations/paymentInfor/updatePa
 
 const deletePaymentInfo = importGraphqlString('./mutations/paymentInfor/deletePaymentInfo.graphql');
 
+const updateStatusOrder = importGraphqlString('./mutations/order/updateStatusOrder.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -380,6 +382,13 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: deletePaymentInfo,
             headers: userAuth,
             variables: prettifyJsonString(variables.deletePaymentInfo),
+        },
+        {
+            endpoint: path,
+            name: 'Cập nhật trạng thái và tài liệu đơn hàng',
+            query: updateStatusOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.updateStatusOrder),
         },
     ];
 };
