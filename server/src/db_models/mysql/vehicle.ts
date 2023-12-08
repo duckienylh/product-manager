@@ -2,18 +2,21 @@ import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { imageOfVehicle, imageOfVehicleId } from './imageOfVehicle';
 import type { user, userId } from './user';
+import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
+import { TypeImageOfVehicle } from '../../lib/enum';
+import { pmDb } from '../../loader/mysql';
 
 export interface vehicleAttributes {
-  id: number;
-  driverId: number;
-  typeVehicle?: string;
-  weight?: number;
-  licensePlates: string;
-  registerDate: Date;
-  renewRegisterDate: Date;
-  note?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+    id: number;
+    driverId: number;
+    typeVehicle?: string;
+    weight?: number;
+    licensePlates: string;
+    registerDate: Date;
+    renewRegisterDate: Date;
+    note?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type vehiclePk = 'id';
@@ -21,120 +24,137 @@ export type vehicleId = vehicle[vehiclePk];
 export type vehicleOptionalAttributes = 'id' | 'typeVehicle' | 'weight' | 'note' | 'createdAt' | 'updatedAt';
 export type vehicleCreationAttributes = Optional<vehicleAttributes, vehicleOptionalAttributes>;
 
+export type VehicleEdge = TRDBEdge<vehicle>;
+export type VehicleConnection = TRDBConnection<vehicle>;
+
 export class vehicle extends Model<vehicleAttributes, vehicleCreationAttributes> implements vehicleAttributes {
-  id!: number;
+    id!: number;
 
-  driverId!: number;
+    driverId!: number;
 
-  typeVehicle?: string;
+    typeVehicle?: string;
 
-  weight?: number;
+    weight?: number;
 
-  licensePlates!: string;
+    licensePlates!: string;
 
-  registerDate!: Date;
+    registerDate!: Date;
 
-  renewRegisterDate!: Date;
+    renewRegisterDate!: Date;
 
-  note?: string;
+    note?: string;
 
-  createdAt?: Date;
+    createdAt?: Date;
 
-  updatedAt?: Date;
+    updatedAt?: Date;
 
-  // vehicle belongsTo user via driverId
-  driver!: user;
+    // vehicle belongsTo user via driverId
+    driver!: user;
 
-  getDriver!: Sequelize.BelongsToGetAssociationMixin<user>;
+    getDriver!: Sequelize.BelongsToGetAssociationMixin<user>;
 
-  setDriver!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
+    setDriver!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
 
-  createDriver!: Sequelize.BelongsToCreateAssociationMixin<user>;
+    createDriver!: Sequelize.BelongsToCreateAssociationMixin<user>;
 
-  // vehicle hasMany imageOfVehicle via vehicleId
-  imageOfVehicles!: imageOfVehicle[];
+    // vehicle hasMany imageOfVehicle via vehicleId
+    imageOfVehicles!: imageOfVehicle[];
 
-  getImageOfVehicles!: Sequelize.HasManyGetAssociationsMixin<imageOfVehicle>;
+    getImageOfVehicles!: Sequelize.HasManyGetAssociationsMixin<imageOfVehicle>;
 
-  setImageOfVehicles!: Sequelize.HasManySetAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+    setImageOfVehicles!: Sequelize.HasManySetAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
 
-  addImageOfVehicle!: Sequelize.HasManyAddAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+    addImageOfVehicle!: Sequelize.HasManyAddAssociationMixin<imageOfVehicle, imageOfVehicleId>;
 
-  addImageOfVehicles!: Sequelize.HasManyAddAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+    addImageOfVehicles!: Sequelize.HasManyAddAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
 
-  createImageOfVehicle!: Sequelize.HasManyCreateAssociationMixin<imageOfVehicle>;
+    createImageOfVehicle!: Sequelize.HasManyCreateAssociationMixin<imageOfVehicle>;
 
-  removeImageOfVehicle!: Sequelize.HasManyRemoveAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+    removeImageOfVehicle!: Sequelize.HasManyRemoveAssociationMixin<imageOfVehicle, imageOfVehicleId>;
 
-  removeImageOfVehicles!: Sequelize.HasManyRemoveAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+    removeImageOfVehicles!: Sequelize.HasManyRemoveAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
 
-  hasImageOfVehicle!: Sequelize.HasManyHasAssociationMixin<imageOfVehicle, imageOfVehicleId>;
+    hasImageOfVehicle!: Sequelize.HasManyHasAssociationMixin<imageOfVehicle, imageOfVehicleId>;
 
-  hasImageOfVehicles!: Sequelize.HasManyHasAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
+    hasImageOfVehicles!: Sequelize.HasManyHasAssociationsMixin<imageOfVehicle, imageOfVehicleId>;
 
-  countImageOfVehicles!: Sequelize.HasManyCountAssociationsMixin;
+    countImageOfVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
-  static initModel(sequelize: Sequelize.Sequelize): typeof vehicle {
-    return vehicle.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    driverId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'user',
-        key: 'id'
-      }
-    },
-    typeVehicle: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    weight: {
-      type: DataTypes.FLOAT,
-      allowNull: true
-    },
-    licensePlates: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    registerDate: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    renewRegisterDate: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    note: {
-      type: DataTypes.STRING(45),
-      allowNull: true
+    async getImageVehiclesUrl(typeImage: TypeImageOfVehicle) {
+        const imageOfVehiclesObj = this.imageOfVehicles
+            ? this.imageOfVehicles
+            : await pmDb.imageOfVehicle.findAll({
+                  where: { vehicleId: this.id, type: typeImage },
+                  include: {
+                      model: pmDb.file,
+                      as: 'file',
+                      required: false,
+                  },
+              });
+
+        return imageOfVehiclesObj.filter((e) => e.type === typeImage);
     }
-  }, {
-    sequelize,
-    tableName: 'vehicle',
-    timestamps: true,
-    indexes: [
-      {
-        name: 'PRIMARY',
-        unique: true,
-        using: 'BTREE',
-        fields: [
-          { name: 'id' },
-        ]
-      },
-      {
-        name: 'fk_vehicle_1_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'driverId' },
-        ]
-      },
-    ]
-  });
-  }
+
+    static initModel(sequelize: Sequelize.Sequelize): typeof vehicle {
+        return vehicle.init(
+            {
+                id: {
+                    autoIncrement: true,
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                driverId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'user',
+                        key: 'id',
+                    },
+                },
+                typeVehicle: {
+                    type: DataTypes.STRING(45),
+                    allowNull: true,
+                },
+                weight: {
+                    type: DataTypes.FLOAT,
+                    allowNull: true,
+                },
+                licensePlates: {
+                    type: DataTypes.STRING(45),
+                    allowNull: false,
+                },
+                registerDate: {
+                    type: DataTypes.DATE,
+                    allowNull: false,
+                },
+                renewRegisterDate: {
+                    type: DataTypes.DATE,
+                    allowNull: false,
+                },
+                note: {
+                    type: DataTypes.STRING(45),
+                    allowNull: true,
+                },
+            },
+            {
+                sequelize,
+                tableName: 'vehicle',
+                timestamps: true,
+                indexes: [
+                    {
+                        name: 'PRIMARY',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'fk_vehicle_1_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'driverId' }],
+                    },
+                ],
+            }
+        );
+    }
 }

@@ -23,3 +23,9 @@ export enum StatusOrder {
     paid = 'Đang thanh toán',
     done = 'Đơn hàng hoàn thành',
 }
+
+export enum TypeImageOfVehicle {
+    vehicleImage = 'Ảnh xe',
+    registrationImage = 'Ảnh đăng ký biển xe',
+    licenseImage = 'Ảnh giấy phép lái xe',
+}

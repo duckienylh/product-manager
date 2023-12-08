@@ -1,0 +1,14 @@
+type ImageOfVehicle {
+    id: Int!
+    vehicle: Vehicle!
+    file: File!
+    type: TypeImageOfVehicle!
+    createdAt: Date
+    updatedAt: Date
+}
+
+enum TypeImageOfVehicle {
+    vehicleImage
+    registrationImage
+    licenseImage
+}

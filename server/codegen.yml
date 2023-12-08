@@ -32,3 +32,7 @@ generates:
         PaymentInfor: ../db_models/mysql/init-models#paymentInfor
         OrderDocument: ../db_models/mysql/init-models#orderDocument
         File: ../db_models/mysql/init-models#file
+        Vehicle: ../db_models/mysql/init-models#vehicle
+        ImageOfVehicle: ../db_models/mysql/init-models#imageOfVehicle
+        VehicleEdge: ../db_models/mysql/vehicle#VehicleEdge
+        VehicleConnection: ../db_models/mysql/vehicle#VehicleConnection

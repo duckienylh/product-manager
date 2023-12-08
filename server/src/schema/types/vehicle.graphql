@@ -1,0 +1,87 @@
+extend type Query {
+    listAllVehicle(input: ListAllVehicleInput!): VehicleConnection!
+
+    listDriverUnselectedVehicle: [User]!
+}
+
+extend type Mutation {
+    createVehicle(input: CreateVehicleInput!): Vehicle!
+
+    updateVehicle(input: UpdateVehicleInput!): SuccessResponse!
+
+    deleteVehicles(input: DeleteVehiclesInput!): SuccessResponse!
+}
+
+type VehicleConnection {
+    edges: [VehicleEdge]
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type VehicleEdge {
+    cursor: String!
+    node: Vehicle
+}
+
+type Vehicle {
+    id: Int!
+    driver: User!
+    typeVehicle: String
+    weight: Float!
+    licensePlates: String!
+    registerDate: Date!
+    renewRegisterDate: Date!
+    vehicleImage:[ImageOfVehicle]
+    registrationImage:[ImageOfVehicle]
+    licenseImage:[ImageOfVehicle]
+    note: String
+    createdAt: Date
+    updatedAt: Date
+}
+
+input ListAllVehicleInput {
+    stringQuery: String
+    driverId: Int
+    typeVehicle: String
+    isRegisterExpired: Boolean
+    isRegisterAlmostExpired: Boolean
+    repairDate:filterDate
+    args: PaginationInput
+}
+
+input CreateVehicleInput {
+    createdById:Int!
+    driverId: Int!
+    typeVehicle: String
+    weight: Float!
+    licensePlates: String!
+    registerDate: Date!
+    renewRegisterDate: Date!
+    vehicleImage: [Upload]!
+    registrationImage: [Upload]!
+    licenseImage: [Upload]!
+    note: String
+}
+
+input UpdateVehicleInput {
+    vehicleId: Int!
+    createdById:Int!
+    driverId: Int
+    typeVehicle: String
+    weight: Float
+    licensePlates: String
+    registerDate: Date
+    renewRegisterDate: Date
+    vehicleImageUpload: [Upload]
+    vehicleImageRemove: [Int!]
+    registrationImageUpload: [Upload]
+    registrationImageRemove: [Int!]
+    licenseImageUpload: [Upload]
+    licenseImageRemove: [Int!]
+    note: String
+}
+
+input DeleteVehiclesInput {
+    ids: [Int!]!
+    deletedBy: Int!
+}
