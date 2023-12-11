@@ -51,6 +51,8 @@ const order_resolver: IResolvers = {
         remainingPaymentMoney: async (parent) => await parent.calculateRemainingPaymentMoney(),
 
         orderDocumentList: async (parent) => parent.orderDocuments ?? (await parent.getOrderDocuments()),
+
+        profit: async (parent) => await parent.getProfit(),
     },
 
     OrderDocument: {

@@ -489,6 +489,7 @@ export type IOrder = {
   orderDocumentList?: Maybe<Array<Maybe<IOrderDocument>>>;
   orderItemList?: Maybe<Array<Maybe<IOrderItem>>>;
   paymentList?: Maybe<Array<Maybe<IPaymentInfor>>>;
+  profit?: Maybe<Scalars['Float']['output']>;
   remainingPaymentMoney?: Maybe<Scalars['Float']['output']>;
   sale: IUser;
   status: IStatusOrder;
@@ -726,6 +727,7 @@ export type ISalesReportRevenueByMonthInput = {
 export type ISalesReportRevenueByMonthResponse = {
   __typename?: 'SalesReportRevenueByMonthResponse';
   month: Scalars['Int']['output'];
+  totalProfit: Scalars['Float']['output'];
   totalRevenue: Scalars['Float']['output'];
 };
 
@@ -738,6 +740,7 @@ export type ISalesReportRevenueByWeekInput = {
 export type ISalesReportRevenueByWeekResponse = {
   __typename?: 'SalesReportRevenueByWeekResponse';
   date: Scalars['Date']['output'];
+  totalProfit: Scalars['Float']['output'];
   totalRevenue: Scalars['Float']['output'];
 };
 
@@ -1431,6 +1434,7 @@ export type IOrderResolvers<ContextType = any, ParentType extends IResolversPare
   orderDocumentList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderDocument']>>>, ParentType, ContextType>;
   orderItemList?: Resolver<Maybe<Array<Maybe<IResolversTypes['OrderItem']>>>, ParentType, ContextType>;
   paymentList?: Resolver<Maybe<Array<Maybe<IResolversTypes['PaymentInfor']>>>, ParentType, ContextType>;
+  profit?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   remainingPaymentMoney?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   sale?: Resolver<IResolversTypes['User'], ParentType, ContextType>;
   status?: Resolver<IResolversTypes['StatusOrder'], ParentType, ContextType>;
@@ -1560,12 +1564,14 @@ export type IQueryResolvers<ContextType = any, ParentType extends IResolversPare
 
 export type ISalesReportRevenueByMonthResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['SalesReportRevenueByMonthResponse'] = IResolversParentTypes['SalesReportRevenueByMonthResponse']> = {
   month?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  totalProfit?: Resolver<IResolversTypes['Float'], ParentType, ContextType>;
   totalRevenue?: Resolver<IResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ISalesReportRevenueByWeekResponseResolvers<ContextType = any, ParentType extends IResolversParentTypes['SalesReportRevenueByWeekResponse'] = IResolversParentTypes['SalesReportRevenueByWeekResponse']> = {
   date?: Resolver<IResolversTypes['Date'], ParentType, ContextType>;
+  totalProfit?: Resolver<IResolversTypes['Float'], ParentType, ContextType>;
   totalRevenue?: Resolver<IResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
