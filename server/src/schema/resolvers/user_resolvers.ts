@@ -156,7 +156,8 @@ const user_resolvers: IResolvers = {
             const orderByWeek = await pmDb.orders.findAll(option);
 
             const arrayTotalMoney = orderByWeek.map((order) => order.getTotalMoney());
-            await Promise.all(arrayTotalMoney);
+            const arrayProfit = orderByWeek.map((order) => order.getProfit());
+            await Promise.all([...arrayTotalMoney, ...arrayProfit]);
 
             for (let i = new Date(startAt); i <= new Date(endAt); i = getNextNDayFromDate(i, 1)) {
                 const weeklySales = orderByWeek
@@ -168,7 +169,9 @@ const user_resolvers: IResolvers = {
                     0.0
                 );
 
-                revenueByWeekArr.push({ date: i, totalRevenue });
+                const totalProfit = weeklySales.reduce((sumRevenue, order) => sumRevenue + (order ? parseFloat(String(order.profit)) : 0.0), 0.0);
+
+                revenueByWeekArr.push({ date: i, totalRevenue, totalProfit });
             }
 
             return revenueByWeekArr;
@@ -208,7 +211,9 @@ const user_resolvers: IResolvers = {
             const orderByMonth = await pmDb.orders.findAll(option);
 
             const arrayTotalMoney = orderByMonth.map((order) => order.getTotalMoney());
-            await Promise.all(arrayTotalMoney);
+            const arrayProfit = orderByMonth.map((order) => order.getProfit());
+
+            await Promise.all([...arrayTotalMoney, ...arrayProfit]);
 
             for (let i = 0; i < 12; i += 1) {
                 const monthlySales = orderByMonth.filter((order) => order.createdAt.getMonth() === i);
@@ -218,7 +223,9 @@ const user_resolvers: IResolvers = {
                     0.0
                 );
 
-                revenueByMonthArr.push({ month: i, totalRevenue });
+                const totalProfit = monthlySales.reduce((sumRevenue, order) => sumRevenue + (order ? parseFloat(String(order.profit)) : 0.0), 0.0);
+
+                revenueByMonthArr.push({ month: i, totalProfit, totalRevenue });
             }
 
             return revenueByMonthArr;

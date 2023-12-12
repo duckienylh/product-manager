@@ -9,6 +9,8 @@ import { file as _file } from './file';
 import type { fileAttributes, fileCreationAttributes } from './file';
 import { imageOfProduct as _imageOfProduct } from './imageOfProduct';
 import type { imageOfProductAttributes, imageOfProductCreationAttributes } from './imageOfProduct';
+import { imageOfVehicle as _imageOfVehicle } from './imageOfVehicle';
+import type { imageOfVehicleAttributes, imageOfVehicleCreationAttributes } from './imageOfVehicle';
 import { notifications as _notifications } from './notifications';
 import type { notificationsAttributes, notificationsCreationAttributes } from './notifications';
 import { orderDocument as _orderDocument } from './orderDocument';
@@ -27,6 +29,8 @@ import { user as _user } from './user';
 import type { userAttributes, userCreationAttributes } from './user';
 import { userNotifications as _userNotifications } from './userNotifications';
 import type { userNotificationsAttributes, userNotificationsCreationAttributes } from './userNotifications';
+import { vehicle as _vehicle } from './vehicle';
+import type { vehicleAttributes, vehicleCreationAttributes } from './vehicle';
 
 export {
   _categories as categories,
@@ -34,6 +38,7 @@ export {
   _deliverOrder as deliverOrder,
   _file as file,
   _imageOfProduct as imageOfProduct,
+  _imageOfVehicle as imageOfVehicle,
   _notifications as notifications,
   _orderDocument as orderDocument,
   _orderItem as orderItem,
@@ -43,6 +48,7 @@ export {
   _products as products,
   _user as user,
   _userNotifications as userNotifications,
+  _vehicle as vehicle,
 };
 
 export type {
@@ -56,6 +62,8 @@ export type {
   fileCreationAttributes,
   imageOfProductAttributes,
   imageOfProductCreationAttributes,
+  imageOfVehicleAttributes,
+  imageOfVehicleCreationAttributes,
   notificationsAttributes,
   notificationsCreationAttributes,
   orderDocumentAttributes,
@@ -74,6 +82,8 @@ export type {
   userCreationAttributes,
   userNotificationsAttributes,
   userNotificationsCreationAttributes,
+  vehicleAttributes,
+  vehicleCreationAttributes,
 };
 
 export function initModels(sequelize: Sequelize) {
@@ -82,6 +92,7 @@ export function initModels(sequelize: Sequelize) {
   const deliverOrder = _deliverOrder.initModel(sequelize);
   const file = _file.initModel(sequelize);
   const imageOfProduct = _imageOfProduct.initModel(sequelize);
+  const imageOfVehicle = _imageOfVehicle.initModel(sequelize);
   const notifications = _notifications.initModel(sequelize);
   const orderDocument = _orderDocument.initModel(sequelize);
   const orderItem = _orderItem.initModel(sequelize);
@@ -91,6 +102,7 @@ export function initModels(sequelize: Sequelize) {
   const products = _products.initModel(sequelize);
   const user = _user.initModel(sequelize);
   const userNotifications = _userNotifications.initModel(sequelize);
+  const vehicle = _vehicle.initModel(sequelize);
 
   products.belongsTo(categories, { as: 'category', foreignKey: 'categoryId'});
   categories.hasMany(products, { as: 'products', foreignKey: 'categoryId'});
@@ -100,6 +112,8 @@ export function initModels(sequelize: Sequelize) {
   customers.hasMany(orders, { as: 'orders', foreignKey: 'customerId'});
   paymentInfor.belongsTo(customers, { as: 'customer', foreignKey: 'customerId'});
   customers.hasMany(paymentInfor, { as: 'paymentInfors', foreignKey: 'customerId'});
+  imageOfVehicle.belongsTo(file, { as: 'file', foreignKey: 'fileId'});
+  file.hasMany(imageOfVehicle, { as: 'imageOfVehicles', foreignKey: 'fileId'});
   orderDocument.belongsTo(file, { as: 'file', foreignKey: 'fileId'});
   file.hasMany(orderDocument, { as: 'orderDocuments', foreignKey: 'fileId'});
   userNotifications.belongsTo(notifications, { as: 'notification', foreignKey: 'notificationId'});
@@ -130,6 +144,10 @@ export function initModels(sequelize: Sequelize) {
   user.hasMany(orders, { as: 'orders', foreignKey: 'saleId'});
   userNotifications.belongsTo(user, { as: 'user', foreignKey: 'userId'});
   user.hasMany(userNotifications, { as: 'userNotifications', foreignKey: 'userId'});
+  vehicle.belongsTo(user, { as: 'driver', foreignKey: 'driverId'});
+  user.hasMany(vehicle, { as: 'vehicles', foreignKey: 'driverId'});
+  imageOfVehicle.belongsTo(vehicle, { as: 'vehicle', foreignKey: 'vehicleId'});
+  vehicle.hasMany(imageOfVehicle, { as: 'imageOfVehicles', foreignKey: 'vehicleId'});
 
   return {
     categories,
@@ -137,6 +155,7 @@ export function initModels(sequelize: Sequelize) {
     deliverOrder,
     file,
     imageOfProduct,
+    imageOfVehicle,
     notifications,
     orderDocument,
     orderItem,
@@ -146,5 +165,6 @@ export function initModels(sequelize: Sequelize) {
     products,
     user,
     userNotifications,
+    vehicle,
   };
 }

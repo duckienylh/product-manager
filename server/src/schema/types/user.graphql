@@ -74,11 +74,13 @@ type NotificationResponse {
 
 type SalesReportRevenueByWeekResponse {
     date: Date!
+    totalProfit: Float!
     totalRevenue: Float!
 }
 
 type SalesReportRevenueByMonthResponse {
     month: Int!
+    totalProfit: Float!
     totalRevenue: Float!
 }
 

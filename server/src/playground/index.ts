@@ -107,6 +107,16 @@ const deletePaymentInfo = importGraphqlString('./mutations/paymentInfor/deletePa
 
 const updateStatusOrder = importGraphqlString('./mutations/order/updateStatusOrder.graphql');
 
+const createVehicle = importGraphqlString('./mutations/vehicle/createVehicle.graphql');
+
+const updateVehicle = importGraphqlString('./mutations/vehicle/updateVehicle.graphql');
+
+const deleteVehicles = importGraphqlString('./mutations/vehicle/deleteVehicles.graphql');
+
+const listAllVehicle = importGraphqlString('./queries/vehicle/listAllVehicle.graphql');
+
+const listDriverUnselectedVehicle = importGraphqlString('./queries/vehicle/listDriverUnselectedVehicle.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -389,6 +399,41 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: updateStatusOrder,
             headers: userAuth,
             variables: prettifyJsonString(variables.updateStatusOrder),
+        },
+        {
+            endpoint: path,
+            name: 'Tạo phương tiện',
+            query: createVehicle,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createVehicle),
+        },
+        {
+            endpoint: path,
+            name: 'Sửa phương tiện',
+            query: updateVehicle,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createVehicle),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa phương tiện',
+            query: deleteVehicles,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createVehicle),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách phương tiện',
+            query: listAllVehicle,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createVehicle),
+        },
+        {
+            endpoint: path,
+            name: 'Danh sách lái xe chưa có phương tiện',
+            query: listDriverUnselectedVehicle,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.createVehicle),
         },
     ];
 };

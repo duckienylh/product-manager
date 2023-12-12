@@ -30,6 +30,9 @@ export enum PM_ERROR_CODE {
     UserNotificationNotFound = 'UserNotificationNotFound',
     PaymentInfoNotFound = 'PaymentInfoNotFound',
     FileNotFound = 'FileNotFound',
+    DriverAlreadyExist = 'DriverAlreadyExist',
+    LicensePlatesAlreadyExist = 'LicensePlatesAlreadyExist',
+    VehicleNotExist = 'VehicleNotExist',
 }
 
 export class AuthenticationError extends GraphQLError {
@@ -197,6 +200,36 @@ export class FileNotFoundError extends GraphQLError {
         super(message || 'Tài liệu không tồn tại', {
             extensions: {
                 code: PM_ERROR_CODE.FileNotFound,
+            },
+        });
+    }
+}
+
+export class DriverAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Lái xe đã có xe', {
+            extensions: {
+                code: PM_ERROR_CODE.DriverAlreadyExist,
+            },
+        });
+    }
+}
+
+export class LicensePlatesAlreadyExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Biển số xe đã tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.LicensePlatesAlreadyExist,
+            },
+        });
+    }
+}
+
+export class VehicleNotExistError extends GraphQLError {
+    constructor(message: string | null = null) {
+        super(message || 'Phương tiện không tồn tại', {
+            extensions: {
+                code: PM_ERROR_CODE.VehicleNotExist,
             },
         });
     }

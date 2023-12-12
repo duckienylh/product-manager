@@ -251,4 +251,7 @@ export const variables = {
             newFiles: [],
         },
     },
+    createVehicle: {
+        input: {},
+    },
 };

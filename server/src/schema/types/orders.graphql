@@ -29,6 +29,7 @@ type Order {
     invoiceNo: String!
     VAT: Float
     totalMoney: Float
+    profit: Float
     status: StatusOrder!
     discount: Float
     freightPrice: Float

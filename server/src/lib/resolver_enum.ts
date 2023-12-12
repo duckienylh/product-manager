@@ -1,5 +1,5 @@
-import { INotificationEvent, IRole, IStatusOrder } from '../__generated__/graphql';
-import { RoleList, StatusOrder } from './enum';
+import { INotificationEvent, IRole, IStatusOrder, ITypeImageOfVehicle } from '../__generated__/graphql';
+import { RoleList, StatusOrder, TypeImageOfVehicle } from './enum';
 import { InValidRoleError, InValidValueError } from './classes/graphqlErrors';
 import { NotificationEvent } from './classes/PubSubService';
 
@@ -59,6 +59,8 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.UpdatedDeliverOrder;
         case INotificationEvent.NewPayment:
             return NotificationEvent.NewPayment;
+        case INotificationEvent.NewVehicle:
+            return NotificationEvent.NewVehicle;
     }
 };
 
@@ -99,6 +101,19 @@ export const IStatusOrderToStatusOrder = (iStatusOrderInput: IStatusOrder) => {
             return StatusOrder.paid;
         case IStatusOrder.Done:
             return StatusOrder.done;
+        default:
+            throw new InValidValueError();
+    }
+};
+
+export const typeImageOfVehicleToITypeImageOfVehicle = (input: TypeImageOfVehicle | string) => {
+    switch (input) {
+        case TypeImageOfVehicle.licenseImage:
+            return ITypeImageOfVehicle.LicenseImage;
+        case TypeImageOfVehicle.registrationImage:
+            return ITypeImageOfVehicle.RegistrationImage;
+        case TypeImageOfVehicle.vehicleImage:
+            return ITypeImageOfVehicle.VehicleImage;
         default:
             throw new InValidValueError();
     }
