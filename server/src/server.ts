@@ -17,7 +17,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { expressMiddleware } from '@apollo/server/express4';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import cron from 'cron';
+import { CronJob } from 'cron';
 import resolvers from './schema/resolvers';
 import typeDefs from './schema/types';
 import { USER_JWT } from './lib/utils/jwt';
@@ -175,7 +175,7 @@ async function startServer() {
     });
 }
 
-const productAlmostOverFunc = new cron.CronJob('0 9 * * *', async () => {
+const productAlmostOverFunc = new CronJob('0 9 * * * ', async () => {
     try {
         await productAlmostOver();
     } catch (error) {
