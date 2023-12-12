@@ -47,7 +47,7 @@ const product_resolver: IResolvers = {
                         required: false,
                     },
                 ],
-                order: [['id', 'DESC']],
+                order: [['inventory', 'DESC']],
             };
 
             const orWhereOpt: WhereOptions<pmDb.products> = {};
