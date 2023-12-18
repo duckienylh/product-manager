@@ -1,4 +1,4 @@
-import { FindAndCountOptions, FindOptions, Op, Transaction, WhereOptions } from 'sequelize';
+import { FindAndCountOptions, Op, Transaction, WhereOptions } from 'sequelize';
 import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
@@ -388,7 +388,7 @@ const vehicle_resolvers: IResolvers = {
                     if (vehicleImageUpload && vehicleImageUpload.length > 0) {
                         for (let i = 0; i < vehicleImageUpload.length; i += 1) {
                             // eslint-disable-next-line no-await-in-loop
-                            const { createReadStream, filename, mimetype, encoding } = await vehicleImageUpload[i];
+                            const { createReadStream, filename, mimetype, encoding } = await vehicleImageUpload[i].file;
                             const filePath = `vehicle/driver/${createdById}/vehicleImage/${filename}`;
                             const fileStream = createReadStream();
 
@@ -453,7 +453,7 @@ const vehicle_resolvers: IResolvers = {
                     if (registrationImageUpload && registrationImageUpload.length > 0) {
                         for (let i = 0; i < registrationImageUpload.length; i += 1) {
                             // eslint-disable-next-line no-await-in-loop
-                            const { createReadStream, filename, mimetype, encoding } = await registrationImageUpload[i];
+                            const { createReadStream, filename, mimetype, encoding } = await registrationImageUpload[i].file;
                             const filePath = `vehicle/driver/${createdById}/registrationImage/${filename}`;
                             const fileStream = createReadStream();
 
@@ -517,7 +517,7 @@ const vehicle_resolvers: IResolvers = {
                     if (licenseImageUpload && licenseImageUpload.length > 0) {
                         for (let i = 0; i < licenseImageUpload.length; i += 1) {
                             // eslint-disable-next-line no-await-in-loop
-                            const { createReadStream, filename, mimetype, encoding } = await licenseImageUpload[i];
+                            const { createReadStream, filename, mimetype, encoding } = await licenseImageUpload[i].file;
                             const filePath = `vehicle/driver/${createdById}/licenseImage/${filename}`;
                             const fileStream = createReadStream();
 

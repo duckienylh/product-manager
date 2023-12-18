@@ -285,7 +285,7 @@ const order_resolver: IResolvers = {
                         // eslint-disable-next-line no-await-in-loop
                         const updateWeightProduct = await pmDb.products.findByPk(product[i].productId, { rejectOnEmpty: new ProductNotFoundError() });
 
-                        const remainingWeight = updateWeightProduct.inventory ? updateWeightProduct.inventory : 0.0 - product[i].quantity;
+                        const remainingWeight = (updateWeightProduct.inventory ? Number(updateWeightProduct.inventory) : 0.0) - product[i].quantity;
                         if (remainingWeight < 0) throw new Error('Khối lượng gỗ trong kho không đủ!!!');
                         updateWeightProduct.inventory = remainingWeight;
 

@@ -73,11 +73,11 @@ input UpdateVehicleInput {
     registerDate: Date
     renewRegisterDate: Date
     vehicleImageUpload: [Upload]
-    vehicleImageRemove: [Int!]
+    vehicleImageRemove: [Int!] #id of file
     registrationImageUpload: [Upload]
-    registrationImageRemove: [Int!]
+    registrationImageRemove: [Int!] #id of file
     licenseImageUpload: [Upload]
-    licenseImageRemove: [Int!]
+    licenseImageRemove: [Int!] #id of file
     note: String
 }
 
