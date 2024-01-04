@@ -230,6 +230,41 @@ const order_resolver: IResolvers = {
             checkAuthentication(context);
             return await pmDb.orders.findByPk(orderId, { rejectOnEmpty: new OrderNotFoundError() });
         },
+        getLatest5Orders: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            const { saleId } = input;
+            return await pmDb.orders.findAll({
+                where: {
+                    saleId,
+                },
+                include: [
+                    {
+                        model: pmDb.user,
+                        as: 'sale',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.customers,
+                        as: 'customer',
+                        required: true,
+                    },
+                    {
+                        model: pmDb.orderDocument,
+                        as: 'orderDocuments',
+                        required: false,
+                        include: [
+                            {
+                                model: pmDb.file,
+                                as: 'file',
+                                required: false,
+                            },
+                        ],
+                    },
+                ],
+                order: [['createdAt', 'DESC']],
+                limit: 5,
+            });
+        },
     },
 
     Mutation: {
@@ -642,14 +677,12 @@ const order_resolver: IResolvers = {
                     }
 
                     if (statusOrder) {
-                        order.status = IStatusOrderToStatusOrder(statusOrder);
-
                         // notifications
                         const newOrderProcess: orderProcessCreationAttributes = {
                             orderId: order.id,
                             userId,
-                            fromStatus: StatusOrder.creatNew,
-                            toStatus: StatusOrder.createExportOrder,
+                            fromStatus: order.status,
+                            toStatus: IStatusOrderToStatusOrder(statusOrder),
                             description: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
                                 statusOrder
                             )}`,
@@ -670,7 +703,7 @@ const order_resolver: IResolvers = {
 
                         const notificationAttribute: notificationsCreationAttributes = {
                             orderId: order.id,
-                            event: NotificationEvent.NewDeliverOrder,
+                            event: NotificationEvent.UpdateOrder,
                             content: `Đơn hàng khách ${order.customer.name ?? order.customer.phoneNumber} vừa được ${IStatusOrderToStatusOrder(
                                 statusOrder
                             )}`,
@@ -701,6 +734,8 @@ const order_resolver: IResolvers = {
                             notification,
                             order,
                         });
+
+                        order.status = IStatusOrderToStatusOrder(statusOrder);
 
                         await order.save({ transaction: t });
                     }

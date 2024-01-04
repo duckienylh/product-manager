@@ -119,6 +119,7 @@ type Mutation {
     createUser(input: CreateUserInput!): User!
     createVehicle(input: CreateVehicleInput!): Vehicle!
     deleteCustomer(input: DeleteCustomerInput!): SuccessResponse!
+    deleteDeliverOrders(input: DeleteDeliverOrdersInput!): SuccessResponse!
     deletePaymentInfo(input: DeletePaymentInfoInput!): SuccessResponse!
     deleteProduct(input: DeleteProductInput!): SuccessResponse!
     deleteUser(input: DeleteUserInput!): SuccessResponse!
@@ -261,6 +262,7 @@ type Query {
     adminReportRevenueByMonth(input: AdminReportRevenueByMonthInput!): [AdminReportRevenueByMonthResponse]!
     getCategoryById(id: Int!): Category!
     getCustomerById(CustomerId: Int!): Customer!
+    getLatest5Orders(input: getLatest5OrdersInput!): [Order]!
     getOrderById(orderId: Int!): Order!
     getProductById(productId: Int!): Product!
     getUserById(userId: Int!): User!
@@ -502,6 +504,11 @@ input DeleteCustomerInput {
     ids: [Int!]!
 }
 
+input DeleteDeliverOrdersInput {
+    deleteBy: Int!
+    ids: [Int!]!
+}
+
 input DeletePaymentInfoInput {
     deleteBy: Int!
     ids: [Int!]!
@@ -536,6 +543,7 @@ input ListAllDeliverOrderInput {
     queryString: String
     saleId: Int
     status: String
+    theNext7Days: Boolean
 }
 
 input ListAllOrderInput {
@@ -726,6 +734,10 @@ input UsersInput {
 input filterDate {
     endAt: Date!
     startAt: Date!
+}
+
+input getLatest5OrdersInput {
+    saleId: Int!
 }
 
 input productInput {

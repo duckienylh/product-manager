@@ -158,6 +158,11 @@ export type IDeleteCustomerInput = {
   ids: Array<Scalars['Int']['input']>;
 };
 
+export type IDeleteDeliverOrdersInput = {
+  deleteBy: Scalars['Int']['input'];
+  ids: Array<Scalars['Int']['input']>;
+};
+
 export type IDeletePaymentInfoInput = {
   deleteBy: Scalars['Int']['input'];
   ids: Array<Scalars['Int']['input']>;
@@ -241,6 +246,7 @@ export type IListAllDeliverOrderInput = {
   queryString?: InputMaybe<Scalars['String']['input']>;
   saleId?: InputMaybe<Scalars['Int']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
+  theNext7Days?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type IListAllDeliverOrderResponse = {
@@ -311,6 +317,7 @@ export type IMutation = {
   createUser: IUser;
   createVehicle: IVehicle;
   deleteCustomer: ISuccessResponse;
+  deleteDeliverOrders: ISuccessResponse;
   deletePaymentInfo: ISuccessResponse;
   deleteProduct: ISuccessResponse;
   deleteUser: ISuccessResponse;
@@ -371,6 +378,11 @@ export type IMutationCreateVehicleArgs = {
 
 export type IMutationDeleteCustomerArgs = {
   input: IDeleteCustomerInput;
+};
+
+
+export type IMutationDeleteDeliverOrdersArgs = {
+  input: IDeleteDeliverOrdersInput;
 };
 
 
@@ -605,6 +617,7 @@ export type IQuery = {
   adminReportRevenueByMonth: Array<Maybe<IAdminReportRevenueByMonthResponse>>;
   getCategoryById: ICategory;
   getCustomerById: ICustomer;
+  getLatest5Orders: Array<Maybe<IOrder>>;
   getOrderById: IOrder;
   getProductById: IProduct;
   getUserById: IUser;
@@ -637,6 +650,11 @@ export type IQueryGetCategoryByIdArgs = {
 
 export type IQueryGetCustomerByIdArgs = {
   CustomerId: Scalars['Int']['input'];
+};
+
+
+export type IQueryGetLatest5OrdersArgs = {
+  input: IGetLatest5OrdersInput;
 };
 
 
@@ -990,6 +1008,10 @@ export type IFilterDate = {
   startAt: Scalars['Date']['input'];
 };
 
+export type IGetLatest5OrdersInput = {
+  saleId: Scalars['Int']['input'];
+};
+
 export type IProductInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   priceProduct: Scalars['Float']['input'];
@@ -1086,6 +1108,7 @@ export type IResolversTypes = {
   CustomerEdge: ResolverTypeWrapper<CustomerEdge>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DeleteCustomerInput: IDeleteCustomerInput;
+  DeleteDeliverOrdersInput: IDeleteDeliverOrdersInput;
   DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
@@ -1158,6 +1181,7 @@ export type IResolversTypes = {
   VehicleConnection: ResolverTypeWrapper<VehicleConnection>;
   VehicleEdge: ResolverTypeWrapper<VehicleEdge>;
   filterDate: IFilterDate;
+  getLatest5OrdersInput: IGetLatest5OrdersInput;
   productInput: IProductInput;
 };
 
@@ -1181,6 +1205,7 @@ export type IResolversParentTypes = {
   CustomerEdge: CustomerEdge;
   Date: Scalars['Date']['output'];
   DeleteCustomerInput: IDeleteCustomerInput;
+  DeleteDeliverOrdersInput: IDeleteDeliverOrdersInput;
   DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
@@ -1248,6 +1273,7 @@ export type IResolversParentTypes = {
   VehicleConnection: VehicleConnection;
   VehicleEdge: VehicleEdge;
   filterDate: IFilterDate;
+  getLatest5OrdersInput: IGetLatest5OrdersInput;
   productInput: IProductInput;
 };
 
@@ -1388,6 +1414,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   createUser?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IMutationCreateUserArgs, 'input'>>;
   createVehicle?: Resolver<IResolversTypes['Vehicle'], ParentType, ContextType, RequireFields<IMutationCreateVehicleArgs, 'input'>>;
   deleteCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteCustomerArgs, 'input'>>;
+  deleteDeliverOrders?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteDeliverOrdersArgs, 'input'>>;
   deletePaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeletePaymentInfoArgs, 'input'>>;
   deleteProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteProductArgs, 'input'>>;
   deleteUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteUserArgs, 'input'>>;
@@ -1543,6 +1570,7 @@ export type IQueryResolvers<ContextType = any, ParentType extends IResolversPare
   adminReportRevenueByMonth?: Resolver<Array<Maybe<IResolversTypes['AdminReportRevenueByMonthResponse']>>, ParentType, ContextType, RequireFields<IQueryAdminReportRevenueByMonthArgs, 'input'>>;
   getCategoryById?: Resolver<IResolversTypes['Category'], ParentType, ContextType, RequireFields<IQueryGetCategoryByIdArgs, 'id'>>;
   getCustomerById?: Resolver<IResolversTypes['Customer'], ParentType, ContextType, RequireFields<IQueryGetCustomerByIdArgs, 'CustomerId'>>;
+  getLatest5Orders?: Resolver<Array<Maybe<IResolversTypes['Order']>>, ParentType, ContextType, RequireFields<IQueryGetLatest5OrdersArgs, 'input'>>;
   getOrderById?: Resolver<IResolversTypes['Order'], ParentType, ContextType, RequireFields<IQueryGetOrderByIdArgs, 'orderId'>>;
   getProductById?: Resolver<IResolversTypes['Product'], ParentType, ContextType, RequireFields<IQueryGetProductByIdArgs, 'productId'>>;
   getUserById?: Resolver<IResolversTypes['User'], ParentType, ContextType, RequireFields<IQueryGetUserByIdArgs, 'userId'>>;
