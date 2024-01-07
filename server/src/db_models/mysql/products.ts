@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { categories, categoriesId } from './categories';
+import type { imageOfProduct, imageOfProductId } from './imageOfProduct';
 import type { orderItem, orderItemId } from './orderItem';
 import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
@@ -80,6 +81,29 @@ export class products extends Model<productsAttributes, productsCreationAttribut
     setCategory!: Sequelize.BelongsToSetAssociationMixin<categories, categoriesId>;
 
     createCategory!: Sequelize.BelongsToCreateAssociationMixin<categories>;
+
+    // products hasMany imageOfProduct via productId
+    imageOfProducts!: imageOfProduct[];
+
+    getImageOfProducts!: Sequelize.HasManyGetAssociationsMixin<imageOfProduct>;
+
+    setImageOfProducts!: Sequelize.HasManySetAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    addImageOfProduct!: Sequelize.HasManyAddAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    addImageOfProducts!: Sequelize.HasManyAddAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    createImageOfProduct!: Sequelize.HasManyCreateAssociationMixin<imageOfProduct>;
+
+    removeImageOfProduct!: Sequelize.HasManyRemoveAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    removeImageOfProducts!: Sequelize.HasManyRemoveAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    hasImageOfProduct!: Sequelize.HasManyHasAssociationMixin<imageOfProduct, imageOfProductId>;
+
+    hasImageOfProducts!: Sequelize.HasManyHasAssociationsMixin<imageOfProduct, imageOfProductId>;
+
+    countImageOfProducts!: Sequelize.HasManyCountAssociationsMixin;
 
     // products hasMany orderItem via productId
     orderItems!: orderItem[];

@@ -12,6 +12,7 @@ import { minIOServices } from '../../lib/classes';
 import { BucketValue, RoleList } from '../../lib/enum';
 import { convertRDBRowsToConnection, getRDBPaginationParams, rdbConnectionResolver, rdbEdgeResolver } from '../../lib/utils/relay';
 import { warningInventory } from '../../lib/utils/orthers';
+import { imageOfProductCreationAttributes } from '../../db_models/mysql/imageOfProduct';
 
 const product_resolver: IResolvers = {
     ProductEdge: rdbEdgeResolver,
@@ -22,6 +23,16 @@ const product_resolver: IResolvers = {
         category: async (parent) => parent.category ?? (await parent.getCategory()),
 
         image: async (parent) => (parent.image ? await minIOServices.generateDownloadURL(parent.image, null) : null),
+
+        imagesOfProduct: async (parent) => parent.imageOfProducts ?? (await parent.getImageOfProducts()),
+    },
+
+    ImageOfProduct: {
+        product: async (parent) => parent.product ?? (await parent.getProduct()),
+
+        uploadBy: async (parent) => parent.uploadBy_user ?? (await parent.getProduct()),
+
+        url: async (parent) => await minIOServices.generateDownloadURL(parent.keyPath, BucketValue.DEVTEAM),
     },
 
     Query: {
@@ -79,7 +90,7 @@ const product_resolver: IResolvers = {
     Mutation: {
         createProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            const { name, code, height, inventory, age, image, price, description, weight, width, quantity, categoryId } = input;
+            const { name, code, height, inventory, age, image, imagesOfProduct, price, description, weight, width, quantity, categoryId } = input;
             await pmDb.categories.findByPk(categoryId, { rejectOnEmpty: new CategoryNotFoundError() });
             const productAttribute: productsCreationAttributes = {
                 categoryId,
@@ -97,13 +108,36 @@ const product_resolver: IResolvers = {
             return await sequelize.transaction(async (t: Transaction) => {
                 try {
                     const newProduct = await pmDb.products.create(productAttribute);
+                    const imageOfProductPromise = [];
+                    const imageOfProductNew = [];
+
                     if (image) {
-                        const { createReadStream, filename, mimetype } = await image.file;
-                        const fileStream = createReadStream();
-                        const filePath = `image_product/${filename}`;
-                        await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
-                        newProduct.image = filePath;
+                        const { filename } = await image.file;
+
+                        newProduct.image = `image_product/${newProduct.id}/${filename}`;
                         await newProduct.save({ transaction: t });
+                    }
+
+                    if (imagesOfProduct) {
+                        for (let i = 0; i < imagesOfProduct.length; i += 1) {
+                            // eslint-disable-next-line no-await-in-loop
+                            const { createReadStream, filename, mimetype } = await imagesOfProduct[i].file;
+                            const fileStream = createReadStream();
+                            const filePath = `image_product/${newProduct.id}/${filename}`;
+                            const imageOfProduct: imageOfProductCreationAttributes = {
+                                fileName: filePath,
+                                productId: newProduct.id,
+                                uploadBy: undefined,
+                                mineType: mimetype,
+                                keyPath: filePath,
+                            };
+                            imageOfProductNew.push(pmDb.imageOfProduct.create(imageOfProduct, { transaction: t }));
+                            imageOfProductPromise.push(minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype));
+                        }
+                    }
+
+                    if (imageOfProductNew.length > 0 || imageOfProductPromise.length > 0) {
+                        await Promise.all([imageOfProductNew, ...imageOfProductPromise]);
                     }
                     return newProduct;
                 } catch (error) {
@@ -114,7 +148,7 @@ const product_resolver: IResolvers = {
         },
         updateProduct: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
-            const { id, name, code, height, inventory, age, image, price, description, weight, width, quantity, categoryId } = input;
+            const { id, name, code, height, inventory, age, image, imagesOfProduct, price, description, weight, width, quantity, categoryId } = input;
 
             const product = await pmDb.products.findByPk(id, { rejectOnEmpty: new ProductNotFoundError() });
             if (categoryId) {
@@ -134,15 +168,62 @@ const product_resolver: IResolvers = {
 
             return await sequelize.transaction(async (t: Transaction) => {
                 try {
+                    const deleteImageProductOnS3: string[] = [];
+
                     if (image) {
-                        const { createReadStream, filename, mimetype } = await image.file;
-                        const fileStream = createReadStream();
-                        const filePath = `image_product/${filename}`;
-                        await minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype);
-                        product.image = filePath;
+                        const { filename } = await image.file;
+
+                        product.image = `image_product/${id}/${filename}`;
                     }
 
+                    const imageOfProductPromise = [];
+                    const imageOfProductNew = [];
+
+                    if (imagesOfProduct) {
+                        const imagesPrd = await pmDb.imageOfProduct
+                            .findAll({
+                                where: {
+                                    productId: id,
+                                },
+                            })
+                            .then((e) =>
+                                e.map((ePrd) => {
+                                    deleteImageProductOnS3.push(ePrd.keyPath);
+                                    return ePrd.id;
+                                })
+                            );
+
+                        for (let i = 0; i < imagesOfProduct.length; i += 1) {
+                            // eslint-disable-next-line no-await-in-loop
+                            const { createReadStream, filename, mimetype } = await imagesOfProduct[i].file;
+                            const fileStream = createReadStream();
+                            const filePath = `image_product/${id}/${filename}`;
+                            const imageOfProduct: imageOfProductCreationAttributes = {
+                                fileName: filePath,
+                                productId: id,
+                                uploadBy: undefined,
+                                mineType: mimetype,
+                                keyPath: filePath,
+                            };
+                            imageOfProductNew.push(pmDb.imageOfProduct.create(imageOfProduct, { transaction: t }));
+                            imageOfProductPromise.push(minIOServices.upload(BucketValue.DEVTEAM, filePath, fileStream, mimetype));
+                        }
+
+                        if (imagesPrd.length > 0) {
+                            await pmDb.imageOfProduct.destroy({
+                                where: {
+                                    id: imagesPrd,
+                                },
+                            });
+                        }
+                    }
                     await product.save({ transaction: t });
+
+                    if (deleteImageProductOnS3.length > 0) await minIOServices.deleteObjects(deleteImageProductOnS3, BucketValue.DEVTEAM);
+
+                    if (imageOfProductNew.length > 0 || imageOfProductPromise.length > 0) {
+                        await Promise.all([imageOfProductNew, ...imageOfProductPromise]);
+                    }
                     return ISuccessResponse.Success;
                 } catch (error) {
                     await t.rollback();
@@ -176,9 +257,26 @@ const product_resolver: IResolvers = {
                 try {
                     const deleteImageProductOnS3: string[] = [];
 
-                    deleteProduct.forEach((e) => {
-                        if (e.image) deleteImageProductOnS3.push(e.image);
-                    });
+                    const imagesPrd = await pmDb.imageOfProduct
+                        .findAll({
+                            where: {
+                                productId: ids,
+                            },
+                        })
+                        .then((e) =>
+                            e.map((ePrd) => {
+                                deleteImageProductOnS3.push(ePrd.keyPath);
+                                return ePrd.id;
+                            })
+                        );
+
+                    if (imagesPrd.length > 0) {
+                        await pmDb.imageOfProduct.destroy({
+                            where: {
+                                id: imagesPrd,
+                            },
+                        });
+                    }
 
                     await pmDb.products.destroy({ where: { id: ids }, transaction: t });
 
@@ -220,12 +318,24 @@ const product_resolver: IResolvers = {
                     const xlData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
                     const productDuplicate = [];
 
-                    const getAllProduct = await pmDb.products.findAll();
+                    const getAllProduct = await pmDb.products.findAll({
+                        include: [
+                            {
+                                model: pmDb.categories,
+                                as: 'category',
+                                required: false,
+                            },
+                        ],
+                    });
                     for (let i = 0; i < xlData?.length; i += 1) {
                         let isDuplicate = false;
                         for (let j = 0; j < getAllProduct.length; j += 1) {
                             if (xlData) {
-                                if (xlData[i]['Tên'] === getAllProduct[j].name && xlData[i]['Mã sản phẩm'] === getAllProduct[j].code) {
+                                if (
+                                    xlData[i]['Tên'] === getAllProduct[j].name &&
+                                    xlData[i]['Mã sản phẩm'] === getAllProduct[j].code &&
+                                    xlData[i]['Danh mục'] === getAllProduct[j].category.name
+                                ) {
                                     // update inventory product when have duplicate product
                                     getAllProduct[j].inventory += xlData[i]['Tồn kho'];
                                     productDuplicate.push(getAllProduct[j].save());

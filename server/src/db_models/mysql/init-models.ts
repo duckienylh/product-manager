@@ -130,6 +130,8 @@ export function initModels(sequelize: Sequelize) {
   orders.hasMany(orderProcess, { as: 'orderProcesses', foreignKey: 'orderId'});
   paymentInfor.belongsTo(orders, { as: 'order', foreignKey: 'orderId'});
   orders.hasMany(paymentInfor, { as: 'paymentInfors', foreignKey: 'orderId'});
+  imageOfProduct.belongsTo(products, { as: 'product', foreignKey: 'productId'});
+  products.hasMany(imageOfProduct, { as: 'imageOfProducts', foreignKey: 'productId'});
   orderItem.belongsTo(products, { as: 'product', foreignKey: 'productId'});
   products.hasMany(orderItem, { as: 'orderItems', foreignKey: 'productId'});
   deliverOrder.belongsTo(user, { as: 'driver', foreignKey: 'driverId'});

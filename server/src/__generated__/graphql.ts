@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { user, customers, categories, products, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications, paymentInfor, orderDocument, file, vehicle, imageOfVehicle } from '../db_models/mysql/init-models';
+import { user, customers, categories, products, imageOfProduct, orders, notifications, orderItem, orderProcess, deliverOrder, userNotifications, paymentInfor, orderDocument, file, vehicle, imageOfVehicle } from '../db_models/mysql/init-models';
 import { UserEdge, UserConnection } from '../db_models/mysql/user';
 import { CustomerEdge, CustomerConnection } from '../db_models/mysql/customers';
 import { ProductEdge, ProductConnection } from '../db_models/mysql/products';
@@ -95,6 +95,7 @@ export type ICreateProductInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   height?: InputMaybe<Scalars['Float']['input']>;
   image?: InputMaybe<Scalars['Upload']['input']>;
+  imagesOfProduct?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   inventory?: InputMaybe<Scalars['Float']['input']>;
   name: Scalars['String']['input'];
   price: Scalars['Float']['input'];
@@ -215,6 +216,20 @@ export type IFile = {
   id: Scalars['Int']['output'];
   keyPath: Scalars['String']['output'];
   mimeType?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['Date']['output']>;
+  uploadBy?: Maybe<IUser>;
+  url: Scalars['String']['output'];
+};
+
+export type IImageOfProduct = {
+  __typename?: 'ImageOfProduct';
+  createdAt?: Maybe<Scalars['Date']['output']>;
+  encoding?: Maybe<Scalars['String']['output']>;
+  fileName: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  keyPath: Scalars['String']['output'];
+  mineType?: Maybe<Scalars['String']['output']>;
+  product: IProduct;
   updatedAt?: Maybe<Scalars['Date']['output']>;
   uploadBy?: Maybe<IUser>;
   url: Scalars['String']['output'];
@@ -590,6 +605,7 @@ export type IProduct = {
   height?: Maybe<Scalars['Float']['output']>;
   id: Scalars['Int']['output'];
   image?: Maybe<Scalars['String']['output']>;
+  imagesOfProduct?: Maybe<Array<Maybe<IImageOfProduct>>>;
   inventory?: Maybe<Scalars['Float']['output']>;
   name: Scalars['String']['output'];
   price: Scalars['Float']['output'];
@@ -853,6 +869,7 @@ export type IUpdateProductInput = {
   height?: InputMaybe<Scalars['Float']['input']>;
   id: Scalars['Int']['input'];
   image?: InputMaybe<Scalars['Upload']['input']>;
+  imagesOfProduct?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
   inventory?: InputMaybe<Scalars['Float']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   price?: InputMaybe<Scalars['Float']['input']>;
@@ -1118,6 +1135,7 @@ export type IResolversTypes = {
   DeliverOrderEdge: ResolverTypeWrapper<DeliverOrderEdge>;
   File: ResolverTypeWrapper<file>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  ImageOfProduct: ResolverTypeWrapper<imageOfProduct>;
   ImageOfVehicle: ResolverTypeWrapper<imageOfVehicle>;
   ImportExcelProductInput: IImportExcelProductInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -1215,6 +1233,7 @@ export type IResolversParentTypes = {
   DeliverOrderEdge: DeliverOrderEdge;
   File: file;
   Float: Scalars['Float']['output'];
+  ImageOfProduct: imageOfProduct;
   ImageOfVehicle: imageOfVehicle;
   ImportExcelProductInput: IImportExcelProductInput;
   Int: Scalars['Int']['output'];
@@ -1358,6 +1377,20 @@ export type IFileResolvers<ContextType = any, ParentType extends IResolversParen
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   keyPath?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   mimeType?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  uploadBy?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>;
+  url?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IImageOfProductResolvers<ContextType = any, ParentType extends IResolversParentTypes['ImageOfProduct'] = IResolversParentTypes['ImageOfProduct']> = {
+  createdAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
+  encoding?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  fileName?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
+  keyPath?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
+  mineType?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  product?: Resolver<IResolversTypes['Product'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<IResolversTypes['Date']>, ParentType, ContextType>;
   uploadBy?: Resolver<Maybe<IResolversTypes['User']>, ParentType, ContextType>;
   url?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
@@ -1543,6 +1576,7 @@ export type IProductResolvers<ContextType = any, ParentType extends IResolversPa
   height?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>;
   image?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>;
+  imagesOfProduct?: Resolver<Maybe<Array<Maybe<IResolversTypes['ImageOfProduct']>>>, ParentType, ContextType>;
   inventory?: Resolver<Maybe<IResolversTypes['Float']>, ParentType, ContextType>;
   name?: Resolver<IResolversTypes['String'], ParentType, ContextType>;
   price?: Resolver<IResolversTypes['Float'], ParentType, ContextType>;
@@ -1700,6 +1734,7 @@ export type IResolvers<ContextType = any> = {
   DeliverOrderConnection?: IDeliverOrderConnectionResolvers<ContextType>;
   DeliverOrderEdge?: IDeliverOrderEdgeResolvers<ContextType>;
   File?: IFileResolvers<ContextType>;
+  ImageOfProduct?: IImageOfProductResolvers<ContextType>;
   ImageOfVehicle?: IImageOfVehicleResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   ListAllDeliverOrderResponse?: IListAllDeliverOrderResponseResolvers<ContextType>;

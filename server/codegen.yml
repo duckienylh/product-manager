@@ -19,6 +19,7 @@ generates:
         Product: ../db_models/mysql/init-models#products
         ProductEdge: ../db_models/mysql/products#ProductEdge
         ProductConnection: ../db_models/mysql/products#ProductConnection
+        ImageOfProduct: ../db_models/mysql/init-models#imageOfProduct
         Order: ../db_models/mysql/init-models#orders
         OrderEdge: ../db_models/mysql/orders#OrderEdge
         OrderConnection: ../db_models/mysql/orders#OrderConnection

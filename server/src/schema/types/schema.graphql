@@ -76,6 +76,19 @@ type File {
     url: String!
 }
 
+type ImageOfProduct {
+    createdAt: Date
+    encoding: String
+    fileName: String!
+    id: Int!
+    keyPath: String!
+    mineType: String
+    product: Product!
+    updatedAt: Date
+    uploadBy: User
+    url: String!
+}
+
 type ImageOfVehicle {
     createdAt: Date
     file: File!
@@ -238,6 +251,7 @@ type Product {
     height: Float
     id: Int!
     image: String
+    imagesOfProduct: [ImageOfProduct]
     inventory: Float
     name: String!
     price: Float!
@@ -466,6 +480,7 @@ input CreateProductInput {
     description: String
     height: Float
     image: Upload
+    imagesOfProduct: [Upload]
     inventory: Float
     name: String!
     price: Float!
@@ -657,6 +672,7 @@ input UpdateProductInput {
     height: Float
     id: Int!
     image: Upload
+    imagesOfProduct: [Upload]
     inventory: Float
     name: String
     price: Float
