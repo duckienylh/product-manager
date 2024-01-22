@@ -3,7 +3,14 @@ import { IResolvers, ISuccessResponse } from '../../__generated__/graphql';
 import { PmContext } from '../../server';
 import { checkAuthentication } from '../../lib/utils/permision';
 import { pmDb, sequelize } from '../../loader/mysql';
-import { CustomerNotFoundError, DeliverOrderNotFoundError, MySQLError, OrderNotFoundError, UserNotFoundError } from '../../lib/classes/graphqlErrors';
+import {
+    CustomerNotFoundError,
+    DeliverOrderNotFoundError,
+    MySQLError,
+    OrderNotFoundError,
+    PermissionError,
+    UserNotFoundError,
+} from '../../lib/classes/graphqlErrors';
 import { deliverOrderCreationAttributes } from '../../db_models/mysql/deliverOrder';
 import { orderProcessCreationAttributes } from '../../db_models/mysql/orderProcess';
 import { RoleList, StatusOrder } from '../../lib/enum';
@@ -30,7 +37,7 @@ const deliverOrder_resolver: IResolvers = {
         listAllDeliverOrder: async (_parent, { input }, context: PmContext) => {
             checkAuthentication(context);
 
-            const { driverId, queryString, saleId, status, createAt, args } = input;
+            const { driverId, queryString, saleId, status, createAt, theNext7Days, args } = input;
             const { limit, offset, limitForLast } = getRDBPaginationParams(args);
             const commonOption: FindAndCountOptions = {
                 include: [
@@ -102,6 +109,13 @@ const deliverOrder_resolver: IResolvers = {
                         [Op.and]: [{ [Op.not]: StatusOrder.done }, { [Op.not]: StatusOrder.createExportOrder }],
                     };
                 }
+            }
+
+            if (theNext7Days) {
+                const today = new Date();
+                whereOpt['$deliverOrder.deliveryDate$'] = {
+                    [Op.between]: [today, getNextNDayFromDate(today, 8)],
+                };
             }
 
             limitOption.where = !queryString
@@ -330,6 +344,99 @@ const deliverOrder_resolver: IResolvers = {
                     });
 
                     await deliverOrder.save({ transaction: t });
+                    return ISuccessResponse.Success;
+                } catch (error) {
+                    await t.rollback();
+                    throw new MySQLError(`Lỗi bất thường khi thao tác trong cơ sở dữ liệu: ${error}`);
+                }
+            });
+        },
+        deleteDeliverOrders: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            if (context.user?.role !== RoleList.admin && context.user?.role !== RoleList.director) {
+                throw new PermissionError();
+            }
+            const { ids, deleteBy } = input;
+
+            const userDelete = await pmDb.user.findByPk(deleteBy, { rejectOnEmpty: new UserNotFoundError() });
+
+            const deliverOrders = await pmDb.deliverOrder.findAll({
+                where: { id: ids },
+                include: [
+                    {
+                        model: pmDb.orders,
+                        as: 'order',
+                        required: true,
+                        include: [
+                            {
+                                model: pmDb.user,
+                                as: 'sale',
+                                required: true,
+                            },
+                        ],
+                    },
+                ],
+            });
+            if (deliverOrders.length !== ids.length && deliverOrders.length < 1) {
+                throw new DeliverOrderNotFoundError();
+            }
+
+            return await sequelize.transaction(async (t: Transaction) => {
+                try {
+                    await pmDb.deliverOrder.destroy({
+                        where: {
+                            id: ids,
+                        },
+                        transaction: t,
+                    });
+
+                    const userNotificationPromise: Promise<pmDb.userNotifications>[] = [];
+
+                    const notificationForUsers = await pmDb.user.findAll({
+                        where: {
+                            role: [RoleList.sales, RoleList.admin, RoleList.director, RoleList.manager],
+                        },
+                        attributes: ['id'],
+                    });
+
+                    const userIds: number[] = [];
+                    notificationForUsers.forEach((e) => {
+                        userIds.push(e.id);
+                    });
+
+                    deliverOrders.forEach((e) => {
+                        userIds.push(e.order.saleId);
+                    });
+
+                    for (let i = 0; i < deliverOrders.length; i += 1) {
+                        const notificationAttribute: notificationsCreationAttributes = {
+                            orderId: deliverOrders[i].orderId,
+                            event: NotificationEvent.UpdatedDeliverOrder,
+                            content: `Giao hàng cho đơn hàng ${deliverOrders[i].order.invoiceNo} vừa được xoá bởi ${userDelete.fullName}`,
+                        };
+
+                        // eslint-disable-next-line no-await-in-loop
+                        const createNotification = await pmDb.notifications.create(notificationAttribute, { transaction: t });
+
+                        userIds.forEach((userId) => {
+                            const userNotificationAttribute: userNotificationsCreationAttributes = {
+                                userId,
+                                notificationId: createNotification.id,
+                                isRead: false,
+                            };
+
+                            const createUserNotification = pmDb.userNotifications.create(userNotificationAttribute, { transaction: t });
+
+                            userNotificationPromise.push(createUserNotification);
+                        });
+
+                        pubsubService.publishToUsers(userIds, NotificationEvent.Common, {
+                            message: `Giao hàng cho đơn hàng ${deliverOrders[i].order.invoiceNo} vừa được xoá bởi ${userDelete.fullName}`,
+                        });
+                    }
+
+                    await Promise.all(userNotificationPromise);
+
                     return ISuccessResponse.Success;
                 } catch (error) {
                     await t.rollback();

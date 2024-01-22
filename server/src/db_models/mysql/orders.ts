@@ -55,6 +55,8 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
 
     totalMoney!: number;
 
+    profit!: number;
+
     remainingPaymentMoney!: number;
 
     createdAt!: Date;
@@ -216,6 +218,35 @@ export class orders extends Model<ordersAttributes, ordersCreationAttributes> im
     setSale!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
 
     createSale!: Sequelize.BelongsToCreateAssociationMixin<user>;
+
+    async getProfit(): Promise<number> {
+        const orderItems = await pmDb.orderItem.findAll({
+            where: {
+                orderId: this.id,
+            },
+            include: [
+                {
+                    model: pmDb.products,
+                    as: 'product',
+                    required: false,
+                },
+            ],
+        });
+
+        const subProfit = orderItems.reduce(
+            (sum, odi) =>
+                sum + (odi.productId ? parseFloat(String(odi.quantity)) * (odi.product.price ? parseFloat(String(odi.product.price)) : 0.0) : 0.0),
+            0.0
+        );
+
+        // add 10% VAT and freight price
+        const totalProfit = subProfit * 1.1 + (this.freightPrice ? parseFloat(String(this.freightPrice)) : 0.0);
+
+        await this.getTotalMoney();
+        this.profit = this.totalMoney - totalProfit;
+
+        return this.profit;
+    }
 
     async getTotalMoney(): Promise<number> {
         const orderItems = this.orderItems ?? (await this.getOrderItems());

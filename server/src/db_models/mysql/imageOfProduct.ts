@@ -1,16 +1,18 @@
 import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
+import type { products, productsId } from './products';
 import type { user, userId } from './user';
 
 export interface imageOfProductAttributes {
-  id: number;
-  fileName: string;
-  uploadBy?: number;
-  mineType?: string;
-  keyPath: string;
-  encoding?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+    id: number;
+    productId: number;
+    fileName: string;
+    uploadBy?: number;
+    mineType?: string;
+    keyPath: string;
+    encoding?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type imageOfProductPk = 'id';
@@ -19,84 +21,107 @@ export type imageOfProductOptionalAttributes = 'id' | 'uploadBy' | 'mineType' | 
 export type imageOfProductCreationAttributes = Optional<imageOfProductAttributes, imageOfProductOptionalAttributes>;
 
 export class imageOfProduct extends Model<imageOfProductAttributes, imageOfProductCreationAttributes> implements imageOfProductAttributes {
-  id!: number;
+    id!: number;
 
-  fileName!: string;
+    productId!: number;
 
-  uploadBy?: number;
+    fileName!: string;
 
-  mineType?: string;
+    uploadBy?: number;
 
-  keyPath!: string;
+    mineType?: string;
 
-  encoding?: string;
+    keyPath!: string;
 
-  createdAt?: Date;
+    encoding?: string;
 
-  updatedAt?: Date;
+    createdAt!: Date;
 
-  // imageOfProduct belongsTo user via uploadBy
-  uploadBy_user!: user;
+    updatedAt!: Date;
 
-  getUploadBy_user!: Sequelize.BelongsToGetAssociationMixin<user>;
+    // imageOfProduct belongsTo products via productId
+    product!: products;
 
-  setUploadBy_user!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
+    getProduct!: Sequelize.BelongsToGetAssociationMixin<products>;
 
-  createUploadBy_user!: Sequelize.BelongsToCreateAssociationMixin<user>;
+    setProduct!: Sequelize.BelongsToSetAssociationMixin<products, productsId>;
 
-  static initModel(sequelize: Sequelize.Sequelize): typeof imageOfProduct {
-    return imageOfProduct.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    fileName: {
-      type: DataTypes.STRING(100),
-      allowNull: false
-    },
-    uploadBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'user',
-        key: 'id'
-      }
-    },
-    mineType: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    keyPath: {
-      type: DataTypes.STRING(200),
-      allowNull: false
-    },
-    encoding: {
-      type: DataTypes.STRING(45),
-      allowNull: true
+    createProduct!: Sequelize.BelongsToCreateAssociationMixin<products>;
+
+    // imageOfProduct belongsTo user via uploadBy
+    uploadBy_user!: user;
+
+    getUploadBy_user!: Sequelize.BelongsToGetAssociationMixin<user>;
+
+    setUploadBy_user!: Sequelize.BelongsToSetAssociationMixin<user, userId>;
+
+    createUploadBy_user!: Sequelize.BelongsToCreateAssociationMixin<user>;
+
+    static initModel(sequelize: Sequelize.Sequelize): typeof imageOfProduct {
+        return imageOfProduct.init(
+            {
+                id: {
+                    autoIncrement: true,
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                productId: {
+                    type: DataTypes.INTEGER,
+                    allowNull: false,
+                    references: {
+                        model: 'products',
+                        key: 'id',
+                    },
+                },
+                fileName: {
+                    type: DataTypes.STRING(100),
+                    allowNull: false,
+                },
+                uploadBy: {
+                    type: DataTypes.INTEGER,
+                    allowNull: true,
+                    references: {
+                        model: 'user',
+                        key: 'id',
+                    },
+                },
+                mineType: {
+                    type: DataTypes.STRING(45),
+                    allowNull: true,
+                },
+                keyPath: {
+                    type: DataTypes.STRING(200),
+                    allowNull: false,
+                },
+                encoding: {
+                    type: DataTypes.STRING(45),
+                    allowNull: true,
+                },
+            },
+            {
+                sequelize,
+                tableName: 'imageOfProduct',
+                timestamps: true,
+                indexes: [
+                    {
+                        name: 'PRIMARY',
+                        unique: true,
+                        using: 'BTREE',
+                        fields: [{ name: 'id' }],
+                    },
+                    {
+                        name: 'fk_imageOfProduct_1_idx',
+                        using: 'BTREE',
+                        fields: [{ name: 'uploadBy' }],
+                    },
+                    {
+                        name: 'fk_imageOfProduct_1_idx1',
+                        using: 'BTREE',
+                        fields: [{ name: 'productId' }],
+                    },
+                ],
+            }
+        );
     }
-  }, {
-    sequelize,
-    tableName: 'imageOfProduct',
-    timestamps: true,
-    indexes: [
-      {
-        name: 'PRIMARY',
-        unique: true,
-        using: 'BTREE',
-        fields: [
-          { name: 'id' },
-        ]
-      },
-      {
-        name: 'fk_imageOfProduct_1_idx',
-        using: 'BTREE',
-        fields: [
-          { name: 'uploadBy' },
-        ]
-      },
-    ]
-  });
-  }
 }

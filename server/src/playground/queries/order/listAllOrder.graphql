@@ -79,6 +79,7 @@ query ListAllOrder($input: ListAllOrderInput!) {
                             encoding
                         }
                     }
+                    totalProfit
                     remainingPaymentMoney
                     invoiceNo
                     VAT

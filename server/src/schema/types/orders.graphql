@@ -2,6 +2,8 @@ extend type Query {
     listAllOrder(input: ListAllOrderInput!): ListAllOrderResponse!
 
     getOrderById(orderId: Int!): Order!
+
+    getLatest5Orders(input: getLatest5OrdersInput!): [Order]!
 }
 
 extend type Mutation {
@@ -29,6 +31,7 @@ type Order {
     invoiceNo: String!
     VAT: Float
     totalMoney: Float
+    profit: Float
     status: StatusOrder!
     discount: Float
     freightPrice: Float
@@ -127,4 +130,8 @@ input UpdateStatusOrderInput {
     statusOrder: StatusOrder
     removeFiles: [Int!] #id of orderDocument
     newFiles: [Upload!]
+}
+
+input getLatest5OrdersInput {
+    saleId: Int!
 }

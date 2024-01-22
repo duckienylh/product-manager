@@ -17,12 +17,15 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { expressMiddleware } from '@apollo/server/express4';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { CronJob } from 'cron';
 import resolvers from './schema/resolvers';
 import typeDefs from './schema/types';
 import { USER_JWT } from './lib/utils/jwt';
 import { syncDatabase } from './loader/mysql';
 import { appConfig } from './constant/appConfiguration';
 import { queryExample } from './playground';
+import { MySQLError } from './lib/classes/graphqlErrors';
+import { productAlmostOver } from './lib/utils/orthers';
 
 export interface PmContext {
     isAuth: boolean;
@@ -171,6 +174,16 @@ async function startServer() {
         console.log(`🚀 Subscription endpoint ready at ws://${appConfig.host}:${appConfig.port}/subscriptions`);
     });
 }
+
+const productAlmostOverFunc = new CronJob('0 9 * * * ', async () => {
+    try {
+        await productAlmostOver();
+    } catch (error) {
+        throw new MySQLError(`Tự dộng thông báo sản phẩm sắp hết hàng thất bại: ${error}`);
+    }
+});
+
+productAlmostOverFunc.start();
 
 startServer().catch((error) => {
     console.error('Unable start server: ', error);

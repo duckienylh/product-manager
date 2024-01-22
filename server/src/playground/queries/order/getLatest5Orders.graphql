@@ -1,5 +1,5 @@
-query GetOrderById {
-    getOrderById(orderId: 1) {
+query GetLatest5Orders($input: getLatest5OrdersInput!){
+    getLatest5Orders(input:$input){
         id
         sale {
             id
@@ -8,7 +8,6 @@ query GetOrderById {
             phoneNumber
             firstName
             lastName
-            fullName
             address
             avatarURL
             isActive
@@ -17,26 +16,6 @@ query GetOrderById {
         customer {
             id
             name
-            phoneNumber
-            email
-            address
-            companyName
-        }
-        orderItemList {
-            id
-            product {
-                id
-                name
-                code
-                price
-                image
-                description
-                quantity
-            }
-            quantity
-            unitPrice
-            note
-            weight
         }
         deliverOrderList{
             id
@@ -92,7 +71,7 @@ query GetOrderById {
                 encoding
             }
         }
-        totalProfit
+        profit
         remainingPaymentMoney
         invoiceNo
         VAT

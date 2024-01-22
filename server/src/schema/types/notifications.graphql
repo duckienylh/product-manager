@@ -15,4 +15,5 @@ enum NotificationEvent {
     NewDeliverOrder
     UpdatedDeliverOrder
     NewPayment
+    NewVehicle
 }

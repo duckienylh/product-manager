@@ -13,6 +13,8 @@ import * as userNotificationType from './userNotifications.graphql';
 import * as paymentInforType from './paymentInfor.graphql';
 import * as fileType from './file.graphql';
 import * as orderDocumentType from './orderDocument.graphql';
+import * as vehicleType from './vehicle.graphql';
+import * as imageOfVehicleType from './imageOfVehicle.graphql';
 
 export default [
     root,
@@ -29,4 +31,6 @@ export default [
     paymentInforType,
     fileType,
     orderDocumentType,
+    vehicleType,
+    imageOfVehicleType,
 ];

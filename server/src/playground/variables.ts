@@ -251,4 +251,12 @@ export const variables = {
             newFiles: [],
         },
     },
+    createVehicle: {
+        input: {},
+    },
+    getLatest5Orders: {
+        input: {
+            saleId: 5,
+        },
+    },
 };

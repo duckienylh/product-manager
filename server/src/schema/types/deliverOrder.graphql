@@ -6,6 +6,8 @@ extend type Mutation {
     createDeliverOrder(input: CreateDeliverOrderInput!): DeliverOrder!
 
     updateDeliverOrder(input: UpdateDeliverOrderInput!): SuccessResponse!
+
+    deleteDeliverOrders(input: DeleteDeliverOrdersInput!): SuccessResponse!
 }
 
 type DeliverOrder {
@@ -64,6 +66,12 @@ input ListAllDeliverOrderInput{
     saleId: Int
     queryString: String
     status: String
+    theNext7Days: Boolean
     createAt: filterDate
     args: PaginationInput
+}
+
+input DeleteDeliverOrdersInput {
+    deleteBy: Int!
+    ids: [Int!]!
 }

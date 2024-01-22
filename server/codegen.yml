@@ -19,6 +19,7 @@ generates:
         Product: ../db_models/mysql/init-models#products
         ProductEdge: ../db_models/mysql/products#ProductEdge
         ProductConnection: ../db_models/mysql/products#ProductConnection
+        ImageOfProduct: ../db_models/mysql/init-models#imageOfProduct
         Order: ../db_models/mysql/init-models#orders
         OrderEdge: ../db_models/mysql/orders#OrderEdge
         OrderConnection: ../db_models/mysql/orders#OrderConnection
@@ -32,3 +33,7 @@ generates:
         PaymentInfor: ../db_models/mysql/init-models#paymentInfor
         OrderDocument: ../db_models/mysql/init-models#orderDocument
         File: ../db_models/mysql/init-models#file
+        Vehicle: ../db_models/mysql/init-models#vehicle
+        ImageOfVehicle: ../db_models/mysql/init-models#imageOfVehicle
+        VehicleEdge: ../db_models/mysql/vehicle#VehicleEdge
+        VehicleConnection: ../db_models/mysql/vehicle#VehicleConnection

@@ -6,6 +6,7 @@ import type { imageOfProduct, imageOfProductId } from './imageOfProduct';
 import type { orderProcess, orderProcessId } from './orderProcess';
 import type { orders, ordersId } from './orders';
 import type { userNotifications, userNotificationsId } from './userNotifications';
+import type { vehicle, vehicleId } from './vehicle';
 import { TRDBConnection, TRDBEdge } from '../../lib/utils/relay';
 
 export interface userAttributes {
@@ -199,6 +200,29 @@ export class user extends Model<userAttributes, userCreationAttributes> implemen
     hasUserNotifications!: Sequelize.HasManyHasAssociationsMixin<userNotifications, userNotificationsId>;
 
     countUserNotifications!: Sequelize.HasManyCountAssociationsMixin;
+
+    // user hasMany vehicle via driverId
+    vehicles!: vehicle[];
+
+    getVehicles!: Sequelize.HasManyGetAssociationsMixin<vehicle>;
+
+    setVehicles!: Sequelize.HasManySetAssociationsMixin<vehicle, vehicleId>;
+
+    addVehicle!: Sequelize.HasManyAddAssociationMixin<vehicle, vehicleId>;
+
+    addVehicles!: Sequelize.HasManyAddAssociationsMixin<vehicle, vehicleId>;
+
+    createVehicle!: Sequelize.HasManyCreateAssociationMixin<vehicle>;
+
+    removeVehicle!: Sequelize.HasManyRemoveAssociationMixin<vehicle, vehicleId>;
+
+    removeVehicles!: Sequelize.HasManyRemoveAssociationsMixin<vehicle, vehicleId>;
+
+    hasVehicle!: Sequelize.HasManyHasAssociationMixin<vehicle, vehicleId>;
+
+    hasVehicles!: Sequelize.HasManyHasAssociationsMixin<vehicle, vehicleId>;
+
+    countVehicles!: Sequelize.HasManyCountAssociationsMixin;
 
     static initModel(sequelize: Sequelize.Sequelize): typeof user {
         return user.init(
