@@ -259,4 +259,9 @@ export const variables = {
             saleId: 5,
         },
     },
+    deleteOrder: {
+        input: {
+            orderId: 1,
+        },
+    },
 };

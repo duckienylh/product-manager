@@ -119,6 +119,8 @@ const listDriverUnselectedVehicle = importGraphqlString('./queries/vehicle/listD
 
 const getLatest5Orders = importGraphqlString('./queries/order/getLatest5Orders.graphql');
 
+const deleteOrder = importGraphqlString('./mutations/order/deleteOrder.graphql');
+
 export const queryExample = async (path: string = defaultPath): Promise<Tab[]> => {
     const userAuth = await setUserAuthorization();
     const subscriptionHeaders = {
@@ -443,6 +445,13 @@ export const queryExample = async (path: string = defaultPath): Promise<Tab[]> =
             query: getLatest5Orders,
             headers: userAuth,
             variables: prettifyJsonString(variables.getLatest5Orders),
+        },
+        {
+            endpoint: path,
+            name: 'Xóa đơn hàng',
+            query: deleteOrder,
+            headers: userAuth,
+            variables: prettifyJsonString(variables.deleteOrder),
         },
     ];
 };

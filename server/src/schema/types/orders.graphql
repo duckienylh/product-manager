@@ -12,6 +12,8 @@ extend type Mutation {
     updateOrder(input: UpdateOrderInput!): SuccessResponse!
 
     updateStatusOrder(input: UpdateStatusOrderInput!): SuccessResponse!
+
+    deleteOrder(input: DeleteOrderInput!): SuccessResponse!
 }
 
 enum StatusOrder {
@@ -134,4 +136,8 @@ input UpdateStatusOrderInput {
 
 input getLatest5OrdersInput {
     saleId: Int!
+}
+
+input DeleteOrderInput {
+    orderId: Int!
 }

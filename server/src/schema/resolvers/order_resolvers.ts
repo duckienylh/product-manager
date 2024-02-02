@@ -9,6 +9,7 @@ import {
     MySQLError,
     OrderItemNotFoundError,
     OrderNotFoundError,
+    PermissionError,
     ProductNotFoundError,
     UserNotFoundError,
 } from '../../lib/classes/graphqlErrors';
@@ -747,6 +748,97 @@ const order_resolver: IResolvers = {
                     if (deleteFilesOD.length > 0) await Promise.all(deleteFilesOD);
 
                     if (deleteFilesOnS3.length > 0) await minIOServices.deleteObjects(deleteFilesOnS3, BucketValue.DEVTEAM);
+
+                    return ISuccessResponse.Success;
+                } catch (error) {
+                    await t.rollback();
+                    throw new MySQLError(`Lỗi bất thường khi thao tác trong cơ sở dữ liệu: ${error}`);
+                }
+            });
+        },
+        deleteOrder: async (_parent, { input }, context: PmContext) => {
+            checkAuthentication(context);
+            if (context.user?.role !== RoleList.admin && context.user?.role !== RoleList.director && context.user?.role !== RoleList.manager) {
+                throw new PermissionError();
+            }
+            const { orderId } = input;
+            const orderDeleted = await pmDb.orders.findByPk(orderId, {
+                rejectOnEmpty: new OrderNotFoundError(),
+            });
+
+            if (orderDeleted.status !== StatusOrder.creatNew) {
+                throw new Error('Đơn hàng không được phép xóa');
+            }
+
+            return await sequelize.transaction(async (t: Transaction) => {
+                try {
+                    const inventoryProductPromise: Promise<pmDb.products>[] = [];
+
+                    const orderItem = await pmDb.orderItem.findAll({
+                        where: {
+                            orderId,
+                        },
+                        include: [
+                            {
+                                model: pmDb.products,
+                                as: 'product',
+                                required: true,
+                            },
+                        ],
+                    });
+
+                    if (orderItem.length > 0) {
+                        for (let i = 0; i < orderItem.length; i += 1) {
+                            orderItem[i].product.inventory =
+                                (orderItem[i].product.inventory ? parseFloat(String(orderItem[i].product.inventory)) : 0) +
+                                (orderItem[i].quantity ? parseFloat(String(orderItem[i].quantity)) : 0);
+
+                            inventoryProductPromise.push(orderItem[i].product.save({ transaction: t }));
+                        }
+                    }
+
+                    if (inventoryProductPromise.length > 0) await Promise.all(inventoryProductPromise);
+
+                    const notiOrder = await pmDb.notifications.findAll({ where: { orderId } });
+
+                    const notiOrderId = notiOrder.map((e) => e.id);
+
+                    await pmDb.userNotifications.destroy({
+                        where: {
+                            notificationId: notiOrderId,
+                        },
+                        transaction: t,
+                    });
+
+                    const deleteNotiOrder = pmDb.notifications.destroy({
+                        where: {
+                            orderId,
+                        },
+                        transaction: t,
+                    });
+
+                    const deleteOrderProcess = pmDb.orderProcess.destroy({
+                        where: {
+                            orderId,
+                        },
+                        transaction: t,
+                    });
+
+                    const deleteOrderItem = pmDb.orderItem.destroy({
+                        where: {
+                            orderId,
+                        },
+                        transaction: t,
+                    });
+
+                    await Promise.all([deleteNotiOrder, deleteOrderProcess, deleteOrderItem]);
+
+                    await pmDb.orders.destroy({
+                        where: {
+                            id: orderId,
+                        },
+                        transaction: t,
+                    });
 
                     return ISuccessResponse.Success;
                 } catch (error) {

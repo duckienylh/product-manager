@@ -198,7 +198,7 @@ const paymentInfor_resolvers: IResolvers = {
 
                     const notificationAttribute: notificationsCreationAttributes = {
                         orderId: paymentInfo.orderId,
-                        event: NotificationEvent.NewPayment,
+                        event: NotificationEvent.PaymentUpdated,
                         content: `Thông tin thanh toán đơn hàng ${paymentInfo.order.invoiceNo} đã được sửa bởi ${user.lastName} ${user.firstName}`,
                     };
 
@@ -305,7 +305,7 @@ const paymentInfor_resolvers: IResolvers = {
 
                     const notificationAttribute: notificationsCreationAttributes = {
                         orderId: paymentInfos[0].orderId,
-                        event: NotificationEvent.NewPayment,
+                        event: NotificationEvent.PaymentUpdated,
                         content: `Thông tin thanh toán đơn hàng ${paymentInfos[0].order.invoiceNo} của khách hàng ${
                             paymentInfos[0].customer.name ?? paymentInfos[0].customer.phoneNumber
                         } đã bị xoá bởi ${user.fullName}`,

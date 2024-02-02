@@ -59,6 +59,8 @@ export const iNotificationEventToValueResolve = (event: INotificationEvent) => {
             return NotificationEvent.UpdatedDeliverOrder;
         case INotificationEvent.NewPayment:
             return NotificationEvent.NewPayment;
+        case INotificationEvent.PaymentUpdated:
+            return NotificationEvent.PaymentUpdated;
         case INotificationEvent.NewVehicle:
             return NotificationEvent.NewVehicle;
     }

@@ -164,6 +164,10 @@ export type IDeleteDeliverOrdersInput = {
   ids: Array<Scalars['Int']['input']>;
 };
 
+export type IDeleteOrderInput = {
+  orderId: Scalars['Int']['input'];
+};
+
 export type IDeletePaymentInfoInput = {
   deleteBy: Scalars['Int']['input'];
   ids: Array<Scalars['Int']['input']>;
@@ -333,6 +337,7 @@ export type IMutation = {
   createVehicle: IVehicle;
   deleteCustomer: ISuccessResponse;
   deleteDeliverOrders: ISuccessResponse;
+  deleteOrder: ISuccessResponse;
   deletePaymentInfo: ISuccessResponse;
   deleteProduct: ISuccessResponse;
   deleteUser: ISuccessResponse;
@@ -398,6 +403,11 @@ export type IMutationDeleteCustomerArgs = {
 
 export type IMutationDeleteDeliverOrdersArgs = {
   input: IDeleteDeliverOrdersInput;
+};
+
+
+export type IMutationDeleteOrderArgs = {
+  input: IDeleteOrderInput;
 };
 
 
@@ -492,6 +502,7 @@ export enum INotificationEvent {
   NewOrder = 'NewOrder',
   NewPayment = 'NewPayment',
   NewVehicle = 'NewVehicle',
+  PaymentUpdated = 'PaymentUpdated',
   UpdateOrder = 'UpdateOrder',
   UpdatedDeliverOrder = 'UpdatedDeliverOrder'
 }
@@ -1126,6 +1137,7 @@ export type IResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteDeliverOrdersInput: IDeleteDeliverOrdersInput;
+  DeleteOrderInput: IDeleteOrderInput;
   DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
@@ -1224,6 +1236,7 @@ export type IResolversParentTypes = {
   Date: Scalars['Date']['output'];
   DeleteCustomerInput: IDeleteCustomerInput;
   DeleteDeliverOrdersInput: IDeleteDeliverOrdersInput;
+  DeleteOrderInput: IDeleteOrderInput;
   DeletePaymentInfoInput: IDeletePaymentInfoInput;
   DeleteProductInput: IDeleteProductInput;
   DeleteUserInput: IDeleteUserInput;
@@ -1448,6 +1461,7 @@ export type IMutationResolvers<ContextType = any, ParentType extends IResolversP
   createVehicle?: Resolver<IResolversTypes['Vehicle'], ParentType, ContextType, RequireFields<IMutationCreateVehicleArgs, 'input'>>;
   deleteCustomer?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteCustomerArgs, 'input'>>;
   deleteDeliverOrders?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteDeliverOrdersArgs, 'input'>>;
+  deleteOrder?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteOrderArgs, 'input'>>;
   deletePaymentInfo?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeletePaymentInfoArgs, 'input'>>;
   deleteProduct?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteProductArgs, 'input'>>;
   deleteUser?: Resolver<IResolversTypes['SuccessResponse'], ParentType, ContextType, RequireFields<IMutationDeleteUserArgs, 'input'>>;

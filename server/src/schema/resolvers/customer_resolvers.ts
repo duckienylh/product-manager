@@ -76,7 +76,7 @@ const customer_resolver: IResolvers = {
 
             if (name) customer.name = name;
             if (phoneNumber) customer.phoneNumber = phoneNumber;
-            if (email) customer.name = email;
+            if (email) customer.email = email;
             if (address) customer.address = address;
             if (companyName) customer.companyName = companyName;
 

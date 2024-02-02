@@ -49,6 +49,18 @@ const userNotification_resolver: IResolvers = {
                 whereOpt['$notification.event$'] = {
                     [Op.eq]: event,
                 };
+
+                option.where = whereOpt;
+
+                const allUserNotification = await pmDb.userNotifications.findAll(option);
+
+                return allUserNotification.reduce((uniqueList: pmDb.userNotifications[], notification: pmDb.userNotifications) => {
+                    const orderId = notification.notification?.order?.id;
+                    if (orderId && !uniqueList.some((item) => item.notification?.order?.id === orderId)) {
+                        uniqueList.push(notification);
+                    }
+                    return uniqueList;
+                }, []);
             }
 
             option.where = whereOpt;
